@@ -1,0 +1,160 @@
+name: Build Kinic Desktop
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller pyautogui flask flask-cors requests pillow pystray
+    
+    - name: Create icon
+      run: |
+        python -c "
+        from PIL import Image, ImageDraw
+        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([10, 10, 246, 246], fill='#2196F3')
+        draw.text((128, 128), 'K', fill='white', anchor='mm')
+        img.save('kinic-icon.ico', format='ICO')
+        "
+      working-directory: kinic-api
+    
+    - name: Build executable
+      run: |
+        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.ico --add-data="kinic-api.py;." --hidden-import=pystray._win32 kinic-desktop.py
+      working-directory: kinic-api
+    
+    - name: Upload Windows artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: KinicDesktop-Windows
+        path: kinic-api/dist/KinicDesktop.exe
+        retention-days: 30
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller pyautogui flask flask-cors requests pillow pystray pyobjc-framework-Quartz
+    
+    - name: Create icon
+      run: |
+        python -c "
+        from PIL import Image, ImageDraw
+        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.ellipse([10, 10, 246, 246], fill='#2196F3')
+        draw.text((128, 128), 'K', fill='white', anchor='mm')
+        img.save('kinic-icon.icns', format='ICNS')
+        "
+      working-directory: kinic-api
+    
+    - name: Build executable
+      run: |
+        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.icns --add-data="kinic-api.py:." --osx-bundle-identifier=com.kinic.desktop kinic-desktop.py
+      working-directory: kinic-api
+    
+    - name: Create DMG
+      run: |
+        mkdir -p dmg
+        cp -r dist/KinicDesktop.app dmg/
+        hdiutil create -volname "Kinic Desktop" -srcfolder dmg -ov -format UDZO KinicDesktop.dmg
+      working-directory: kinic-api
+    
+    - name: Upload macOS artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: KinicDesktop-macOS
+        path: kinic-api/KinicDesktop.dmg
+        retention-days: 30
+
+  create-summary:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Create artifact download summary
+      run: |
+        echo "## 🎉 Build Artifacts Available!" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Download Links:" >> $GITHUB_STEP_SUMMARY
+        echo "- [Windows Executable](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)" >> $GITHUB_STEP_SUMMARY
+        echo "- [macOS DMG](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Direct Download (requires GitHub login):" >> $GITHUB_STEP_SUMMARY
+        echo "Visit the [Actions tab](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) and scroll to the Artifacts section." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Artifacts will be retained for 30 days." >> $GITHUB_STEP_SUMMARY
+
+  create-release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          KinicDesktop-Windows/KinicDesktop.exe
+          KinicDesktop-macOS/KinicDesktop.dmg
+        body: |
+          # Kinic Desktop Release
+          
+          ## Download for your platform:
+          - **Windows**: `KinicDesktop.exe`
+          - **macOS**: `KinicDesktop.dmg`
+          
+          ## Installation:
+          
+          ### Windows
+          1. Download `KinicDesktop.exe`
+          2. Double-click to run
+          3. If Windows Defender warns, click "More info" → "Run anyway"
+          
+          ### macOS
+          1. Download `KinicDesktop.dmg`
+          2. Open the DMG file
+          3. Drag Kinic Desktop to Applications
+          4. First run: Right-click → Open (to bypass Gatekeeper)
+          ## What's New
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
