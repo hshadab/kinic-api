@@ -2,139 +2,129 @@ name: Build Kinic Desktop
 
 on:
   push:
-    branches:
-      - main
-      - master
-    tags:
-      - 'v*'
+    branches: [ main, master ]
+    tags: [ 'v*' ]
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build-windows:
     runs-on: windows-2022
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        lfs: false
-    
-    - name: Configure Git Safe Directory
-      run: |
-        git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
-        git config --global --add safe.directory "$env:GITHUB_WORKSPACE/kinic-api"
-        git config --global user.email "ci@example.com"
-        git config --global user.name "GitHub Actions"
-        echo "GIT_TERMINAL_PROMPT=0" | Out-File -FilePath $env:GITHUB_ENV -Append
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller==6.6.0 pyautogui pyperclip pillow
-    
-    - name: Create icon
-      run: |
-        python -c "
-        from PIL import Image, ImageDraw
-        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([10, 10, 246, 246], fill='#2196F3')
-        draw.text((128, 128), 'K', fill='white', anchor='mm')
-        img.save('kinic-icon.ico', format='ICO')
-        "
-      working-directory: kinic-api
-    
-    - name: Build executable
-      run: |
-        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.ico --add-data="kinic-api.py;." kinic-final.py
-      working-directory: kinic-api
-    
-    - name: Upload Windows artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: KinicDesktop-Windows
-        path: kinic-api/dist/KinicDesktop.exe
-        retention-days: 30
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+      
+      - name: Make repo safe for git + disable prompts
+        run: |
+          git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$env:GITHUB_WORKSPACE/kinic-api"
+          git config --global user.email "ci@example.com"
+          git config --global user.name "ci"
+          echo "GIT_TERMINAL_PROMPT=0" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller==6.6.0 pyautogui pyperclip pillow
+
+      - name: Create .ico (Windows)
+        shell: python
+        run: |
+          from PIL import Image, ImageDraw
+          img = Image.new('RGBA', (256,256), (0,0,0,0))
+          d = ImageDraw.Draw(img)
+          d.ellipse((10,10,246,246), fill="#2196F3")
+          d.text((128,128),"K", fill="white", anchor="mm")
+          img.save("kinic-api/kinic-icon.ico")
+
+      - name: PyInstaller (Windows)
+        run: |
+          pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.ico --add-data="kinic-api.py;." kinic-final.py
+        working-directory: kinic-api
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KinicDesktop-Windows
+          path: kinic-api/dist/KinicDesktop.exe
+          retention-days: 30
 
   build-macos:
     runs-on: macos-13
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        lfs: false
-    
-    - name: Configure Git Safe Directory
-      run: |
-        git config --global --add safe.directory "$GITHUB_WORKSPACE"
-        git config --global --add safe.directory "$GITHUB_WORKSPACE/kinic-api"
-        git config --global user.email "ci@example.com"
-        git config --global user.name "GitHub Actions"
-        git config --global advice.detachedHead false
-        echo "GIT_TERMINAL_PROMPT=0" >> $GITHUB_ENV
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pyinstaller==6.6.0 pyautogui pyperclip pillow pyobjc-framework-Quartz
-    
-    - name: Create icon using iconutil
-      run: |
-        mkdir -p icon.iconset
-        python -c "
-        from PIL import Image, ImageDraw
-        img = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(img)
-        draw.ellipse([64, 64, 960, 960], fill='#2196F3')
-        draw.text((512, 512), 'K', fill='white', anchor='mm')
-        img.save('icon_1024x1024.png')
-        "
-        # Generate all required icon sizes
-        sips -z 16 16     icon_1024x1024.png --out icon.iconset/icon_16x16.png
-        sips -z 32 32     icon_1024x1024.png --out icon.iconset/icon_16x16@2x.png
-        sips -z 32 32     icon_1024x1024.png --out icon.iconset/icon_32x32.png
-        sips -z 64 64     icon_1024x1024.png --out icon.iconset/icon_32x32@2x.png
-        sips -z 128 128   icon_1024x1024.png --out icon.iconset/icon_128x128.png
-        sips -z 256 256   icon_1024x1024.png --out icon.iconset/icon_128x128@2x.png
-        sips -z 256 256   icon_1024x1024.png --out icon.iconset/icon_256x256.png
-        sips -z 512 512   icon_1024x1024.png --out icon.iconset/icon_256x256@2x.png
-        cp icon_1024x1024.png icon.iconset/icon_512x512.png
-        cp icon_1024x1024.png icon.iconset/icon_512x512@2x.png
-        # Create the actual icns file
-        iconutil -c icns icon.iconset -o kinic-icon.icns
-      working-directory: kinic-api
-    
-    - name: Build executable
-      run: |
-        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.icns --add-data="kinic-api.py:." --osx-bundle-identifier=com.kinic.desktop kinic-final.py
-      working-directory: kinic-api
-    
-    - name: Create DMG
-      run: |
-        mkdir -p dmg
-        cp -r dist/KinicDesktop.app dmg/
-        hdiutil create -volname "Kinic Desktop" -srcfolder dmg -ov -format UDZO KinicDesktop.dmg
-      working-directory: kinic-api
-    
-    - name: Upload macOS artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: KinicDesktop-macOS
-        path: kinic-api/KinicDesktop.dmg
-        retention-days: 30
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+      
+      - name: Make repo safe for git + disable prompts
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE/kinic-api"
+          git config --global user.email "ci@example.com"
+          git config --global user.name "ci"
+          echo "GIT_TERMINAL_PROMPT=0" >> $GITHUB_ENV
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller==6.6.0 pyautogui pyperclip pillow pyobjc-framework-Quartz rubicon-objc
+
+      - name: Create .icns (macOS)
+        run: |
+          mkdir -p icon.iconset
+          python << 'PY'
+          from PIL import Image, ImageDraw
+          img = Image.new('RGBA', (1024,1024), (0,0,0,0))
+          d = ImageDraw.Draw(img)
+          d.ellipse((64,64,960,960), fill="#2196F3")
+          d.text((512,512),"K", fill="white", anchor="mm")
+          img.save("icon_1024.png")
+          PY
+          sips -z 16 16     icon_1024.png --out icon.iconset/icon_16x16.png
+          sips -z 32 32     icon_1024.png --out icon.iconset/icon_16x16@2x.png
+          sips -z 32 32     icon_1024.png --out icon.iconset/icon_32x32.png
+          sips -z 64 64     icon_1024.png --out icon.iconset/icon_32x32@2x.png
+          sips -z 128 128   icon_1024.png --out icon.iconset/icon_128x128.png
+          sips -z 256 256   icon_1024.png --out icon.iconset/icon_128x128@2x.png
+          sips -z 256 256   icon_1024.png --out icon.iconset/icon_256x256.png
+          sips -z 512 512   icon_1024.png --out icon.iconset/icon_256x256@2x.png
+          cp icon_1024.png icon.iconset/icon_512x512.png
+          cp icon_1024.png icon.iconset/icon_512x512@2x.png
+          iconutil -c icns icon.iconset -o kinic-icon.icns
+        working-directory: kinic-api
+
+      - name: PyInstaller (macOS)
+        run: |
+          pyinstaller --name=KinicDesktop --onefile --windowed \
+            --icon=kinic-icon.icns \
+            --add-data="kinic-api.py:." \
+            --osx-bundle-identifier=com.kinic.desktop \
+            kinic-final.py
+        working-directory: kinic-api
+
+      - name: Create DMG
+        run: |
+          mkdir -p dmg
+          cp -r dist/KinicDesktop.app dmg/
+          hdiutil create -volname "Kinic Desktop" -srcfolder dmg -ov -format UDZO KinicDesktop.dmg
+        working-directory: kinic-api
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KinicDesktop-macOS
+          path: kinic-api/KinicDesktop.dmg
+          retention-days: 30
 
   create-summary:
     needs: [build-windows, build-macos]
