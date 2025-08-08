@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller pyautogui flask flask-cors requests pillow pystray
+        pip install pyinstaller pyautogui pyperclip pillow
     
     - name: Create icon
       run: |
@@ -43,7 +43,7 @@ jobs:
     
     - name: Build executable
       run: |
-        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.ico --add-data="kinic-api.py;." --hidden-import=pystray._win32 kinic-desktop.py
+        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.ico --add-data="kinic-api.py;." kinic-final.py
       working-directory: kinic-api
     
     - name: Upload Windows artifact
@@ -66,7 +66,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller pyautogui flask flask-cors requests pillow pystray pyobjc-framework-Quartz
+        pip install pyinstaller pyautogui pyperclip pillow pyobjc-framework-Quartz
     
     - name: Create icon
       run: |
@@ -82,7 +82,7 @@ jobs:
     
     - name: Build executable
       run: |
-        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.icns --add-data="kinic-api.py:." --osx-bundle-identifier=com.kinic.desktop kinic-desktop.py
+        pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.icns --add-data="kinic-api.py:." --osx-bundle-identifier=com.kinic.desktop kinic-final.py
       working-directory: kinic-api
     
     - name: Create DMG
