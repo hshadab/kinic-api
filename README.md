@@ -6,11 +6,13 @@ Transform your Kinic Chrome extension into a powerful API with desktop app - no 
 
 Get started in 30 seconds with our user-friendly desktop application:
 
-### Download Latest Build:
-[![Download for Windows](https://img.shields.io/badge/Download-Windows-blue?style=for-the-badge&logo=windows)](https://github.com/ICME-Lab/kinic/actions/workflows/build-desktop.yml)
-[![Download for macOS](https://img.shields.io/badge/Download-macOS-black?style=for-the-badge&logo=apple)](https://github.com/ICME-Lab/kinic/actions/workflows/build-desktop.yml)
+### Direct Downloads (Latest Build):
+[![Download for Windows](https://img.shields.io/badge/Download-Windows-blue?style=for-the-badge&logo=windows)](https://nightly.link/ICME-Lab/kinic-api/workflows/build-desktop/main/KinicDesktop-Windows.zip)
+[![Download for macOS](https://img.shields.io/badge/Download-macOS-black?style=for-the-badge&logo=apple)](https://nightly.link/ICME-Lab/kinic-api/workflows/build-desktop/main/KinicDesktop-macOS.zip)
 
-> **Note:** Click the links above, then select the latest workflow run and download the artifact for your platform from the "Artifacts" section (requires GitHub login)
+> **Direct downloads powered by [nightly.link](https://nightly.link)** - No GitHub login required!
+> 
+> Alternative: [View all builds](https://github.com/ICME-Lab/kinic-api/actions/workflows/build-desktop.yml) on GitHub Actions
 
 ### Three Simple Steps:
 1. **Download** - Click your platform above
