@@ -42,17 +42,16 @@ jobs:
           d = ImageDraw.Draw(img)
           d.ellipse((10,10,246,246), fill="#2196F3")
           d.text((128,128),"K", fill="white", anchor="mm")
-          img.save("kinic-api/kinic-icon.ico")
+          img.save("kinic-icon.ico")
 
       - name: PyInstaller (Windows)
         run: |
           pyinstaller --name=KinicDesktop --onefile --windowed --icon=kinic-icon.ico --add-data="kinic-api.py;." kinic-final.py
-        working-directory: kinic-api
 
       - uses: actions/upload-artifact@v4
         with:
           name: KinicDesktop-Windows
-          path: kinic-api/dist/KinicDesktop.exe
+          path: dist/KinicDesktop.exe
           retention-days: 30
 
   build-macos:
@@ -102,7 +101,6 @@ jobs:
           cp icon_1024.png icon.iconset/icon_512x512.png
           cp icon_1024.png icon.iconset/icon_512x512@2x.png
           iconutil -c icns icon.iconset -o kinic-icon.icns
-        working-directory: kinic-api
 
       - name: PyInstaller (macOS)
         run: |
@@ -111,19 +109,17 @@ jobs:
             --add-data="kinic-api.py:." \
             --osx-bundle-identifier=com.kinic.desktop \
             kinic-final.py
-        working-directory: kinic-api
 
       - name: Create DMG
         run: |
           mkdir -p dmg
           cp -r dist/KinicDesktop.app dmg/
           hdiutil create -volname "Kinic Desktop" -srcfolder dmg -ov -format UDZO KinicDesktop.dmg
-        working-directory: kinic-api
 
       - uses: actions/upload-artifact@v4
         with:
           name: KinicDesktop-macOS
-          path: kinic-api/KinicDesktop.dmg
+          path: KinicDesktop.dmg
           retention-days: 30
 
   create-summary:
