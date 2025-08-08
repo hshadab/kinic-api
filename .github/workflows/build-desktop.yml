@@ -15,9 +15,20 @@ on:
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        lfs: false
+    
+    - name: Configure Git Safe Directory
+      run: |
+        git config --global --add safe.directory "$env:GITHUB_WORKSPACE"
+        git config --global --add safe.directory "$env:GITHUB_WORKSPACE/kinic-api"
+        git config --global user.email "ci@example.com"
+        git config --global user.name "GitHub Actions"
+        echo "GIT_TERMINAL_PROMPT=0" | Out-File -FilePath $env:GITHUB_ENV -Append
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -27,7 +38,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller pyautogui pyperclip pillow
+        pip install pyinstaller==6.6.0 pyautogui pyperclip pillow
     
     - name: Create icon
       run: |
@@ -54,9 +65,21 @@ jobs:
         retention-days: 30
 
   build-macos:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        lfs: false
+    
+    - name: Configure Git Safe Directory
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        git config --global --add safe.directory "$GITHUB_WORKSPACE/kinic-api"
+        git config --global user.email "ci@example.com"
+        git config --global user.name "GitHub Actions"
+        git config --global advice.detachedHead false
+        echo "GIT_TERMINAL_PROMPT=0" >> $GITHUB_ENV
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -66,18 +89,32 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller pyautogui pyperclip pillow pyobjc-framework-Quartz
+        pip install pyinstaller==6.6.0 pyautogui pyperclip pillow pyobjc-framework-Quartz
     
-    - name: Create icon
+    - name: Create icon using iconutil
       run: |
+        mkdir -p icon.iconset
         python -c "
         from PIL import Image, ImageDraw
-        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+        img = Image.new('RGBA', (1024, 1024), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
-        draw.ellipse([10, 10, 246, 246], fill='#2196F3')
-        draw.text((128, 128), 'K', fill='white', anchor='mm')
-        img.save('kinic-icon.icns', format='ICNS')
+        draw.ellipse([64, 64, 960, 960], fill='#2196F3')
+        draw.text((512, 512), 'K', fill='white', anchor='mm')
+        img.save('icon_1024x1024.png')
         "
+        # Generate all required icon sizes
+        sips -z 16 16     icon_1024x1024.png --out icon.iconset/icon_16x16.png
+        sips -z 32 32     icon_1024x1024.png --out icon.iconset/icon_16x16@2x.png
+        sips -z 32 32     icon_1024x1024.png --out icon.iconset/icon_32x32.png
+        sips -z 64 64     icon_1024x1024.png --out icon.iconset/icon_32x32@2x.png
+        sips -z 128 128   icon_1024x1024.png --out icon.iconset/icon_128x128.png
+        sips -z 256 256   icon_1024x1024.png --out icon.iconset/icon_128x128@2x.png
+        sips -z 256 256   icon_1024x1024.png --out icon.iconset/icon_256x256.png
+        sips -z 512 512   icon_1024x1024.png --out icon.iconset/icon_256x256@2x.png
+        cp icon_1024x1024.png icon.iconset/icon_512x512.png
+        cp icon_1024x1024.png icon.iconset/icon_512x512@2x.png
+        # Create the actual icns file
+        iconutil -c icns icon.iconset -o kinic-icon.icns
       working-directory: kinic-api
     
     - name: Build executable
@@ -154,6 +191,7 @@ jobs:
           2. Open the DMG file
           3. Drag Kinic Desktop to Applications
           4. First run: Right-click → Open (to bypass Gatekeeper)
+          
           ## What's New
           See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
       env:
