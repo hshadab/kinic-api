@@ -307,9 +307,9 @@ def search_ai_extract():
         
         # Triple-click to select AI text (VERY fast like real triple-click)
         windows_click(config['ai_response_x'], config['ai_response_y'])
-        time.sleep(0.03)  # 30ms between clicks (near instant)
+        time.sleep(0.02)  # 20ms between clicks (ultra fast)
         windows_click(config['ai_response_x'], config['ai_response_y'])
-        time.sleep(0.03)  # 30ms between clicks (near instant)
+        time.sleep(0.02)  # 20ms between clicks (ultra fast)
         windows_click(config['ai_response_x'], config['ai_response_y'])
         time.sleep(2)  # Wait after selection
         
