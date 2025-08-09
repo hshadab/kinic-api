@@ -4,6 +4,13 @@
 
 Transform your Kinic Chrome extension into a powerful memory system for AI assistants like Claude, ChatGPT, and Cursor.
 
+## 📖 What is Kinic?
+
+Kinic is a Chrome extension that lets you save and search any webpage using AI. It stores your knowledge in an on-chain vector database, making it permanent and searchable forever. Think of it as your personal, AI-powered knowledge vault.
+
+**First time using Kinic?** 
+👉 **[Get your free account at kinic.io](https://kinic.io)** and install the Chrome extension
+
 ## 🎯 What You Can Do
 
 ### Practical AI Memory Use Cases
@@ -23,8 +30,9 @@ Transform your Kinic Chrome extension into a powerful memory system for AI assis
 ## 🚀 Simple Setup (5 Minutes)
 
 ### Prerequisites
-- Windows with Chrome browser
-- [Kinic Chrome extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc) installed
+1. **Kinic Account** - [Sign up free at kinic.io](https://kinic.io)
+2. **Chrome Browser** with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc) installed
+3. **Windows/Mac/Linux** computer
 
 ### Step 1: Get the Code
 Open PowerShell or Terminal and paste:
