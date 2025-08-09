@@ -68,7 +68,6 @@ Transform Kinic into a powerful API for your workflows:
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/save` | POST | Save current page to Kinic |
-| `/search` | POST | Search your Kinic memory |
 | `/search-and-retrieve` | POST | Search and get first URL |
 | `/search-ai-extract` | POST | Search with AI analysis extraction |
 | `/click` | POST | Open Kinic extension |

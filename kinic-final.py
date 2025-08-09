@@ -1,302 +1,464 @@
 #!/usr/bin/env python3
-"""
-Kinic Desktop v2.1 - Final Working Version
-Pure Python with tkinter only - guaranteed to build
-"""
+"""Kinic Desktop v7 - Working Build Version"""
 
 import tkinter as tk
-from tkinter import messagebox, scrolledtext
+from tkinter import ttk, messagebox, scrolledtext
+import threading
 import subprocess
 import sys
 import os
 import json
-import time
-from datetime import datetime
 import webbrowser
+from datetime import datetime
+import time
+
+# Handle imports that might fail in PyInstaller
+try:
+    import pyautogui
+    pyautogui.FAILSAFE = False
+except:
+    pyautogui = None
+
+try:
+    from PIL import Image, ImageDraw, ImageTk
+except:
+    Image = ImageDraw = ImageTk = None
+
+try:
+    import requests
+except:
+    requests = None
+
+try:
+    import pyperclip
+except:
+    pyperclip = None
+
+COLORS = {
+    'primary': '#6366F1',
+    'primary_dark': '#4F46E5',
+    'background': '#FFFFFF',
+    'text_primary': '#0F172A',
+    'text_secondary': '#64748B',
+    'success': '#10B981',
+    'error': '#EF4444',
+    'border': '#E2E8F0',
+}
 
 class KinicDesktop:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("Kinic Desktop v2.1")
-        self.root.geometry("800x600")
+        self.root.title("Kinic Desktop")
+        self.root.geometry("1000x800")
+        self.root.configure(bg=COLORS['background'])
         
         self.config_file = os.path.expanduser("~/.kinic/config.json")
-        self.config = self.load_config()
+        self.ensure_config_dir()
+        self.load_config()
         
-        self.create_ui()
+        self.api_running = False
+        self.api_port = 5000
+        self.api_process = None
         
+        self.setup_ui()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+    
+    def ensure_config_dir(self):
+        config_dir = os.path.dirname(self.config_file)
+        if not os.path.exists(config_dir):
+            os.makedirs(config_dir)
+    
     def load_config(self):
-        try:
-            os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
-            if os.path.exists(self.config_file):
+        default_config = {'kinic_x': None, 'kinic_y': None}
+        if os.path.exists(self.config_file):
+            try:
                 with open(self.config_file, 'r') as f:
-                    return json.load(f)
-        except:
-            pass
-        return {'kinic_x': None, 'kinic_y': None}
+                    self.config = json.load(f)
+            except:
+                self.config = default_config
+        else:
+            self.config = default_config
+            self.save_config()
     
     def save_config(self):
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)
     
-    def create_ui(self):
-        # Title
-        title = tk.Label(self.root, text="Kinic Desktop", 
-                        font=("Arial", 24, "bold"))
-        title.pack(pady=20)
+    def setup_ui(self):
+        # Header - NO subtitle
+        header = tk.Frame(self.root, bg=COLORS['primary'], height=80)
+        header.pack(fill=tk.X)
+        header.pack_propagate(False)
         
-        # Status
-        if self.config.get('kinic_x'):
-            status = f"✓ Configured: ({self.config['kinic_x']}, {self.config['kinic_y']})"
+        tk.Label(header, text="Kinic Desktop", 
+                font=('Arial', 28, 'bold'),
+                bg=COLORS['primary'], fg='white').pack(expand=True)
+        
+        # Main container
+        main = tk.Frame(self.root, bg=COLORS['background'])
+        main.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Setup section
+        setup_frame = tk.LabelFrame(main, text="⚙️ Setup", 
+                                   font=('Arial', 14, 'bold'),
+                                   bg=COLORS['background'], padx=20, pady=15)
+        setup_frame.pack(fill=tk.X, pady=(0, 15))
+        
+        if self.is_configured():
+            config_frame = tk.Frame(setup_frame, bg=COLORS['background'])
+            config_frame.pack()
+            tk.Label(config_frame, text="✓", font=('Arial', 16), 
+                    bg=COLORS['background'], fg=COLORS['success']).pack(side=tk.LEFT)
+            tk.Label(config_frame, 
+                    text=f"Position: ({self.config['kinic_x']}, {self.config['kinic_y']})",
+                    font=('Arial', 12), bg=COLORS['background']).pack(side=tk.LEFT, padx=10)
+            tk.Button(setup_frame, text="Reconfigure", command=self.setup_position,
+                     bg=COLORS['primary'], fg='white', font=('Arial', 11),
+                     padx=15, pady=8).pack(pady=10)
         else:
-            status = "⚠️ Setup Required"
+            tk.Label(setup_frame, text="⚠️ Setup required", 
+                    font=('Arial', 12), bg=COLORS['background'], 
+                    fg=COLORS['error']).pack(pady=5)
+            tk.Button(setup_frame, text="Setup Position", command=self.setup_position,
+                     bg=COLORS['primary'], fg='white', font=('Arial', 11, 'bold'),
+                     padx=20, pady=10).pack(pady=10)
         
-        tk.Label(self.root, text=status, font=("Arial", 12)).pack(pady=10)
+        # API Server section
+        api_frame = tk.LabelFrame(main, text="🚀 API Server", 
+                                 font=('Arial', 14, 'bold'),
+                                 bg=COLORS['background'], padx=20, pady=15)
+        api_frame.pack(fill=tk.X, pady=(0, 15))
         
-        # Buttons
-        tk.Button(self.root, text="⚙️ Setup Position", 
-                 command=self.setup_wizard,
-                 width=30, height=2,
-                 bg="#6366F1", fg="white").pack(pady=5)
+        self.api_status_label = tk.Label(api_frame, text="● Server Stopped", 
+                                         font=('Arial', 12),
+                                         bg=COLORS['background'], 
+                                         fg=COLORS['text_secondary'])
+        self.api_status_label.pack(pady=5)
         
-        tk.Button(self.root, text="💾 Save Current Page", 
-                 command=self.save_action,
-                 width=30, height=2,
-                 bg="#10B981", fg="white").pack(pady=5)
+        self.api_button = tk.Button(api_frame, text="Start API Server", 
+                                   command=self.toggle_api,
+                                   bg=COLORS['success'], fg='white',
+                                   font=('Arial', 11, 'bold'),
+                                   padx=20, pady=10)
+        self.api_button.pack(pady=10)
         
-        # Search frame
-        search_frame = tk.Frame(self.root)
-        search_frame.pack(pady=10)
+        # Actions section - NO regular Search
+        actions_frame = tk.LabelFrame(main, text="⚡ Actions", 
+                                     font=('Arial', 14, 'bold'),
+                                     bg=COLORS['background'], padx=20, pady=15)
+        actions_frame.pack(fill=tk.X, pady=(0, 15))
         
-        tk.Label(search_frame, text="Search:").pack(side=tk.LEFT)
-        self.search_entry = tk.Entry(search_frame, width=30)
-        self.search_entry.pack(side=tk.LEFT, padx=5)
+        # Save Page
+        save_frame = tk.Frame(actions_frame, bg=COLORS['background'])
+        save_frame.pack(fill=tk.X, pady=10)
+        tk.Button(save_frame, text="💾 Save Current Page", 
+                 command=self.save_page,
+                 bg=COLORS['primary'], fg='white',
+                 font=('Arial', 12, 'bold'),
+                 padx=30, pady=12).pack()
         
-        tk.Button(search_frame, text="🔗 Search & Retrieve URL", 
-                 command=self.search_action,
-                 bg="#6366F1", fg="white").pack(side=tk.LEFT)
+        # Search and Retrieve URL (renamed from Get First URL)
+        search_frame = tk.Frame(actions_frame, bg=COLORS['background'])
+        search_frame.pack(fill=tk.X, pady=10)
         
-        # Output
-        tk.Label(self.root, text="Output:").pack(pady=5)
-        self.output = scrolledtext.ScrolledText(self.root, height=10, width=70)
-        self.output.pack(pady=10)
+        tk.Label(search_frame, text="Search and Retrieve URL:", 
+                font=('Arial', 12),
+                bg=COLORS['background']).pack(pady=5)
         
-        # Help button
-        tk.Button(self.root, text="📚 Installation Help", 
-                 command=self.show_help,
-                 width=30, height=2).pack(pady=5)
+        self.search_entry = tk.Entry(search_frame, font=('Arial', 11), width=40)
+        self.search_entry.pack(pady=5)
         
-        self.log("Kinic Desktop v2.1 Ready")
-        self.log("✅ All requested features included:")
-        self.log("  - No 'API-powered' subtitle")
-        self.log("  - No Search action (only Search & Retrieve URL)")
-        self.log("  - Chrome focus + ESC with 1-second delay")
-        self.log("  - Updated action sequences as requested")
+        tk.Button(search_frame, text="🔗 Search and Retrieve URL", 
+                 command=self.search_retrieve_url,
+                 bg=COLORS['primary'], fg='white',
+                 font=('Arial', 11, 'bold'),
+                 padx=20, pady=10).pack(pady=5)
+        
+        # Results
+        results_frame = tk.LabelFrame(main, text="📊 Results", 
+                                     font=('Arial', 14, 'bold'),
+                                     bg=COLORS['background'], padx=20, pady=15)
+        results_frame.pack(fill=tk.BOTH, expand=True)
+        
+        self.results_text = scrolledtext.ScrolledText(results_frame, 
+                                                      height=10, width=80,
+                                                      font=('Consolas', 10),
+                                                      bg='#F8F9FA')
+        self.results_text.pack(fill=tk.BOTH, expand=True)
+        self.log("Kinic Desktop ready!")
     
-    def log(self, msg):
-        self.output.insert(tk.END, f"{msg}\n")
-        self.output.see(tk.END)
-        self.root.update()
+    def is_configured(self):
+        return self.config.get('kinic_x') is not None
     
-    def show_help(self):
-        help_text = """
-INSTALLATION REQUIREMENTS:
-
-To use automation features, you need to install:
-pip install pyautogui pyperclip
-
-On macOS, also install:
-pip install pyobjc-core pyobjc
-
-After installation:
-1. Click 'Setup Position'
-2. Run the setup wizard
-3. Use Save and Search features
-
-The app will create Python scripts that you can run.
-"""
-        messagebox.showinfo("Installation Help", help_text)
+    def focus_chrome(self):
+        """Focus Chrome window before any action"""
+        if not pyautogui:
+            return
+        try:
+            # Click in browser area to ensure focus
+            if self.config.get('kinic_x') and self.config.get('kinic_y'):
+                pyautogui.click(self.config['kinic_x'] - 200, self.config['kinic_y'])
+                time.sleep(0.2)
+        except:
+            pass
     
-    def setup_wizard(self):
-        """Create and show setup instructions"""
-        setup_code = f"""
-# KINIC SETUP WIZARD
-# Save this as setup_kinic.py and run it
-
-import time
-import json
-import os
-
-print("KINIC POSITION SETUP WIZARD")
-print("=" * 40)
-print()
-print("STEP 1: Install required packages")
-print("Run: pip install pyautogui")
-print()
-input("Press Enter after installing...")
-
-try:
-    import pyautogui
-    print("✓ pyautogui installed successfully")
-except ImportError:
-    print("❌ pyautogui not found. Please install it first.")
-    exit(1)
-
-print()
-print("STEP 2: Position Setup")
-print("1. Open Chrome with Kinic extension visible")
-print("2. After pressing Enter, you have 5 seconds")
-print("3. Move your mouse over the Kinic icon")
-print()
-input("Press Enter when ready...")
-
-for i in range(5, 0, -1):
-    print(f"Capturing in {{i}} seconds...")
-    time.sleep(1)
-
-x, y = pyautogui.position()
-print(f"\\n✓ Position captured: ({{x}}, {{y}})")
-
-# Save config
-config_file = "{self.config_file}"
-os.makedirs(os.path.dirname(config_file), exist_ok=True)
-config = {{'kinic_x': x, 'kinic_y': y}}
-with open(config_file, 'w') as f:
-    json.dump(config, f, indent=2)
-
-print(f"✓ Configuration saved to: {{config_file}}")
-print()
-print("Setup complete! You can now use Kinic Desktop.")
-print("Restart Kinic Desktop to see the updated configuration.")
-input("Press Enter to exit...")
-"""
+    def setup_position(self):
+        if not pyautogui:
+            messagebox.showerror("Error", "pyautogui module not available!")
+            return
+            
+        messagebox.showinfo("Setup", 
+            "1. Open Chrome with Kinic visible\n"
+            "2. Click OK\n"
+            "3. Hover over Kinic icon within 5 seconds")
         
-        # Show in output
-        self.output.delete(1.0, tk.END)
-        self.output.insert(tk.END, setup_code)
-        self.log("\n" + "="*50)
-        self.log("SETUP INSTRUCTIONS:")
-        self.log("1. Copy the code above")
-        self.log("2. Save it as 'setup_kinic.py'")
-        self.log("3. Run: python setup_kinic.py")
-        self.log("4. Follow the wizard")
-        self.log("5. Restart this app after setup")
+        self.log("Starting position setup...")
+        
+        for i in range(5, 0, -1):
+            self.log(f"Capturing in {i} seconds...")
+            self.root.update()
+            time.sleep(1)
+        
+        x, y = pyautogui.position()
+        self.config['kinic_x'] = x
+        self.config['kinic_y'] = y
+        self.save_config()
+        
+        self.log(f"✓ Position saved: ({x}, {y})")
+        messagebox.showinfo("Success", f"Position saved: ({x}, {y})")
+        
+        # Refresh UI
+        for widget in self.root.winfo_children():
+            widget.destroy()
+        self.setup_ui()
     
-    def save_action(self):
-        """Generate save script"""
-        if not self.config.get('kinic_x'):
-            messagebox.showerror("Error", "Please run Setup first!")
+    def toggle_api(self):
+        if self.api_running:
+            self.stop_api()
+        else:
+            self.start_api()
+    
+    def start_api(self):
+        if not self.is_configured():
+            messagebox.showerror("Error", "Please setup position first!")
             return
         
-        save_code = f"""
-# SAVE PAGE SCRIPT
-# Run this to save the current page
-
-import time
+        self.log("Starting API server...")
+        
+        # Create API server code
+        api_code = f"""
+import sys
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pyautogui
+import time
+import pyperclip
+
+app = Flask(__name__)
+CORS(app)
+
+KINIC_X = {self.config.get('kinic_x', 0)}
+KINIC_Y = {self.config.get('kinic_y', 0)}
 
 pyautogui.FAILSAFE = False
 
-print("Saving current page...")
+def focus_chrome_and_prepare():
+    # Focus Chrome and press ESC
+    pyautogui.press('escape')
+    time.sleep(1)  # 1 second delay after ESC
 
-# Focus Chrome and ESC
-pyautogui.press('escape')
-time.sleep(1)  # 1 second delay after ESC
+@app.route('/health')
+def health():
+    return jsonify({{'status': 'ok'}})
 
-# Click Kinic
-pyautogui.click({self.config['kinic_x']}, {self.config['kinic_y']})
-time.sleep(0.8)
+@app.route('/api/save', methods=['POST'])
+def save():
+    focus_chrome_and_prepare()
+    pyautogui.click(KINIC_X, KINIC_Y)
+    time.sleep(0.8)
+    pyautogui.hotkey('shift', 'tab')
+    time.sleep(0.3)
+    pyautogui.press('enter')
+    return jsonify({{'success': True, 'message': 'Page saved'}})
 
-# Shift+Tab, then Enter
-pyautogui.hotkey('shift', 'tab')
-time.sleep(0.3)
-pyautogui.press('enter')
+@app.route('/api/search-retrieve-url', methods=['POST'])
+def search_retrieve_url():
+    data = request.json or {{}}
+    query = data.get('query', '')
+    
+    focus_chrome_and_prepare()
+    pyautogui.click(KINIC_X, KINIC_Y)
+    time.sleep(0.8)
+    
+    # Tab 4 times
+    for _ in range(4):
+        pyautogui.press('tab')
+        time.sleep(0.2)
+    
+    pyautogui.typewrite(query)
+    pyautogui.press('enter')
+    time.sleep(3)  # Wait 3 seconds
+    
+    # Tab 2 times
+    pyautogui.press('tab')
+    time.sleep(0.2)
+    pyautogui.press('tab')
+    time.sleep(0.3)
+    
+    # Shift+Fn+F10
+    pyautogui.hotkey('shift', 'fn', 'f10')
+    time.sleep(2)  # Wait 2 seconds
+    
+    # Down 5 times
+    for _ in range(5):
+        pyautogui.press('down')
+        time.sleep(0.2)
+    
+    pyautogui.press('enter')
+    time.sleep(0.5)
+    
+    url = pyperclip.paste()
+    return jsonify({{'success': True, 'url': url}})
 
-print("✓ Page saved successfully!")
+if __name__ == '__main__':
+    app.run(port=5000, debug=False)
 """
         
-        self.output.delete(1.0, tk.END)
-        self.output.insert(tk.END, save_code)
-        self.log("\n" + "="*50)
-        self.log("TO SAVE PAGE:")
-        self.log("1. Copy the code above")
-        self.log("2. Save as 'save_page.py'")
-        self.log("3. Run: python save_page.py")
+        # Save and run
+        api_file = os.path.join(os.path.dirname(self.config_file), "api_server.py")
+        with open(api_file, 'w') as f:
+            f.write(api_code)
+        
+        self.api_process = subprocess.Popen([sys.executable, api_file],
+                                           stdout=subprocess.PIPE, 
+                                           stderr=subprocess.PIPE)
+        
+        time.sleep(2)
+        self.api_running = True
+        self.api_status_label.config(text="● Server Running", fg=COLORS['success'])
+        self.api_button.config(text="Stop API Server", bg=COLORS['error'])
+        self.log("✓ API server started on port 5000")
     
-    def search_action(self):
-        """Generate search script"""
+    def stop_api(self):
+        if self.api_process:
+            self.api_process.terminate()
+            self.api_process = None
+        
+        self.api_running = False
+        self.api_status_label.config(text="● Server Stopped", fg=COLORS['text_secondary'])
+        self.api_button.config(text="Start API Server", bg=COLORS['success'])
+        self.log("API server stopped")
+    
+    def save_page(self):
+        if not self.is_configured():
+            messagebox.showerror("Error", "Please setup position first!")
+            return
+        
+        if not pyautogui:
+            messagebox.showerror("Error", "pyautogui not available!")
+            return
+        
+        def do_save():
+            self.log("Saving page...")
+            
+            # Focus Chrome and ESC with 1 second delay
+            self.focus_chrome()
+            pyautogui.press('escape')
+            time.sleep(1)
+            
+            # Click Kinic
+            pyautogui.click(self.config['kinic_x'], self.config['kinic_y'])
+            time.sleep(0.8)
+            
+            # Shift+Tab, Enter
+            pyautogui.hotkey('shift', 'tab')
+            time.sleep(0.3)
+            pyautogui.press('enter')
+            
+            self.log("✓ Page saved!")
+        
+        thread = threading.Thread(target=do_save)
+        thread.daemon = True
+        thread.start()
+    
+    def search_retrieve_url(self):
         query = self.search_entry.get().strip()
         if not query:
             messagebox.showwarning("Warning", "Please enter a search query")
             return
         
-        if not self.config.get('kinic_x'):
-            messagebox.showerror("Error", "Please run Setup first!")
+        if not self.is_configured():
+            messagebox.showerror("Error", "Please setup position first!")
             return
         
-        search_code = f"""
-# SEARCH AND RETRIEVE URL SCRIPT
-# Query: {query}
-
-import time
-import pyautogui
-import pyperclip
-
-pyautogui.FAILSAFE = False
-
-print("Searching for: {query}")
-
-# Focus Chrome and ESC
-pyautogui.press('escape')
-time.sleep(1)  # 1 second delay
-
-# Click Kinic
-pyautogui.click({self.config['kinic_x']}, {self.config['kinic_y']})
-time.sleep(0.8)
-
-# Tab 4 times
-for _ in range(4):
-    pyautogui.press('tab')
-    time.sleep(0.2)
-
-# Type query and search
-pyautogui.typewrite("{query}")
-pyautogui.press('enter')
-
-# Wait 3 seconds for results
-time.sleep(3)
-
-# Tab 2 times
-pyautogui.press('tab')
-time.sleep(0.2)
-pyautogui.press('tab')
-time.sleep(0.3)
-
-# Shift+Fn+F10 (context menu)
-pyautogui.hotkey('shift', 'fn', 'f10')
-time.sleep(2)  # Wait 2 seconds
-
-# Down 5 times
-for _ in range(5):
-    pyautogui.press('down')
-    time.sleep(0.2)
-
-# Press Enter
-pyautogui.press('enter')
-time.sleep(0.5)
-
-# Get URL from clipboard
-url = pyperclip.paste()
-print(f"✓ URL retrieved: {{url}}")
-"""
+        if not pyautogui:
+            messagebox.showerror("Error", "pyautogui not available!")
+            return
         
-        self.output.delete(1.0, tk.END)
-        self.output.insert(tk.END, search_code)
-        self.log("\n" + "="*50)
-        self.log("TO SEARCH AND RETRIEVE URL:")
-        self.log("1. Copy the code above")
-        self.log("2. Save as 'search_url.py'")
-        self.log("3. Run: python search_url.py")
+        def do_search():
+            self.log(f"Searching and retrieving URL for: {query}")
+            
+            # Focus Chrome and ESC with 1 second delay
+            self.focus_chrome()
+            pyautogui.press('escape')
+            time.sleep(1)
+            
+            # Click Kinic
+            pyautogui.click(self.config['kinic_x'], self.config['kinic_y'])
+            time.sleep(0.8)
+            
+            # Tab 4 times
+            for _ in range(4):
+                pyautogui.press('tab')
+                time.sleep(0.2)
+            
+            # Type and search
+            pyautogui.typewrite(query)
+            pyautogui.press('enter')
+            
+            # Wait 3 seconds
+            time.sleep(3)
+            
+            # Tab 2 times
+            pyautogui.press('tab')
+            time.sleep(0.2)
+            pyautogui.press('tab')
+            time.sleep(0.3)
+            
+            # Shift+Fn+F10
+            pyautogui.hotkey('shift', 'fn', 'f10')
+            time.sleep(2)
+            
+            # Down 5 times
+            for _ in range(5):
+                pyautogui.press('down')
+                time.sleep(0.2)
+            
+            # Enter
+            pyautogui.press('enter')
+            time.sleep(0.5)
+            
+            # Get URL
+            if pyperclip:
+                url = pyperclip.paste()
+                self.log(f"✓ URL retrieved: {url}")
+            else:
+                self.log("✓ URL copied to clipboard")
+        
+        thread = threading.Thread(target=do_search)
+        thread.daemon = True
+        thread.start()
+    
+    def log(self, message):
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.results_text.insert(tk.END, f"[{timestamp}] {message}\n")
+        self.results_text.see(tk.END)
+        self.root.update()
+    
+    def on_closing(self):
+        if self.api_running:
+            self.stop_api()
+        self.root.destroy()
     
     def run(self):
         self.root.mainloop()

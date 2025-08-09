@@ -133,7 +133,6 @@ def home():
         'endpoints': {
             'POST /click': 'Click Kinic button',
             'POST /save': 'Save current page',
-            'POST /search': 'Search - Body: {"query": "text"}',
             'POST /search-and-retrieve': 'Search and get first URL - Body: {"query": "text"}',
             'POST /search-ai-extract': 'Search, run AI, and extract text - Body: {"query": "text"}',
             'POST /close': 'Close Kinic',
@@ -289,31 +288,6 @@ def save_page():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/search', methods=['POST'])
-def search():
-    try:
-        data = request.get_json() or {}
-        query = data.get('query', '')
-        
-        if not query:
-            return jsonify({'success': False, 'error': 'No query'}), 400
-        
-        focus_chrome()
-        time.sleep(0.3)
-        windows_click(config['kinic_x'], config['kinic_y'])
-        time.sleep(2)
-        
-        for _ in range(4):
-            send_keys("{TAB}")
-            time.sleep(0.2)
-        
-        send_keys(query.replace('{', '{{').replace('}', '}}'))
-        time.sleep(0.5)
-        send_keys("{ENTER}")
-        
-        return jsonify({'success': True, 'message': f'Searched: {query}'})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/close', methods=['POST'])
 def close_kinic():

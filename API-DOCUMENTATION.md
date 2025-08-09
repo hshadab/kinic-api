@@ -140,26 +140,7 @@ curl -X POST http://localhost:5005/save
 }
 ```
 
-### 3. Search
-**Endpoint:** `POST /search`
-
-Searches your Kinic collection.
-
-```bash
-curl -X POST http://localhost:5005/search \
-  -H "Content-Type: application/json" \
-  -d '{"query":"python tutorial"}'
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Searched: python tutorial"
-}
-```
-
-### 4. Search and Retrieve URL
+### 3. Search and Retrieve URL
 **Endpoint:** `POST /search-and-retrieve`
 
 Searches and returns the URL of the first result using the exact sequence:
@@ -190,7 +171,7 @@ curl -X POST http://localhost:5005/search-and-retrieve \
 }
 ```
 
-### 5. Search and Extract AI Analysis
+### 4. Search and Extract AI Analysis
 **Endpoint:** `POST /search-ai-extract`
 
 Searches, triggers AI analysis, and extracts the generated text using triple-click selection.
@@ -211,7 +192,7 @@ curl -X POST http://localhost:5005/search-ai-extract \
 }
 ```
 
-### 6. Close Kinic
+### 5. Close Kinic
 **Endpoint:** `POST /close`
 
 Closes the Kinic extension popup.
@@ -220,7 +201,7 @@ Closes the Kinic extension popup.
 curl -X POST http://localhost:5005/close
 ```
 
-### 7. Setup Kinic Position
+### 6. Setup Kinic Position
 **Endpoint:** `POST /setup-kinic`
 
 Updates the Kinic button coordinates.
@@ -231,7 +212,7 @@ curl -X POST http://localhost:5005/setup-kinic \
   -d '{"x":1387,"y":99}'
 ```
 
-### 8. Setup AI Response Position
+### 7. Setup AI Response Position
 **Endpoint:** `POST /setup-ai`
 
 Updates the AI response text area coordinates.
