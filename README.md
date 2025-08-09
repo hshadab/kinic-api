@@ -1,69 +1,71 @@
-# Kinic API - On-Chain Vector Database for AI Agents
+# Kinic API - Give Your AI Perfect Memory
 
-Transform your Kinic Chrome extension into a powerful API for LLM copilots and AI agents.
+**Save any webpage. Search with AI. Never lose information again.**
 
-> **🔗 Kinic is an on-chain vector database** - enabling verifiable, decentralized, and immutable knowledge storage for AI agents and collaborative development.
+Transform your Kinic Chrome extension into a powerful memory system for AI assistants like Claude, ChatGPT, and Cursor.
 
-### Why Kinic vs Traditional RAG/Memory Solutions?
-Unlike cloud-based memory APIs that charge per call and lock your data in proprietary silos:
-- **✅ You Own Your Data** - On-chain storage means no vendor lock-in, no API fees
-- **✅ Cross-Platform Memory** - Works across ALL your AI agents, not just one provider
-- **✅ Zero Marginal Cost** - After initial storage, unlimited queries without per-call charges
-- **✅ Composable & Interoperable** - Any agent/app can access the same memory layer
-- **✅ Censorship Resistant** - No provider can suddenly restrict or delete your knowledge
-- **✅ Privacy First** - Your memory stays yours, not training someone else's models
+## 🎯 What You Can Do
 
-> **📚 Full API Documentation:** See [API-DOCUMENTATION.md](API-DOCUMENTATION.md) for complete v5 API implementation details, including search-and-retrieve URLs and AI text extraction features.
+### Practical AI Memory Use Cases
+- **🧠 Never Lose Research** - Save important articles, docs, and code snippets, then ask your AI to recall them anytime
+- **💡 Context That Persists** - Your AI remembers everything from past sessions - no more re-explaining projects
+- **🔍 Smart Code Search** - "What was that Python script I saved about webscraping?" - instant retrieval
+- **📚 Personal Knowledge Base** - Build a searchable library of everything you've learned
+- **🤝 Team Knowledge Sharing** - Share discoveries with your team through a common memory layer
+- **🔄 Cross-Tool Memory** - Same memory works in VSCode, browser, terminal - everywhere
 
-## 🚀 Quick Start
+### Advanced Blockchain Features
+> **🔗 Powered by on-chain vector database** - Your knowledge is verifiable, permanent, and truly yours
+- **Proof of Learning** - Cryptographic evidence of what your AI learned from
+- **Zero Vendor Lock-in** - No API fees, no service shutdowns, no data hostage
+- **Censorship Resistant** - Your knowledge can't be deleted or restricted
 
-### Installation
+## 🚀 Simple Setup (5 Minutes)
+
+### Prerequisites
+- Windows with Chrome browser
+- [Kinic Chrome extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc) installed
+
+### Step 1: Get the Code
+Open PowerShell or Terminal and paste:
 ```bash
 git clone https://github.com/hshadab/kinic-api.git
 cd kinic-api
+```
+
+### Step 2: Install Python (if needed)
+```bash
+# Check if Python is installed
+python --version
+
+# If not installed, download from python.org
+# Or on Windows: winget install Python.Python.3.12
+```
+
+### Step 3: Install Requirements
+```bash
 pip install flask flask-cors pyautogui pyperclip requests
 ```
 
-### Setup Coordinates
+### Step 4: Set Up Kinic Position
 ```bash
-# Capture Kinic button position (10-second timer)
-python3 capture-position-10s.py
+# This will count down from 10 - hover your mouse over the Kinic icon
+python capture-position-10s.py
 
-# Capture AI response area position
-python3 capture-ai-position.py
+# Do the same for the AI response area in Kinic
+python capture-ai-position.py
 ```
 
-### Run the API Server
+### Step 5: Start the API
 ```bash
-python3 kinic-api.py
+python kinic-api.py
 ```
 
-The API runs on `http://localhost:5005`
+That's it! The API is now running at `http://localhost:5005`
 
-## ✨ Features
+## 📡 API Endpoints
 
-### 🎯 Inspiring Use Cases
-
-#### 🔗 On-Chain Vector Database Powers
-Leverage Kinic's blockchain foundation for verifiable, decentralized AI memory:
-- **Verifiable AI Training** - Cryptographic proof of what data your AI learned from
-- **Knowledge DAOs** - Teams share discoveries with on-chain attribution and incentives
-- **Proof of Debug** - Build reputation with immutable problem-solving history
-- **Zero-Knowledge Code Reviews** - Learn from others' code without seeing proprietary details
-
-#### 🧠 Persistent Shared Memory Magic
-Transform how AI agents and developers collaborate across sessions:
-- **Multi-Agent Hive Mind** - AI agents that share discoveries and learn collectively
-- **Context Resurrection** - Instantly restore your mental state when returning to projects
-- **Rubber Duck with Memory** - Debugging assistant that recalls all past conversations
-- **Cross-Session Learning** - Your AI gets smarter by remembering what worked
-- **Living Documentation** - Docs that evolve based on actual code usage
-- **Predictive Debugging** - Anticipate bugs based on historical patterns
-- **Code Pattern Mining** - Discover patterns across all your projects automatically
-- **Self-Improving Reviews** - AI that learns from accepted/rejected suggestions
-
-### API Endpoints (v5)
-Transform Kinic into a powerful API for your workflows:
+Simple endpoints to control Kinic from your AI:
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
@@ -75,70 +77,72 @@ Transform Kinic into a powerful API for your workflows:
 | `/setup-kinic` | POST | Configure Kinic button position |
 | `/setup-ai` | POST | Configure AI response position |
 
-## 🛠️ Integration Examples
+## 💬 How to Use with Your AI
 
-### LLM Copilot (Claude, ChatGPT, etc.)
-Tell your AI assistant:
+### With Claude, ChatGPT, or Cursor
+Just tell your AI:
 ```
-"I have a Kinic API running on localhost:5005. 
-Save this page to my Kinic memory: [current URL]"
+"I have Kinic API running on localhost:5005. 
+Save this webpage to my memory."
 
-"Search my Kinic for information about quantum computing 
-and extract the AI analysis"
+"Search my Kinic memory for that Python webscraping tutorial 
+I saved last week and show me the code."
 ```
 
-### Python Script
+Your AI will handle the technical details!
+
+### Quick Examples
+
+**Save the current page:**
 ```python
 import requests
-
-# Save current browser page
 requests.post('http://localhost:5005/save')
+```
 
-# Search and get URL
+**Search and get URL:**
+```python
 result = requests.post('http://localhost:5005/search-and-retrieve', 
     json={'query': 'machine learning'})
 print(result.json()['url'])
+```
 
-# Search and extract AI analysis
+**Get AI analysis of saved content:**
+```python
 result = requests.post('http://localhost:5005/search-ai-extract', 
-    json={'query': 'explain transformers'})
+    json={'query': 'explain that Docker article I saved'})
 print(result.json()['ai_response'])
 ```
 
-### Command Line
-```bash
-# Quick save
-curl -X POST http://localhost:5005/save
 
-# Search and get URL
-curl -X POST http://localhost:5005/search-and-retrieve \
-  -H "Content-Type: application/json" \
-  -d '{"query": "python tutorial"}'
+## 🛠️ Troubleshooting
 
-# Search with AI text extraction
-curl -X POST http://localhost:5005/search-ai-extract \
-  -H "Content-Type: application/json" \
-  -d '{"query": "summarize my research on LLMs"}'
-```
+**"Python not found"**
+- Download from [python.org](https://python.org) or use `winget install Python.Python.3.12`
 
+**"Kinic button not clicking"**
+- Re-run `python capture-position-10s.py` and make sure to hover over the Kinic icon
+
+**"API not responding"**
+- Make sure the server is running (you should see "Running on http://localhost:5005")
+- Check that Chrome and Kinic extension are open
 
 ## 📋 Requirements
 
-- Windows 10/11 with WSL or native Linux
+- Windows 10/11 (with WSL) or Linux/Mac
 - Chrome browser with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc)
-- Python 3.8+
+- Python 3.8 or newer
 
 ## 🤝 Contributing
 
 We welcome contributions! Feel free to:
 - Report bugs or request features via [Issues](https://github.com/hshadab/kinic-api/issues)
 - Submit pull requests
-- Share your integration examples
+- Share your use cases and integrations
 
 ## 📄 License
 
-MIT License
+MIT License - Use it however you want!
 
-## 🙏 Acknowledgments
+## 🙏 About
 
-Built for the Kinic community to enable powerful AI agent integrations with on-chain memory.
+Built to give AI agents perfect memory through Kinic's on-chain vector database. Your knowledge, your control, forever.
