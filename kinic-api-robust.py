@@ -20,8 +20,8 @@ else:
     config = {
         'kinic_x': 1379, 
         'kinic_y': 101,
-        'ai_response_x': 948,
-        'ai_response_y': 830
+        'ai_response_x': 1000,
+        'ai_response_y': 828
     }
 
 def save_config():
@@ -305,13 +305,13 @@ def search_ai_extract():
         # Wait for AI response (10s for generation)
         time.sleep(10)
         
-        # Triple-click to select AI text (0.5s, 0.5s, 2s after)
+        # Triple-click to select AI text (VERY fast like real triple-click)
         windows_click(config['ai_response_x'], config['ai_response_y'])
-        time.sleep(0.5)
+        time.sleep(0.03)  # 30ms between clicks (near instant)
         windows_click(config['ai_response_x'], config['ai_response_y'])
-        time.sleep(0.5)
+        time.sleep(0.03)  # 30ms between clicks (near instant)
         windows_click(config['ai_response_x'], config['ai_response_y'])
-        time.sleep(2)
+        time.sleep(2)  # Wait after selection
         
         # Copy to clipboard (2s delay)
         send_keys("^c")
