@@ -1,6 +1,6 @@
-# Kinic Automation Suite
+# Kinic API - On-Chain Vector Database for AI Agents
 
-Transform your Kinic Chrome extension into a powerful API with desktop app - no coding required!
+Transform your Kinic Chrome extension into a powerful API for LLM copilots and AI agents.
 
 > **🔗 Kinic is an on-chain vector database** - enabling verifiable, decentralized, and immutable knowledge storage for AI agents and collaborative development.
 
@@ -15,46 +15,32 @@ Unlike cloud-based memory APIs that charge per call and lock your data in propri
 
 > **📚 Full API Documentation:** See [API-DOCUMENTATION.md](API-DOCUMENTATION.md) for complete v5 API implementation details, including search-and-retrieve URLs and AI text extraction features.
 
-## 🚀 Quick Start - Download Desktop App
+## 🚀 Quick Start
 
-Get started in 30 seconds with our user-friendly desktop application:
-
-### Direct Downloads (Latest Build):
-[![Download for Windows](https://img.shields.io/badge/Download-Windows-blue?style=for-the-badge&logo=windows)](https://nightly.link/ICME-Lab/kinic-api/workflows/build-desktop/main/KinicDesktop-Windows.zip)
-[![Download for macOS](https://img.shields.io/badge/Download-macOS-black?style=for-the-badge&logo=apple)](https://nightly.link/ICME-Lab/kinic-api/workflows/build-desktop/main/KinicDesktop-macOS.zip)
-
-> **Direct downloads powered by [nightly.link](https://nightly.link)** - No GitHub login required!
-> 
-> Alternative: [View all builds](https://github.com/ICME-Lab/kinic-api/actions/workflows/build-desktop.yml) on GitHub Actions
-
-### Three Simple Steps:
-1. **Download** - Click your platform above
-2. **Setup** - Run app and click "Setup Kinic Position" (hover over icon for 5 seconds)
-3. **Use** - Click buttons or start API server for integrations!
-
-No terminal. No Python. No complexity. Just works! ✨
-
----
-
-## 📁 Project Structure
-
+### Installation
+```bash
+git clone https://github.com/hshadab/kinic-api.git
+cd kinic-api
+pip install flask flask-cors pyautogui pyperclip requests
 ```
-kinic/
-├── kinic-api/          # Main desktop app & API (actively maintained)
-│   ├── kinic-desktop.py    # GUI application
-│   ├── kinic-api.py        # Core API functionality
-│   └── examples/           # Integration examples
-└── kinic-axiom/        # Axiom.ai integration (experimental)
+
+### Setup Coordinates
+```bash
+# Capture Kinic button position (10-second timer)
+python3 capture-position-10s.py
+
+# Capture AI response area position
+python3 capture-ai-position.py
 ```
+
+### Run the API Server
+```bash
+python3 kinic-api-v5.py
+```
+
+The API runs on `http://localhost:5005`
 
 ## ✨ Features
-
-### Desktop Application
-- **🖱️ Visual Setup** - No typing coordinates, just point and click
-- **📍 System Tray** - Runs quietly in background, always accessible
-- **⚡ Quick Actions** - One-click save & search buttons
-- **🔧 Built-in API** - Start/stop API server with a button
-- **🚀 Auto-start** - Launch with your computer (optional)
 
 ### 🎯 Inspiring Use Cases
 
@@ -92,26 +78,32 @@ Transform Kinic into a powerful API for your workflows:
 
 ## 🛠️ Integration Examples
 
-### Zapier / Make / n8n
-```javascript
-// Webhook action
-POST http://localhost:5000/api/save
-{
-  "url": "https://example.com"
-}
+### LLM Copilot (Claude, ChatGPT, etc.)
+Tell your AI assistant:
+```
+"I have a Kinic API running on localhost:5005. 
+Save this page to my Kinic memory: [current URL]"
+
+"Search my Kinic for information about quantum computing 
+and extract the AI analysis"
 ```
 
 ### Python Script
 ```python
 import requests
 
-# Save a page
-requests.post('http://localhost:5000/api/save', 
-    json={'url': 'https://arxiv.org/paper'})
+# Save current browser page
+requests.post('http://localhost:5005/save')
 
-# Search memories
-result = requests.post('http://localhost:5000/api/search', 
-    json={'query': 'machine learning transformers'})
+# Search and get URL
+result = requests.post('http://localhost:5005/search-and-retrieve', 
+    json={'query': 'machine learning'})
+print(result.json()['url'])
+
+# Search and extract AI analysis
+result = requests.post('http://localhost:5005/search-ai-extract', 
+    json={'query': 'explain transformers'})
+print(result.json()['ai_response'])
 ```
 
 ### Command Line
@@ -130,61 +122,24 @@ curl -X POST http://localhost:5005/search-ai-extract \
   -d '{"query": "summarize my research on LLMs"}'
 ```
 
-## 🔧 Advanced Usage
-
-### For Developers (Python Script)
-If you prefer the command-line version:
-
-```bash
-git clone https://github.com/ICME-Lab/kinic-api.git
-cd kinic-api
-pip install -r requirements.txt
-python kinic-api.py
-```
-
-### API Authentication (Optional)
-Set an API key for security:
-```bash
-export KINIC_API_KEY="your-secret-key"
-```
-
-Then include in requests:
-```python
-headers = {'X-API-Key': 'your-secret-key'}
-```
 
 ## 📋 Requirements
 
-- Chrome browser installed
-- [Kinic Chrome extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc) installed
-- Operating System: Windows 10+ or macOS 10.14+
+- Windows 10/11 with WSL or native Linux
+- Chrome browser with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc)
+- Python 3.8+
 
 ## 🤝 Contributing
 
 We welcome contributions! Feel free to:
-- Report bugs or request features via [Issues](https://github.com/ICME-Lab/kinic-api/issues)
+- Report bugs or request features via [Issues](https://github.com/hshadab/kinic-api/issues)
 - Submit pull requests
 - Share your integration examples
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details
-
-## 🆘 Support
-
-- **Documentation**: [Wiki](https://github.com/ICME-Lab/kinic-api/wiki)
-- **Issues**: [Bug Reports](https://github.com/ICME-Lab/kinic-api/issues)
-- **Discussions**: [Community Forum](https://github.com/ICME-Lab/kinic-api/discussions)
+MIT License
 
 ## 🙏 Acknowledgments
 
-Built with ❤️ for the Kinic community. Special thanks to all contributors and users who provided feedback to make this tool better.
-
----
-
-<p align="center">
-  <strong>Ready to supercharge your Kinic workflow?</strong><br>
-  <a href="https://github.com/ICME-Lab/kinic-api/releases/latest">Download Now</a> • 
-  <a href="https://github.com/ICME-Lab/kinic-api/wiki">Read Docs</a> • 
-  <a href="https://github.com/ICME-Lab/kinic-api/issues">Get Help</a>
-</p>
+Built for the Kinic community to enable powerful AI agent integrations with on-chain memory.
