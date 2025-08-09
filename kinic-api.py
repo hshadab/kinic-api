@@ -1,344 +1,336 @@
 #!/usr/bin/env python3
-"""
-Kinic API - The simplest way to use Kinic in your workflows
+"""Kinic API v5 - Complete with AI text extraction"""
 
-Just run: python kinic-api.py
-Then use the API endpoints in n8n, Make, Zapier, or any tool!
-"""
-
-import os
-import sys
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import subprocess
 import time
 import json
-import subprocess
-from datetime import datetime
-
-# Check dependencies
-try:
-    import pyautogui
-    import pyperclip
-    from flask import Flask, request, jsonify
-    from flask_cors import CORS
-except ImportError:
-    print("📦 Installing required packages...")
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pyautogui", "flask", "flask-cors", "pyperclip"])
-    print("✅ Packages installed! Please run the script again.")
-    sys.exit(0)
+import os
 
 app = Flask(__name__)
 CORS(app)
 
-# Simple config file
-CONFIG_FILE = 'kinic-config.json'
-config = {}
-
-def first_time_setup():
-    """Super simple setup - just find the Kinic icon"""
-    print("\n🚀 KINIC API - First Time Setup")
-    print("="*40)
-    print("\n3 quick steps:")
-    print("1. Make sure Chrome is open")
-    print("2. Make sure you can see the Kinic icon")
-    print("3. Click the Kinic icon once to test it\n")
-    
-    input("Press ENTER when ready...")
-    
-    print("\n📍 Now hover your mouse over the Kinic icon")
-    print("   (Don't click - just hover)")
-    print("\n⏰ Recording position in 5 seconds...")
-    
-    for i in range(5, 0, -1):
-        print(f"   {i}...")
-        time.sleep(1)
-    
-    x, y = pyautogui.position()
-    print(f"\n✅ Got it! Kinic icon is at position ({x}, {y})")
-    
-    # Save config
-    config = {'kinic_x': x, 'kinic_y': y}
-    
-    # Ask if user wants to set up AI response position
-    setup_ai = input("\n🤖 Do you want to set up AI response text position? (y/n): ")
-    if setup_ai.lower() == 'y':
-        print("\n📝 Let's find where AI responses appear:")
-        print("1. I'll open Kinic and run a test query")
-        print("2. When you see the AI response, hover your mouse over the text")
-        print("3. I'll record that position\n")
-        
-        input("Press ENTER to start...")
-        
-        # Run a test query
-        pyautogui.click(x, y)  # Click Kinic icon
-        time.sleep(2)
-        
-        print("\n⏰ Please hover over the AI response text area in 5 seconds...")
-        for i in range(5, 0, -1):
-            print(f"   {i}...")
-            time.sleep(1)
-        
-        resp_x, resp_y = pyautogui.position()
-        config['ai_response_x'] = resp_x
-        config['ai_response_y'] = resp_y
-        print(f"\n✅ AI response position recorded: ({resp_x}, {resp_y})")
-    
-    with open(CONFIG_FILE, 'w') as f:
-        json.dump(config, f)
-    
-    print("\n✨ Setup complete! Your API is ready to use.")
-    return config
-
-# Load or create config
-try:
-    with open(CONFIG_FILE, 'r') as f:
+# Load config
+config_file = os.path.expanduser("~/.kinic/config.json")
+if os.path.exists(config_file):
+    with open(config_file, 'r') as f:
         config = json.load(f)
-except:
-    config = first_time_setup()
+else:
+    config = {
+        'kinic_x': 959, 
+        'kinic_y': 98,
+        'ai_response_x': 555,
+        'ai_response_y': 576
+    }
 
-# Core functions
-def click_kinic():
-    """Click the Kinic extension icon"""
-    pyautogui.click(config['kinic_x'], config['kinic_y'])
-    time.sleep(2)
+def save_config():
+    os.makedirs(os.path.dirname(config_file), exist_ok=True)
+    with open(config_file, 'w') as f:
+        json.dump(config, f, indent=2)
 
-def save_current_page():
-    """Save the current page to Kinic"""
-    click_kinic()
-    time.sleep(4)  # Wait for page context
-    pyautogui.hotkey('shift', 'tab')
-    time.sleep(0.5)
-    pyautogui.press('enter')
-
-def search_kinic(query):
-    """Search in Kinic"""
-    click_kinic()
-    for _ in range(4):
-        pyautogui.press('tab')
-        time.sleep(0.2)
-    pyautogui.typewrite(query)
-    pyautogui.press('enter')
-
-def search_and_ai(query, extract_response=True):
-    """Search in Kinic and then run AI on the results"""
-    # First perform the search
-    click_kinic()
-    for _ in range(4):
-        pyautogui.press('tab')
-        time.sleep(0.2)
-    pyautogui.typewrite(query)
-    pyautogui.press('enter')
+def windows_click(x, y):
+    """Click at exact position"""
+    ps_script = f"""
+    Add-Type @'
+        using System;
+        using System.Runtime.InteropServices;
+        public class Win32 {{
+            [DllImport("user32.dll")]
+            public static extern bool SetCursorPos(int X, int Y);
+            
+            [DllImport("user32.dll")]
+            public static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, int dwExtraInfo);
+            
+            public const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
+            public const uint MOUSEEVENTF_LEFTUP = 0x0004;
+        }}
+'@
+    [Win32]::SetCursorPos({x}, {y})
+    Start-Sleep -Milliseconds 100
+    [Win32]::mouse_event([Win32]::MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
+    Start-Sleep -Milliseconds 50
+    [Win32]::mouse_event([Win32]::MOUSEEVENTF_LEFTUP, 0, 0, 0, 0)
+    """
     
-    # Wait for search results to load
-    time.sleep(3)
-    
-    # Now run AI on the results (Tab 5 times then Enter)
-    for _ in range(5):
-        pyautogui.press('tab')
-        time.sleep(0.2)
-    pyautogui.press('enter')
-    
-    if extract_response:
-        # Wait for AI response to generate
-        time.sleep(5)  # Adjust based on typical response time
-        
-        # Get the AI response text position from config or use default
-        response_x = config.get('ai_response_x', config['kinic_x'])
-        response_y = config.get('ai_response_y', config['kinic_y'] + 200)
-        
-        # Move to the AI response area and triple-click to select all
-        pyautogui.moveTo(response_x, response_y)
-        pyautogui.click(clicks=3, interval=0.1)  # Triple click to select paragraph
-        
-        # Copy to clipboard
-        time.sleep(0.5)
-        pyautogui.hotkey('ctrl', 'c')
-        
-        # Get text from clipboard
-        time.sleep(0.5)
-        ai_response = pyperclip.paste()
-        
-        return ai_response
-    
-    return None
+    subprocess.run(
+        ["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+         "-ExecutionPolicy", "Bypass", "-Command", ps_script],
+        capture_output=True, text=True, timeout=5
+    )
 
-# API Routes
+def send_keys(keys):
+    """Send keyboard keys"""
+    ps_script = f"""
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.SendKeys]::SendWait("{keys}")
+    """
+    
+    subprocess.run(
+        ["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+         "-ExecutionPolicy", "Bypass", "-Command", ps_script],
+        capture_output=True, text=True, timeout=5
+    )
+
+def send_shift_f10():
+    """Send Shift+F10 for context menu"""
+    ps_script = """
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.SendKeys]::SendWait("+{F10}")
+    """
+    
+    subprocess.run(
+        ["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+         "-ExecutionPolicy", "Bypass", "-Command", ps_script],
+        capture_output=True, text=True, timeout=5
+    )
+
+def get_clipboard():
+    """Get clipboard content"""
+    ps_script = """
+    Add-Type -AssemblyName System.Windows.Forms
+    [System.Windows.Forms.Clipboard]::GetText()
+    """
+    
+    result = subprocess.run(
+        ["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+         "-ExecutionPolicy", "Bypass", "-Command", ps_script],
+        capture_output=True, text=True, timeout=5
+    )
+    
+    return result.stdout.strip() if result.stdout else None
+
+def focus_chrome():
+    """Focus Chrome window"""
+    ps_script = """
+    Add-Type @'
+        using System;
+        using System.Runtime.InteropServices;
+        public class Win32 {
+            [DllImport("user32.dll")]
+            public static extern bool SetForegroundWindow(IntPtr hWnd);
+            [DllImport("user32.dll")]
+            public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+        }
+'@
+    $chrome = [Win32]::FindWindow("Chrome_WidgetWin_1", $null)
+    if ($chrome -ne [IntPtr]::Zero) {
+        [Win32]::SetForegroundWindow($chrome)
+    }
+    """
+    
+    subprocess.run(
+        ["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
+         "-ExecutionPolicy", "Bypass", "-Command", ps_script],
+        capture_output=True, text=True, timeout=5
+    )
+
 @app.route('/')
 def home():
-    return f'''
-    <h1>🎉 Kinic API is Running!</h1>
-    <p>Your Kinic is now accessible via API</p>
-    
-    <h2>Quick Test:</h2>
-    <button onclick="fetch('/api/save', {{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{url:window.location.href}})}}).then(r=>r.json()).then(d=>alert('Saved!'))">Save This Page</button>
-    <button onclick="testSearchAI()">Search + AI Analysis</button>
-    
-    <div id="ai-response" style="margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 5px; display: none;">
-        <h3>AI Response:</h3>
-        <pre id="ai-text" style="white-space: pre-wrap; font-family: Arial, sans-serif;"></pre>
-    </div>
-    
-    <script>
-    async function testSearchAI() {{
-        const query = prompt('Search query:');
-        if (!query) return;
-        
-        const responseDiv = document.getElementById('ai-response');
-        const textDiv = document.getElementById('ai-text');
-        
-        responseDiv.style.display = 'block';
-        textDiv.textContent = 'Loading... Please wait while Kinic processes your query...';
-        
-        try {{
-            const response = await fetch('/api/search-ai', {{
-                method: 'POST',
-                headers: {{'Content-Type': 'application/json'}},
-                body: JSON.stringify({{query: query}})
-            }});
-            
-            const data = await response.json();
-            
-            if (data.ai_response) {{
-                textDiv.textContent = data.ai_response;
-            }} else {{
-                textDiv.textContent = 'AI response extraction not available. Response: ' + data.message;
-            }}
-        }} catch (error) {{
-            textDiv.textContent = 'Error: ' + error.message;
-        }}
-    }}
-    </script>
-    
-    <h2>API Endpoints:</h2>
-    <pre>
-POST /api/save         - Save a URL to Kinic
-POST /api/search       - Search in Kinic
-POST /api/search-ai    - Search + AI analysis (NEW!)
-POST /api/ai           - Run AI query
-    </pre>
-    
-    <h2>Search + AI Example:</h2>
-    <pre>
-curl -X POST http://localhost:5000/api/search-ai \\
-  -H "Content-Type: application/json" \\
-  -d '{{"query": "machine learning"}}'
-    </pre>
-    
-    <h2>Use in n8n:</h2>
-    <pre>
-HTTP Request node:
-- URL: http://localhost:5000/api/search-ai
-- Method: POST
-- Body: {{"query": "{{{{$json.searchTerm}}}}"}}
-    </pre>
-    '''
-
-@app.route('/api/save', methods=['POST'])
-def api_save():
-    try:
-        url = request.json.get('url') if request.json else None
-        
-        # Navigate to URL if provided
-        if url:
-            subprocess.Popen(['open', url] if sys.platform == 'darwin' else ['xdg-open', url] if sys.platform.startswith('linux') else ['start', url], shell=True)
-            time.sleep(3)
-        
-        save_current_page()
-        
-        return jsonify({
-            'success': True,
-            'message': 'Saved to Kinic!',
-            'timestamp': datetime.now().isoformat()
-        })
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/search', methods=['POST'])
-def api_search():
-    try:
-        query = request.json.get('query')
-        if not query:
-            return jsonify({'error': 'Query required'}), 400
-        
-        search_kinic(query)
-        
-        return jsonify({
-            'success': True,
-            'query': query,
-            'message': 'Search completed'
-        })
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-@app.route('/api/search-ai', methods=['POST'])
-def api_search_ai():
-    """Search and then run AI on the results"""
-    try:
-        query = request.json.get('query')
-        if not query:
-            return jsonify({'error': 'Query required'}), 400
-        
-        # Check if user wants to extract the response
-        extract = request.json.get('extract_response', True)
-        
-        ai_response = search_and_ai(query, extract_response=extract)
-        
-        result = {
-            'success': True,
-            'query': query,
-            'message': 'Search completed and AI analysis triggered'
+    return jsonify({
+        'status': 'running',
+        'config': config,
+        'endpoints': {
+            'POST /click': 'Click Kinic button',
+            'POST /save': 'Save current page',
+            'POST /search-and-retrieve': 'Search and get first URL - Body: {"query": "text"}',
+            'POST /search-ai-extract': 'Search, run AI, and extract text - Body: {"query": "text"}',
+            'POST /close': 'Close Kinic',
+            'POST /setup-kinic': 'Set Kinic position - Body: {"x": 959, "y": 98}',
+            'POST /setup-ai': 'Set AI response position - Body: {"x": 555, "y": 576}'
         }
-        
-        if ai_response:
-            result['ai_response'] = ai_response
-        
-        return jsonify(result)
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+    })
 
-@app.route('/api/ai', methods=['POST'])
-def api_ai():
+@app.route('/search-ai-extract', methods=['POST'])
+def search_ai_extract():
+    """Search, run AI, and extract the AI response text"""
     try:
-        click_kinic()
-        for _ in range(7):
-            pyautogui.press('tab')
+        data = request.get_json() or {}
+        query = data.get('query', '')
+        
+        if not query:
+            return jsonify({'success': False, 'error': 'No query provided'}), 400
+        
+        # Check if AI response position is set
+        if not config.get('ai_response_x') or not config.get('ai_response_y'):
+            return jsonify({
+                'success': False, 
+                'error': 'AI response position not set. Use /setup-ai first'
+            }), 400
+        
+        # Step 1: Open Kinic
+        focus_chrome()
+        time.sleep(0.3)
+        windows_click(config['kinic_x'], config['kinic_y'])
+        time.sleep(2)
+        
+        # Step 2: Search
+        for _ in range(4):
+            send_keys("{TAB}")
             time.sleep(0.2)
-        pyautogui.press('enter')
+        
+        send_keys(query.replace('{', '{{').replace('}', '}}'))
+        time.sleep(0.5)
+        send_keys("{ENTER}")
+        
+        # Step 3: Wait for search results
+        time.sleep(3)
+        
+        # Step 4: Click AI button (5 tabs from search)
+        for _ in range(5):
+            send_keys("{TAB}")
+            time.sleep(0.2)
+        send_keys("{ENTER}")
+        
+        # Step 5: Wait for AI response to generate
+        time.sleep(8)  # Adjust based on typical response time
+        
+        # Step 6: Triple-click in AI response area to select all text
+        windows_click(config['ai_response_x'], config['ai_response_y'])
+        time.sleep(0.2)
+        windows_click(config['ai_response_x'], config['ai_response_y'])
+        time.sleep(0.2)
+        windows_click(config['ai_response_x'], config['ai_response_y'])
+        time.sleep(0.5)
+        
+        # Step 7: Copy to clipboard
+        send_keys("^c")
+        time.sleep(1)
+        
+        # Step 9: Get the AI response text
+        ai_response = get_clipboard()
+        
+        # Close Kinic
+        send_keys("{ESC}")
         
         return jsonify({
-            'success': True,
-            'message': 'AI query triggered'
+            'success': bool(ai_response),
+            'query': query,
+            'ai_response': ai_response,
+            'message': f'AI response extracted for: {query}' if ai_response else 'No AI response captured'
         })
+        
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/config/ai-position', methods=['POST'])
-def set_ai_position():
-    """Set the position where AI responses appear"""
+@app.route('/search-and-retrieve', methods=['POST'])
+def search_and_retrieve():
+    """Search and retrieve first URL"""
     try:
-        data = request.json
-        if 'x' in data and 'y' in data:
-            config['ai_response_x'] = data['x']
-            config['ai_response_y'] = data['y']
-            
-            # Save to file
-            with open(CONFIG_FILE, 'w') as f:
-                json.dump(config, f)
-            
-            return jsonify({
-                'success': True,
-                'message': f'AI response position set to ({data["x"]}, {data["y"]})'
-            })
-        else:
-            return jsonify({'error': 'x and y coordinates required'}), 400
+        data = request.get_json() or {}
+        query = data.get('query', '')
+        
+        if not query:
+            return jsonify({'success': False, 'error': 'No query provided'}), 400
+        
+        focus_chrome()
+        time.sleep(0.3)
+        windows_click(config['kinic_x'], config['kinic_y'])
+        time.sleep(2)
+        
+        for _ in range(4):
+            send_keys("{TAB}")
+            time.sleep(0.2)
+        
+        send_keys(query.replace('{', '{{').replace('}', '}}'))
+        time.sleep(0.5)
+        send_keys("{ENTER}")
+        time.sleep(3)
+        
+        for _ in range(2):
+            send_keys("{TAB}")
+            time.sleep(0.3)
+        
+        send_shift_f10()
+        time.sleep(2)
+        
+        for _ in range(5):
+            send_keys("{DOWN}")
+            time.sleep(0.2)
+        
+        send_keys("{ENTER}")
+        time.sleep(1)
+        
+        url = get_clipboard()
+        send_keys("{ESC}")
+        
+        return jsonify({
+            'success': bool(url),
+            'query': query,
+            'url': url,
+            'message': f'Retrieved first URL for: {query}' if url else 'No URL found'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/click', methods=['POST'])
+def click_kinic():
+    try:
+        focus_chrome()
+        time.sleep(0.3)
+        windows_click(config['kinic_x'], config['kinic_y'])
+        return jsonify({'success': True, 'message': f"Clicked at ({config['kinic_x']}, {config['kinic_y']})"})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/save', methods=['POST'])
+def save_page():
+    try:
+        focus_chrome()
+        time.sleep(0.3)
+        windows_click(config['kinic_x'], config['kinic_y'])
+        time.sleep(2)
+        send_keys("+{TAB}")
+        time.sleep(0.5)
+        send_keys("{ENTER}")
+        return jsonify({'success': True, 'message': 'Page saved'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/close', methods=['POST'])
+def close_kinic():
+    try:
+        send_keys("{ESC}")
+        return jsonify({'success': True, 'message': 'Closed'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/setup-kinic', methods=['POST'])
+def setup_kinic():
+    try:
+        data = request.get_json()
+        config['kinic_x'] = data['x']
+        config['kinic_y'] = data['y']
+        save_config()
+        return jsonify({'success': True, 'config': config})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/setup-ai', methods=['POST'])
+def setup_ai():
+    try:
+        data = request.get_json()
+        config['ai_response_x'] = data['x']
+        config['ai_response_y'] = data['y']
+        save_config()
+        return jsonify({'success': True, 'config': config})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
-    print("\n✨ KINIC API")
-    print("="*40)
-    print(f"✅ Running at: http://localhost:5000")
-    print(f"📍 Kinic icon: ({config.get('kinic_x')}, {config.get('kinic_y')})")
-    print("\n🌐 Open http://localhost:5000 in your browser")
-    print("📝 API Docs: http://localhost:5000")
-    print("\nPress Ctrl+C to stop\n")
-    
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    print("🚀 Kinic API v5 - Complete with AI Text Extraction")
+    print("=" * 60)
+    print("Configuration:")
+    print(f"  Kinic button: ({config.get('kinic_x')}, {config.get('kinic_y')})")
+    print(f"  AI response: ({config.get('ai_response_x')}, {config.get('ai_response_y')})")
+    print("\nKey endpoints:")
+    print("  POST /search-and-retrieve - Search and get first URL")
+    print("  POST /search-ai-extract - Search, AI, and extract text")
+    print("\nExamples:")
+    print('  curl -X POST http://localhost:5005/search-ai-extract \\')
+    print('    -H "Content-Type: application/json" \\')
+    print('    -d \'{"query":"explain quantum computing"}\'')
+    print("\nRunning on http://localhost:5005")
+    app.run(host='0.0.0.0', port=5005, debug=False)

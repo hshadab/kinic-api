@@ -35,7 +35,7 @@ python3 capture-ai-position.py
 
 ### Run the API Server
 ```bash
-python3 kinic-api-v5.py
+python3 kinic-api.py
 ```
 
 The API runs on `http://localhost:5005`
