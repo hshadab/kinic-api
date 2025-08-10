@@ -305,6 +305,11 @@ def search_ai_extract():
         # Wait for AI response (10s for generation)
         time.sleep(10)
         
+        # CRITICAL: First move cursor to AI response area
+        # The cursor disappears after AI generation, so we must explicitly move it
+        windows_click(config['ai_response_x'], config['ai_response_y'])
+        time.sleep(1)  # Let cursor settle in position
+        
         # Triple-click to select AI text (VERY fast like real triple-click)
         windows_click(config['ai_response_x'], config['ai_response_y'])
         time.sleep(0.02)  # 20ms between clicks (ultra fast)

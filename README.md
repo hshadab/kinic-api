@@ -66,10 +66,12 @@ python capture-ai-position.py
 
 ### Step 5: Start the API
 ```bash
-python kinic-api.py
+python kinic-api-robust.py
 ```
 
-That's it! The API is now running at `http://localhost:5005`
+That's it! The API is now running at `http://localhost:5006`
+
+**✅ AI Extraction is now WORKING!** The cursor movement issue has been fixed.
 
 ## 📡 API Endpoints
 
@@ -90,7 +92,7 @@ Simple endpoints to control Kinic from your AI:
 ### With Claude, ChatGPT, or Cursor
 Just tell your AI:
 ```
-"I have Kinic API running on localhost:5005. 
+"I have Kinic API running on localhost:5006. 
 Save this webpage to my memory."
 
 "Search my Kinic memory for that Python webscraping tutorial 
@@ -104,21 +106,22 @@ Your AI will handle the technical details!
 **Save the current page:**
 ```python
 import requests
-requests.post('http://localhost:5005/save')
+requests.post('http://localhost:5006/save')
 ```
 
 **Search and get URL:**
 ```python
-result = requests.post('http://localhost:5005/search-and-retrieve', 
+result = requests.post('http://localhost:5006/search-and-retrieve', 
     json={'query': 'machine learning'})
 print(result.json()['url'])
 ```
 
-**Get AI analysis of saved content:**
+**Get AI analysis of saved content (WORKING!):**
 ```python
-result = requests.post('http://localhost:5005/search-ai-extract', 
+result = requests.post('http://localhost:5006/search-ai-extract', 
     json={'query': 'explain that Docker article I saved'})
 print(result.json()['ai_response'])
+# Returns actual AI-generated insights about your saved content!
 ```
 
 
@@ -131,8 +134,13 @@ print(result.json()['ai_response'])
 - Re-run `python capture-position-10s.py` and make sure to hover over the Kinic icon
 
 **"API not responding"**
-- Make sure the server is running (you should see "Running on http://localhost:5005")
+- Make sure the server is running (you should see "Running on http://localhost:5006")
 - Check that Chrome and Kinic extension are open
+
+**"AI extraction not working"**
+- The cursor must be moved to the AI response area after generation
+- Run `python position-and-test.py` to verify extraction works
+- Make sure coordinates are set correctly with `python capture-ai-position.py`
 
 ## 📋 Requirements
 
