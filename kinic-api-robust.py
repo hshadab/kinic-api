@@ -20,8 +20,8 @@ else:
     config = {
         'kinic_x': 1379, 
         'kinic_y': 101,
-        'ai_response_x': 1000,
-        'ai_response_y': 828
+        'ai_response_x': 939,
+        'ai_response_y': 833
     }
 
 def save_config():
@@ -119,7 +119,7 @@ def robust_action_wrapper(action_func):
     return wrapper
 
 def get_clipboard():
-    """Get clipboard content"""
+    """Get clipboard content with proper encoding handling"""
     ps_script = """
     Add-Type -AssemblyName System.Windows.Forms
     [System.Windows.Forms.Clipboard]::GetText()
@@ -128,7 +128,7 @@ def get_clipboard():
     result = subprocess.run(
         ["/mnt/c/Windows/System32/WindowsPowerShell/v1.0/powershell.exe",
          "-ExecutionPolicy", "Bypass", "-Command", ps_script],
-        capture_output=True, text=True, timeout=5
+        capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=5
     )
     
     return result.stdout.strip() if result.stdout else None

@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-09T22:55:35.305630",
+  "startup_idea": "AI-powered personal fitness coach app",
+  "agents": [
+    {
+      "name": "MarketBot",
+      "insights": 2
+    },
+    {
+      "name": "TechBot",
+      "insights": 2
+    },
+    {
+      "name": "InvestorBot",
+      "insights": 1
+    }
+  ],
+  "verdict": "PROCEED WITH SEED FUNDING",
+  "success_probability": "72%"
+}

@@ -1,0 +1,4 @@
+Position: (939, 833)
+Length: 362 characters
+
+Venice Chat, available at Venice.ai/chat, is an AI-powered chatbot designed to offer information and insights about Venice. While the exact capabilities are not detailed here, it's intended to be a resource for tourists seeking details about the city and potentially travel-related advice. This chatbot represents a new way to explore Venice and its attractions.

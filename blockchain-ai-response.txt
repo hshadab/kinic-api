@@ -1,0 +1,43 @@
+Query: blockchain technology
+Timestamp: 2025-08-10 13:53:52
+Response length: 1571 characters
+
+AI Response:
+============================================================
+(venv) hshadab@Gram2023:~/kinic$  python3 position-and-test.py
+
+������������������������������������������������������������ͻ
+�     POSITION MOUSE AND TEST EXTRACTION                    �
+������������������������������������������������������������͹
+�  1. Position your mouse on the Venice AI response text    �
+�  2. Press Enter                                           �
+�  3. Script will capture position and test extraction      �
+������������������������������������������������������������ͼ
+
+
+Position mouse on Venice AI text and press Enter...
+
+Capturing position in 2 seconds - keep mouse still!
+? Captured position: (939, 833)
+
+Testing extraction at this exact position...
+1. Triple-clicking...
+2. Waiting for selection...
+3. Copying...
+4. Waiting for copy...
+5. Reading clipboard...
+
+============================================================
+RESULT:
+============================================================
+? SUCCESS! Captured 362 characters at (939, 833)
+
+Venice AI Response:
+----------------------------------------
+Venice Chat, available at Venice.ai/chat, is an AI-powered chatbot designed to offer information and insights about Venice. While the exact capabilities are not detailed here, it's intended to be a resource for tourists seeking details about the city and potentially travel-related advice. This chatbot represents a new way to explore Venice and its attractions.
+----------------------------------------
+
+?? Full response saved to venice-full-response.txt
+? Updated config with new position: (939, 833)
+(venv) hshadab@Gram2023:~/kinic$
+============================================================
