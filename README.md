@@ -1,12 +1,12 @@
-# Kinic API - Give Your AI Perfect Memory
+# Kinic API - AI Memory on Blockchain
 
-**Save any webpage. Search with AI. Never lose information again.**
+**Control the Kinic Chrome Extension programmatically to give your AI agents persistent memory on the blockchain.**
 
 Transform your Kinic Chrome extension into a powerful memory system for AI assistants like Claude, ChatGPT, and Cursor.
 
 ## 📖 What is Kinic?
 
-Kinic is a Chrome extension that lets you save and search any webpage using AI. It stores your knowledge in an on-chain vector database, making it permanent and searchable forever. Think of it as your personal, AI-powered knowledge vault.
+Kinic is a Chrome extension that lets you save and search any webpage using AI. It stores your knowledge in an on-chain vector database, making it permanent and searchable forever. The Kinic API provides programmatic control over the extension, enabling AI agents to have persistent, blockchain-based memory.
 
 **First time using Kinic?** 
 👉 **[Get your free account at kinic.io](https://kinic.io)** and install the Chrome extension
@@ -27,6 +27,19 @@ Kinic is a Chrome extension that lets you save and search any webpage using AI. 
 - **Zero Vendor Lock-in** - No API fees, no service shutdowns, no data hostage
 - **Censorship Resistant** - Your knowledge can't be deleted or restricted
 
+## 🏗️ Architecture
+
+```
+┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
+│   AI Agent  │────▶│  Kinic API   │────▶│ Kinic Extension │
+│  (Python)   │     │  (Flask)     │     │   (Chrome)      │
+└─────────────┘     └──────────────┘     └─────────────────┘
+                            │                      │
+                            ▼                      ▼
+                      PyAutoGUI            Blockchain Storage
+                    (Mouse/Keyboard)        (Vector Database)
+```
+
 ## 🚀 Quick Setup (Windows)
 
 ### Prerequisites
@@ -37,8 +50,8 @@ Kinic is a Chrome extension that lets you save and search any webpage using AI. 
 ### Step 1: Get the Code
 Open PowerShell and run:
 ```powershell
-git clone https://github.com/hshadab/kinic-api.git
-cd kinic-api
+git clone https://github.com/hshadab/kinic.git
+cd kinic
 ```
 
 ### Step 2: Install Python (if needed)
@@ -142,33 +155,106 @@ print(result.json()['ai_response'])
 # Returns actual AI-generated insights about your saved content!
 ```
 
+## 🎭 Visual Demo
+
+See the multi-agent collaboration in action:
+
+```powershell
+python stripe-demo-visual.py
+```
+
+This demo showcases:
+- **3 AI Agents** working together through shared blockchain memory
+- **Live visualization** of inputs and outputs
+- **Real-time progress** tracking
+- **No direct communication** between agents - only through Kinic
+
 ## 🛠️ Troubleshooting
+
+### Coordinate Issues
+
+**"Kinic button not clicking correctly"**
+```powershell
+python fix-kinic-button.py
+```
+
+**"AI text not being extracted"**
+```powershell
+python fix-ai-position.py
+```
+
+### Common Problems
 
 **"Python not found"**
 - Install Python: `winget install Python.Python.3.12`
 
-**"Kinic button not clicking"**
-- Re-run `python capture-mouse-windows.py` and hover over the Kinic icon
+**"Mouse position keeps changing"**
+- Ensure Chrome window is maximized consistently
+- Re-run the fix scripts when resolution changes
 
 **"AI extraction returning empty"**
 - Make sure to position mouse in CENTER of AI text when capturing
-- Re-run `python capture-ai-windows.py`
+- Wait for AI text to fully generate (10+ seconds)
 
 **"Running from WSL?"**
 - Use PowerShell instead - WSL has coordinate translation issues
-- Or run directly: `python kinic-api.py` from PowerShell
+- The API now uses native Windows PyAutoGUI to avoid WSL problems
+
+## 📋 Files Overview
+
+### Core Files
+- `kinic-api.py` - Main API server with standardized endpoints
+- `kinic-config.json` - Stores coordinate configuration
+
+### Setup & Calibration
+- `capture-mouse-windows.py` - Initial Kinic button setup
+- `capture-ai-windows.py` - Initial AI response area setup
+- `fix-kinic-button.py` - Quick recalibration for Kinic button
+- `fix-ai-position.py` - Quick recalibration for AI area
+
+### Demo & Testing
+- `stripe-demo-visual.py` - Visual multi-agent collaboration demo
+- `test-ai-extraction-simple.py` - Test AI text extraction
+- `test-mouse-movement.py` - Test mouse positioning
+
+## 🔧 Technical Details
+
+### Standardized Action Pattern
+All endpoints follow a reliable 5-step sequence:
+1. **Focus Chrome** - Click safe area (500, 500)
+2. **Close popup** - ESC key (clears any existing state)
+3. **Open Kinic** - Click at configured position
+4. **Perform action** - Save/Search/Extract
+5. **Close Kinic** - ESC key
+
+### Timing Configuration
+- **Kinic open**: 3 seconds
+- **Search results**: 4 seconds
+- **AI generation**: 10 seconds
+- **Page save**: 8 seconds (full content)
+- **Triple-click**: 20ms intervals
+
+### Current Working Coordinates
+```json
+{
+    "kinic_x": 2088,
+    "kinic_y": 148,
+    "ai_response_x": 1438,
+    "ai_response_y": 1259
+}
+```
 
 ## 📋 Requirements
 
-- Windows 10/11
+- Windows 10/11 (or WSL with display)
 - Chrome browser with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc)
 - Python 3.8 or newer
-- Required packages: flask, flask-cors, pyautogui, pyperclip
+- Required packages: flask, flask-cors, pyautogui, pyperclip, requests
 
 ## 🤝 Contributing
 
 We welcome contributions! Feel free to:
-- Report bugs or request features via [Issues](https://github.com/hshadab/kinic-api/issues)
+- Report bugs or request features via [Issues](https://github.com/hshadab/kinic/issues)
 - Submit pull requests
 - Share your use cases and integrations
 
@@ -179,3 +265,12 @@ MIT License - Use it however you want!
 ## 🙏 About
 
 Built to give AI agents perfect memory through Kinic's on-chain vector database. Your knowledge, your control, forever.
+
+---
+
+**Recent Updates (v2.0)**
+- ✅ Fixed WSL coordinate translation issues
+- ✅ Standardized all endpoints with 5-step pattern
+- ✅ Extended save timeout to 8 seconds
+- ✅ Added visual marketing demo
+- ✅ AI extraction verified: 438+ characters
