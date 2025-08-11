@@ -27,65 +27,76 @@ Kinic is a Chrome extension that lets you save and search any webpage using AI. 
 - **Zero Vendor Lock-in** - No API fees, no service shutdowns, no data hostage
 - **Censorship Resistant** - Your knowledge can't be deleted or restricted
 
-## 🚀 Simple Setup (5 Minutes)
+## 🚀 Quick Setup (Windows)
 
 ### Prerequisites
 1. **Kinic Account** - [Sign up free at kinic.io](https://kinic.io)
 2. **Chrome Browser** with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc) installed
-3. **Windows/Mac/Linux** computer
+3. **Windows 10/11** with Python 3.8+
 
 ### Step 1: Get the Code
-Open PowerShell or Terminal and paste:
-```bash
+Open PowerShell and run:
+```powershell
 git clone https://github.com/hshadab/kinic-api.git
 cd kinic-api
 ```
 
 ### Step 2: Install Python (if needed)
-```bash
+```powershell
 # Check if Python is installed
 python --version
 
-# If not installed, download from python.org
-# Or on Windows: winget install Python.Python.3.12
+# If not installed, use winget:
+winget install Python.Python.3.12
 ```
 
 ### Step 3: Install Requirements
-```bash
+```powershell
 pip install flask flask-cors pyautogui pyperclip requests
 ```
 
-### Step 4: Set Up Kinic Position
-```bash
-# This will count down from 10 - hover your mouse over the Kinic icon
-python capture-position-10s.py
-
-# Do the same for the AI response area in Kinic
-python capture-ai-position.py
+### Step 4: Capture Kinic Button Position
+```powershell
+python capture-mouse-windows.py
 ```
+Position your mouse over the Kinic extension icon when prompted and wait for countdown.
 
-### Step 5: Start the API
-```bash
-python kinic-api-robust.py
+### Step 5: Capture AI Response Position
+```powershell
+python capture-ai-windows.py
+```
+1. Open Kinic and do a search
+2. Click the AI button
+3. When AI text appears, position mouse in CENTER of text
+4. Press Enter to capture
+
+### Step 6: Start the API
+```powershell
+python kinic-api.py
 ```
 
 That's it! The API is now running at `http://localhost:5006`
 
-**✅ AI Extraction is now WORKING!** The cursor movement issue has been fixed.
+## ✅ Test AI Extraction
+
+```powershell
+python test-ai-extraction-simple.py
+```
+
+You should see the AI-generated text extracted successfully!
 
 ## 📡 API Endpoints
 
-Simple endpoints to control Kinic from your AI:
-
 | Endpoint | Method | Description |
 |----------|--------|-------------|
+| `/` | GET | API status and configuration |
 | `/save` | POST | Save current page to Kinic |
 | `/search-and-retrieve` | POST | Search and get first URL |
 | `/search-ai-extract` | POST | Search with AI analysis extraction |
 | `/click` | POST | Open Kinic extension |
 | `/close` | POST | Close Kinic extension |
-| `/setup-kinic` | POST | Configure Kinic button position |
-| `/setup-ai` | POST | Configure AI response position |
+| `/setup-kinic` | POST | Update Kinic button position |
+| `/setup-ai` | POST | Update AI response position |
 
 ## 💬 How to Use with Your AI
 
@@ -116,7 +127,7 @@ result = requests.post('http://localhost:5006/search-and-retrieve',
 print(result.json()['url'])
 ```
 
-**Get AI analysis of saved content (WORKING!):**
+**Get AI analysis of saved content:**
 ```python
 result = requests.post('http://localhost:5006/search-ai-extract', 
     json={'query': 'explain that Docker article I saved'})
@@ -124,29 +135,28 @@ print(result.json()['ai_response'])
 # Returns actual AI-generated insights about your saved content!
 ```
 
-
 ## 🛠️ Troubleshooting
 
 **"Python not found"**
-- Download from [python.org](https://python.org) or use `winget install Python.Python.3.12`
+- Install Python: `winget install Python.Python.3.12`
 
 **"Kinic button not clicking"**
-- Re-run `python capture-position-10s.py` and make sure to hover over the Kinic icon
+- Re-run `python capture-mouse-windows.py` and hover over the Kinic icon
 
-**"API not responding"**
-- Make sure the server is running (you should see "Running on http://localhost:5006")
-- Check that Chrome and Kinic extension are open
+**"AI extraction returning empty"**
+- Make sure to position mouse in CENTER of AI text when capturing
+- Re-run `python capture-ai-windows.py`
 
-**"AI extraction not working"**
-- The cursor must be moved to the AI response area after generation
-- Run `python position-and-test.py` to verify extraction works
-- Make sure coordinates are set correctly with `python capture-ai-position.py`
+**"Running from WSL?"**
+- Use PowerShell instead - WSL has coordinate translation issues
+- Or run directly: `python kinic-api.py` from PowerShell
 
 ## 📋 Requirements
 
-- Windows 10/11 (with WSL) or Linux/Mac
+- Windows 10/11
 - Chrome browser with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc)
 - Python 3.8 or newer
+- Required packages: flask, flask-cors, pyautogui, pyperclip
 
 ## 🤝 Contributing
 

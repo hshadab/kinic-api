@@ -1,2 +1,0 @@
-@echo off
-powershell.exe -NoExit -Command "while($true){Add-Type -A System.Windows.Forms;$p=[System.Windows.Forms.Cursor]::Position;Clear-Host;Write-Host 'MOUSE COORDINATES';Write-Host '================';Write-Host \"X: $($p.X)\";Write-Host \"Y: $($p.Y)\";Write-Host '';Write-Host 'Move mouse over Kinic button';Write-Host 'Note the X,Y values';Write-Host 'Press Ctrl+C to stop';Start-Sleep -Milliseconds 500}"
