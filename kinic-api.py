@@ -124,51 +124,72 @@ def search_and_retrieve():
         if not query:
             return jsonify({'success': False, 'error': 'No query provided'}), 400
         
-        # Close any existing popup
-        pyautogui.press('esc')
+        print(f"\nExecuting /search-and-retrieve for: '{query}'...")
+        
+        # Step 1: Focus on Chrome
+        print("1. Focusing Chrome...")
+        pyautogui.click(500, 500)  # Click in safe area to focus Chrome
         time.sleep(1)
         
-        # Open Kinic
+        # Step 2: Press ESC to close any existing Kinic popup
+        print("2. Closing any existing popup (ESC)...")
+        pyautogui.press('esc')
+        time.sleep(2)
+        
+        # Step 3: Click Kinic button to open extension
+        print(f"3. Opening Kinic at ({config['kinic_x']}, {config['kinic_y']})...")
         pyautogui.click(config['kinic_x'], config['kinic_y'])
         time.sleep(3)
         
-        # Tab to search field
+        # Step 4: Tab to search field
+        print("4. Navigating to search field (TAB x4)...")
         for _ in range(4):
             pyautogui.press('tab')
             time.sleep(0.5)
+        time.sleep(1)
         
-        # Type query
+        # Step 5: Type query and search
+        print(f"5. Typing query: '{query}'...")
         pyautogui.typewrite(query)
         time.sleep(1)
         pyautogui.press('enter')
         
-        # Wait for results
+        # Step 6: Wait for results
+        print("6. Waiting for search results...")
         time.sleep(4)
         
-        # Tab to first result
+        # Step 7: Tab to first result
+        print("7. Navigating to first result (TAB x2)...")
         pyautogui.press('tab')
         time.sleep(0.5)
         pyautogui.press('tab')
         time.sleep(1)
         
-        # Right-click for context menu
+        # Step 8: Right-click for context menu
+        print("8. Opening context menu (SHIFT+F10)...")
         pyautogui.hotkey('shift', 'f10')
         time.sleep(2)
         
-        # Navigate to copy URL
+        # Step 9: Navigate to copy URL
+        print("9. Navigating to 'Copy link address' (DOWN x5)...")
         for _ in range(5):
             pyautogui.press('down')
             time.sleep(0.3)
         
+        print("10. Copying URL (ENTER)...")
         pyautogui.press('enter')
         time.sleep(1)
         
-        # Get URL from clipboard
+        # Step 10: Get URL from clipboard
         url = pyperclip.paste()
+        print(f"11. URL copied: {url[:50]}..." if url else "11. No URL found")
         
-        # Close
+        # Step 11: Close Kinic
+        print("12. Closing Kinic (ESC)...")
         pyautogui.press('esc')
+        time.sleep(1)
         
+        print("✓ Search and retrieve completed")
         return jsonify({
             'success': bool(url),
             'query': query,
@@ -177,6 +198,7 @@ def search_and_retrieve():
         })
         
     except Exception as e:
+        print(f"✗ Search failed: {e}")
         pyautogui.press('esc')
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -190,81 +212,82 @@ def search_ai_extract():
         if not query:
             return jsonify({'success': False, 'error': 'No query provided'}), 400
         
-        print(f"\n{'='*60}")
-        print(f"Starting AI extraction for query: '{query}'")
+        print(f"\nExecuting /search-ai-extract for: '{query}'...")
         print(f"AI Response position: ({config['ai_response_x']}, {config['ai_response_y']})")
-        print(f"{'='*60}\n")
         
-        # Close any existing popup
-        print("1. Closing any existing popups...")
+        # Step 1: Focus on Chrome
+        print("1. Focusing Chrome...")
+        pyautogui.click(500, 500)  # Click in safe area to focus Chrome
+        time.sleep(1)
+        
+        # Step 2: Press ESC to close any existing Kinic popup
+        print("2. Closing any existing popup (ESC)...")
         pyautogui.press('esc')
         time.sleep(2)
         
-        # Open Kinic
-        print(f"2. Opening Kinic at ({config['kinic_x']}, {config['kinic_y']})...")
+        # Step 3: Click Kinic button to open extension
+        print(f"3. Opening Kinic at ({config['kinic_x']}, {config['kinic_y']})...")
         pyautogui.click(config['kinic_x'], config['kinic_y'])
         time.sleep(3)
         
-        # Tab to search field
-        print("3. Navigating to search field...")
+        # Step 4: Tab to search field
+        print("4. Navigating to search field (TAB x4)...")
         for i in range(4):
             pyautogui.press('tab')
             time.sleep(0.5)
         time.sleep(1)
         
-        # Type search query
-        print(f"4. Typing query: '{query}'...")
+        # Step 5: Type search query
+        print(f"5. Typing query: '{query}'...")
         pyautogui.typewrite(query)
         time.sleep(2)
         pyautogui.press('enter')
         
-        # Wait for search results
-        print("5. Waiting for search results...")
+        # Step 6: Wait for search results
+        print("6. Waiting for search results...")
         time.sleep(4)
         
-        # Tab to AI button
-        print("6. Navigating to AI button...")
+        # Step 7: Tab to AI button
+        print("7. Navigating to AI button (TAB x5)...")
         for i in range(5):
             pyautogui.press('tab')
             time.sleep(0.5)
         time.sleep(1)
         
-        # Click AI button
-        print("7. Clicking AI button...")
+        # Step 8: Click AI button
+        print("8. Clicking AI button (ENTER)...")
         pyautogui.press('enter')
         
-        # Wait for AI response to generate
-        print("8. Waiting for AI response generation...")
+        # Step 9: Wait for AI response to generate
+        print("9. Waiting for AI response generation (10 seconds)...")
         time.sleep(10)
         
-        # Move to AI response area
-        print(f"9. Moving to AI response area ({config['ai_response_x']}, {config['ai_response_y']})...")
+        # Step 10: Move to AI response area
+        print(f"10. Moving to AI response area ({config['ai_response_x']}, {config['ai_response_y']})...")
         pyautogui.moveTo(config['ai_response_x'], config['ai_response_y'])
         time.sleep(1)
         
-        # Triple-click to select all text
-        print("10. Triple-clicking to select AI text...")
+        # Step 11: Triple-click to select all text
+        print("11. Triple-clicking to select AI text...")
         pyautogui.tripleClick(config['ai_response_x'], config['ai_response_y'])
         time.sleep(2)
         
-        # Copy to clipboard
-        print("11. Copying selected text...")
+        # Step 12: Copy to clipboard
+        print("12. Copying selected text (CTRL+C)...")
         pyautogui.hotkey('ctrl', 'c')
         time.sleep(2)
         
-        # Get AI response from clipboard
-        print("12. Reading from clipboard...")
+        # Step 13: Get AI response from clipboard
         ai_response = pyperclip.paste()
+        print(f"13. Text copied: {len(ai_response)} characters")
         
-        # Close Kinic
-        print("13. Closing Kinic...")
-        time.sleep(2)
+        # Step 14: Close Kinic
+        print("14. Closing Kinic (ESC)...")
         pyautogui.press('esc')
+        time.sleep(1)
         
-        print(f"\n{'='*60}")
-        print(f"Extraction complete!")
-        print(f"Extracted {len(ai_response)} characters")
-        print(f"{'='*60}\n")
+        print("✓ AI extraction completed")
+        print(f"   Extracted {len(ai_response)} characters")
         
         return jsonify({
             'success': bool(ai_response),
@@ -274,8 +297,8 @@ def search_ai_extract():
         })
         
     except Exception as e:
-        print(f"\nError: {e}")
-        pyautogui.press('esc')
+        print(f"✗ AI extraction failed: {e}")
+        pyautogui.press('esc')  # Try to close on error
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/setup-kinic', methods=['POST'])
