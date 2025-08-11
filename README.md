@@ -87,10 +87,17 @@ You should see the AI-generated text extracted successfully!
 
 ## 📡 API Endpoints
 
+All main endpoints follow a consistent pattern:
+1. **Focus Chrome** (click safe area)
+2. **Close existing popup** (ESC key)
+3. **Open Kinic** at configured position
+4. **Perform action** (save/search/extract)
+5. **Close Kinic** (ESC key)
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/` | GET | API status and configuration |
-| `/save` | POST | Save current page to Kinic |
+| `/save` | POST | Save current page to Kinic (uses SHIFT+TAB) |
 | `/search-and-retrieve` | POST | Search and get first URL |
 | `/search-ai-extract` | POST | Search with AI analysis extraction |
 | `/click` | POST | Open Kinic extension |
