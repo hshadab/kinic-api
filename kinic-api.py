@@ -75,22 +75,43 @@ def close_kinic():
 def save_page():
     """Save current page to Kinic"""
     try:
-        # Click Kinic
-        pyautogui.click(config['kinic_x'], config['kinic_y'])
-        time.sleep(2)
+        print("\nExecuting /save endpoint...")
         
-        # Tab to save button (assuming it's first or second tab)
-        pyautogui.press('tab')
-        time.sleep(0.5)
-        pyautogui.press('enter')
-        time.sleep(2)
+        # Step 1: Focus on Chrome (click somewhere safe on page)
+        print("1. Focusing Chrome...")
+        pyautogui.click(500, 500)  # Click in safe area to focus Chrome
+        time.sleep(1)
         
-        # Close
+        # Step 2: Press ESC to close any existing Kinic popup
+        print("2. Closing any existing popup (ESC)...")
         pyautogui.press('esc')
+        time.sleep(2)
         
+        # Step 3: Click Kinic button to open extension
+        print(f"3. Opening Kinic at ({config['kinic_x']}, {config['kinic_y']})...")
+        pyautogui.click(config['kinic_x'], config['kinic_y'])
+        time.sleep(3)  # Wait for Kinic to fully open
+        
+        # Step 4: SHIFT+TAB to go to save button
+        print("4. Navigating to Save button (SHIFT+TAB)...")
+        pyautogui.hotkey('shift', 'tab')
+        time.sleep(1)
+        
+        # Step 5: Press Enter to save
+        print("5. Saving page (ENTER)...")
+        pyautogui.press('enter')
+        time.sleep(3)  # Wait for save to complete
+        
+        # Step 6: Close Kinic
+        print("6. Closing Kinic (ESC)...")
+        pyautogui.press('esc')
+        time.sleep(1)
+        
+        print("✓ Page saved successfully")
         return jsonify({'success': True, 'message': 'Page saved to Kinic'})
     except Exception as e:
-        pyautogui.press('esc')
+        print(f"✗ Save failed: {e}")
+        pyautogui.press('esc')  # Try to close on error
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/search-and-retrieve', methods=['POST'])

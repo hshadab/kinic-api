@@ -2,7 +2,7 @@
 """
 Stripe API Documentation Multi-Agent Demo - Windows Native Version
 Three agents demonstrating different Kinic capabilities with Stripe docs
-Fully automated - no manual navigation required!
+Fixed: No duplicate actions, proper timing
 """
 
 import requests
@@ -32,12 +32,6 @@ def print_header():
     ╚══════════════════════════════════════════════════════════╝
     """)
 
-def open_url_in_chrome(url):
-    """Open URL in Chrome browser"""
-    print(f"   → Opening {url[:50]}...")
-    webbrowser.open(url)
-    time.sleep(5)  # Wait for page to load
-
 def agent1_save_stripe_docs():
     """Agent 1: Documentation Collector - Saves multiple Stripe docs"""
     print("\n" + "="*60)
@@ -47,15 +41,23 @@ def agent1_save_stripe_docs():
     
     saved_count = 0
     
+    # IMPORTANT: We need to manually navigate to each URL first
+    # The /save endpoint saves the CURRENT page in Chrome
     for doc_type, url in STRIPE_URLS.items():
         print(f"\n📚 Processing {doc_type}:")
+        print(f"   URL: {url}")
         
-        # Open URL automatically
-        open_url_in_chrome(url)
+        # Open URL in Chrome
+        print(f"   → Opening in Chrome...")
+        webbrowser.open(url)
         
-        # Save to Kinic
-        print(f"   → Saving to Kinic...")
-        response = requests.post(f"{KINIC_API}/save")
+        # Wait for page to fully load
+        print(f"   ⏳ Waiting 8 seconds for page to load...")
+        time.sleep(8)
+        
+        # Now call the API to save the current page
+        print(f"   → Calling Kinic API to save...")
+        response = requests.post(f"{KINIC_API}/save", timeout=30)
         
         if response.json().get('success'):
             saved_count += 1
@@ -63,7 +65,9 @@ def agent1_save_stripe_docs():
         else:
             print(f"   ⚠️ Failed to save: {response.json().get('message', 'Unknown error')}")
         
-        time.sleep(2)
+        # Wait before processing next URL
+        print(f"   ⏸️ Waiting 3 seconds before next document...")
+        time.sleep(3)
     
     print(f"\n📊 Agent 1 Summary: Saved {saved_count}/{len(STRIPE_URLS)} Stripe documentation pages")
     return saved_count
@@ -75,25 +79,30 @@ def agent2_retrieve_url():
     print("="*60)
     print("Mission: Search Kinic memory and retrieve Checkout documentation URL")
     
-    time.sleep(2)
+    time.sleep(3)
     
     # Search for checkout documentation
     query = "stripe checkout"
     print(f"\n🔍 Searching for: '{query}'")
-    print("   → Calling Kinic search API...")
+    print("   → This will open Kinic, search, and copy the first URL...")
+    print("   ⏳ Expected time: 15-20 seconds...")
     
+    start_time = time.time()
     response = requests.post(
         f"{KINIC_API}/search-and-retrieve",
-        json={"query": query}
+        json={"query": query},
+        timeout=60
     )
+    elapsed = time.time() - start_time
     
     if response.json().get('success'):
         url = response.json().get('url', '')
-        print(f"   ✅ Found URL: {url}")
+        print(f"   ✅ Found URL in {elapsed:.1f} seconds: {url}")
         print(f"\n📊 Agent 2 Summary: Successfully retrieved Stripe Checkout URL from shared memory")
         return url
     else:
-        print(f"   ⚠️ Could not retrieve URL: {response.json().get('message', 'Unknown error')}")
+        print(f"   ⚠️ Could not retrieve URL after {elapsed:.1f} seconds")
+        print(f"   Error: {response.json().get('message', 'Unknown error')}")
         return None
 
 def agent3_extract_insights():
@@ -103,15 +112,18 @@ def agent3_extract_insights():
     print("="*60)
     print("Mission: Extract AI insights about Stripe payment implementation")
     
-    time.sleep(2)
+    time.sleep(3)
     
     # Ask AI about Stripe implementation
     query = "explain how to implement Stripe payments with best practices"
     print(f"\n🧠 Asking AI: '{query}'")
-    print("⏳ Generating AI response (this takes 30-40 seconds)...")
-    print("   → Opening Kinic extension...")
-    print("   → Searching documentation...")
-    print("   → Generating AI analysis...")
+    print("⏳ This will take 35-45 seconds:")
+    print("   • Opening Kinic extension")
+    print("   • Searching documentation")
+    print("   • Clicking AI button")
+    print("   • Waiting for AI generation")
+    print("   • Extracting AI text")
+    print("\n   Please be patient...")
     
     start_time = time.time()
     response = requests.post(
@@ -135,7 +147,8 @@ def agent3_extract_insights():
             print(f"\n📊 Agent 3 Summary: Successfully extracted AI insights")
             return ai_response
     else:
-        print(f"   ⚠️ Could not extract AI insights: {response.json().get('message', 'Unknown error')}")
+        print(f"   ⚠️ Could not extract AI insights after {elapsed:.1f} seconds")
+        print(f"   Error: {response.json().get('message', 'Unknown error')}")
         return None
 
 def main():
@@ -164,13 +177,17 @@ def main():
         return
     
     print("\n⚠️ IMPORTANT: Make sure Chrome is open with Kinic extension visible")
-    input("Press Enter when ready to start the demonstration...")
+    print("⏱️ This demo will take approximately 2-3 minutes to complete")
+    input("\nPress Enter when ready to start the demonstration...")
     
     print("\n🎬 Starting automated demonstration...")
     print("Each agent will access the same Kinic shared memory")
     time.sleep(3)
     
     # Run Agent 1
+    print("\n" + "─"*60)
+    print("PHASE 1: DOCUMENT COLLECTION")
+    print("─"*60)
     saved_docs = agent1_save_stripe_docs()
     
     if saved_docs == 0:
@@ -180,16 +197,22 @@ def main():
         print("   • Coordinates are correct (run capture-mouse-windows.py)")
         return
     
-    print("\n⏸️ Pausing 3 seconds before Agent 2...")
-    time.sleep(3)
+    print("\n⏸️ Pausing 5 seconds before Agent 2...")
+    time.sleep(5)
     
     # Run Agent 2
+    print("\n" + "─"*60)
+    print("PHASE 2: URL RETRIEVAL")
+    print("─"*60)
     retrieved_url = agent2_retrieve_url()
     
-    print("\n⏸️ Pausing 3 seconds before Agent 3...")
-    time.sleep(3)
+    print("\n⏸️ Pausing 5 seconds before Agent 3...")
+    time.sleep(5)
     
     # Run Agent 3
+    print("\n" + "─"*60)
+    print("PHASE 3: AI ANALYSIS")
+    print("─"*60)
     ai_insights = agent3_extract_insights()
     
     # Final summary
