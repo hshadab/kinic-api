@@ -100,7 +100,8 @@ def save_page():
         # Step 5: Press Enter to save
         print("5. Saving page (ENTER)...")
         pyautogui.press('enter')
-        time.sleep(3)  # Wait for save to complete
+        print("   ⏳ Waiting 8 seconds for full page save...")
+        time.sleep(8)  # Wait longer to ensure full page is saved
         
         # Step 6: Close Kinic
         print("6. Closing Kinic (ESC)...")
