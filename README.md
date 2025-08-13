@@ -21,12 +21,37 @@
 
 Transform your Kinic Chrome extension into a collaborative intelligence platform for AI teams.
 
-## 📖 What is Kinic?
+## 📖 What is Kinic? (For Beginners)
 
-Kinic is a Chrome extension that lets you save and search any webpage using AI. It stores your knowledge in an on-chain vector database, making it permanent and searchable forever. The Kinic API provides programmatic control over the extension, enabling AI agents to have persistent, blockchain-based memory.
+**Think of Kinic as "permanent memory for your AIs"**
 
+### 🤔 The Problem Kinic Solves
+You know how frustrating it is when:
+- You explain your project to Claude, then have to re-explain everything to GPT-4?
+- Your AI forgets everything from your last conversation?
+- Different AI tools can't share knowledge with each other?
+
+### ✨ How Kinic Fixes This
+**Kinic is a Chrome extension that gives AIs shared, permanent memory:**
+- 🧠 **Save knowledge once** - Any AI can access it forever
+- 🔍 **Smart search** - AIs find relevant info even without exact keywords  
+- 🤝 **AI collaboration** - Different AIs can discover and build on each other's work
+- ⛓️ **Blockchain storage** - Your knowledge is permanent and truly yours
+
+### 💡 Real Example
+1. **You ask Claude**: "Research the best sentiment analysis models"
+2. **Claude saves findings to Kinic** (automatically via our API)
+3. **You ask GPT-4**: "How do I build an API for text analysis?"
+4. **GPT-4 searches Kinic** and finds Claude's model research automatically
+5. **Result**: GPT-4 builds an API using the exact models Claude recommended!
+
+**This happened in our demo - 4.5 minutes total, zero manual coordination!**
+
+### 🚀 Get Started
 **First time using Kinic?** 
 👉 **[Get your free account at kinic.io](https://kinic.io)** and install the Chrome extension
+
+**Technical users:** Kinic stores knowledge in an on-chain vector database with semantic search capabilities. Our API provides programmatic control for AI automation.
 
 ## 🎯 What You Can Do
 
@@ -116,63 +141,196 @@ SELECT * FROM docs WHERE title LIKE '%checkout%'
                                     Automatic Relationships
 ```
 
-## 🚀 Quick Setup (Windows)
+## 🚀 Beginner Setup Guide
 
-### Prerequisites
+### ✅ What You Need (Both Windows & Mac)
 1. **Kinic Account** - [Sign up free at kinic.io](https://kinic.io)
 2. **Chrome Browser** with [Kinic extension](https://chrome.google.com/webstore/detail/kinic/mnddmednohmjdgmpbaieolebflkbcbjc) installed
-3. **Windows 10/11** with Python 3.8+
+3. **Computer** - Windows 10/11 or macOS 10.14+
+4. **No coding experience needed!** - We'll walk you through everything
 
-### Step 1: Get the Code
-Open PowerShell and run:
-```powershell
-git clone https://github.com/hshadab/kinic.git
-cd kinic
-```
+---
+
+## 🪟 Windows Setup (Complete Support)
+
+### Step 1: Download the Code
+1. **Open PowerShell** (search for "PowerShell" in Start menu)
+2. **Copy and paste this command:**
+   ```powershell
+   git clone https://bitbucket.org/houmanshadab/kinic-api.git
+   cd kinic-api
+   ```
+   *If you get "git not found", install Git from [git-scm.com](https://git-scm.com)*
 
 ### Step 2: Install Python (if needed)
-```powershell
-# Check if Python is installed
-python --version
+1. **Check if you have Python:**
+   ```powershell
+   python --version
+   ```
+2. **If you see an error, install Python:**
+   ```powershell
+   winget install Python.Python.3.12
+   ```
+   *Or download from [python.org](https://python.org)*
 
-# If not installed, use winget:
-winget install Python.Python.3.12
+### Step 3: Install Required Libraries
+**Copy and paste this command:**
+```powershell
+pip install flask flask-cors pyautogui pyperclip requests anthropic openai
 ```
 
-### Step 3: Install Requirements
-```powershell
-pip install flask flask-cors pyautogui pyperclip requests
-```
+### Step 4: Set Up Your AI API Keys
+1. **Get your Claude API key** from [console.anthropic.com](https://console.anthropic.com)
+2. **Get your OpenAI API key** from [platform.openai.com](https://platform.openai.com)
+3. **Set them in PowerShell:**
+   ```powershell
+   $env:ANTHROPIC_API_KEY = "sk-ant-your-key-here"
+   $env:OPENAI_API_KEY = "sk-your-key-here"
+   ```
 
-### Step 4: Capture Kinic Button Position
+### Step 5: Test Your Setup
+**Test your API keys work:**
 ```powershell
-python setup-tools/capture-mouse-windows.py
+python setup-tools/test-api-keys.py
 ```
-Position your mouse over the Kinic extension icon when prompted and wait for countdown.
+*You should see "✅ Both APIs working!"*
 
-### Step 5: Capture AI Response Position
-```powershell
-python setup-tools/capture-ai-windows.py
-```
-1. Open Kinic and do a search
-2. Click the AI button
-3. When AI text appears, position mouse in CENTER of text
-4. Press Enter to capture
+### Step 6: Calibrate Kinic Extension
+1. **Make sure Chrome is open with Kinic extension visible**
+2. **Capture Kinic button position:**
+   ```powershell
+   python setup-tools/capture-mouse-windows.py
+   ```
+   *Follow the countdown and position mouse over Kinic icon*
 
-### Step 6: Start the API
+3. **Capture AI response area:**
+   ```powershell
+   python setup-tools/capture-ai-windows.py
+   ```
+   *Do a Kinic search, click AI button, position mouse in center of AI text*
+
+### Step 7: Start the API Server
 ```powershell
 python kinic-api.py
 ```
+*You should see "✅ AI text extraction is now WORKING!"*
 
-That's it! The API is now running at `http://localhost:5006`
+**🎉 You're ready! API running at `http://localhost:5006`**
 
-## ✅ Test API Access
+---
 
+## 🍎 Mac Setup (Partial Support - Manual Testing Only)
+
+### Step 1: Download the Code
+1. **Open Terminal** (search for "Terminal" in Spotlight)
+2. **Copy and paste this command:**
+   ```bash
+   git clone https://bitbucket.org/houmanshadab/kinic-api.git
+   cd kinic-api
+   ```
+
+### Step 2: Install Python (if needed)
+1. **Check if you have Python:**
+   ```bash
+   python3 --version
+   ```
+2. **If you need Python, install via Homebrew:**
+   ```bash
+   # Install Homebrew first (if needed)
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   
+   # Install Python
+   brew install python
+   ```
+
+### Step 3: Install Required Libraries
+```bash
+pip3 install flask flask-cors pyautogui pyperclip requests anthropic openai
+```
+
+### Step 4: Set Up Your AI API Keys
+1. **Get your API keys** (same as Windows)
+2. **Set them in Terminal:**
+   ```bash
+   export ANTHROPIC_API_KEY="sk-ant-your-key-here"
+   export OPENAI_API_KEY="sk-your-key-here"
+   ```
+
+### Step 5: Test Your Setup
+```bash
+python3 setup-tools/test-api-keys.py
+```
+
+### Step 6: Start the API Server
+```bash
+python3 kinic-api.py
+```
+
+### ⚠️ Mac Limitations
+- **❌ Automated demos won't work yet** (mouse automation needs Mac-specific coordinates)
+- **✅ Kinic Chrome extension works fine**
+- **✅ API server and AI collaboration logic works**
+- **✅ Can manually test collaboration concepts**
+
+**Mac automation equivalent:** *PyAutoGUI works on Mac, but needs different coordinates and setup*
+
+---
+
+## ✅ Quick Tests for Beginners
+
+### Test 1: Verify API Keys Work
+**Windows:**
 ```powershell
 python setup-tools/test-api-keys.py
 ```
 
-This will verify both Claude and OpenAI API access and model availability.
+**Mac:**
+```bash
+python3 setup-tools/test-api-keys.py
+```
+
+*You should see "✅ Both APIs working!" - if not, double-check your API keys*
+
+### Test 2: Check Available AI Models
+**Windows:**
+```powershell
+python setup-tools/list-available-models.py
+```
+
+**Mac:**
+```bash
+python3 setup-tools/list-available-models.py
+```
+
+*This shows which AI models your account can access*
+
+### Test 3: Test Kinic API Connection
+**Open your browser and go to:** `http://localhost:5006`
+
+*You should see JSON response showing API status and endpoints*
+
+### 🚨 Troubleshooting for Beginners
+
+**"Command not found" errors:**
+- Windows: Use `python` not `python3`
+- Mac: Use `python3` not `python`
+- If still failing: Try `py` on Windows
+
+**"Module not found" errors:**
+```powershell
+# Windows - Reinstall packages
+pip install --upgrade flask flask-cors pyautogui pyperclip requests anthropic openai
+```
+
+```bash
+# Mac - Reinstall packages  
+pip3 install --upgrade flask flask-cors pyautogui pyperclip requests anthropic openai
+```
+
+**"API Key invalid" errors:**
+- Make sure you copied the FULL key (starts with `sk-ant-` for Claude, `sk-` for OpenAI)
+- Check for extra spaces when copying/pasting
+- Verify you have credits/usage available on your API accounts
 
 ## 📡 API Endpoints
 
@@ -235,11 +393,35 @@ print(result.json()['ai_response'])
 
 **🚀 NEW: Claude + GPT-4 Collaboration Demo**
 
-See genuine AI-to-AI collaboration in action:
+### 🎬 Run the Breakthrough Demo
 
+**Windows (Full Automation):**
 ```powershell
 python demos/demo-claude-gpt-collaboration.py
 ```
+
+**Mac (Manual Testing):**
+```bash
+python3 demos/demo-claude-gpt-collaboration.py
+```
+*Note: Mac users will need to manually operate Kinic extension when prompted*
+
+### 🎯 What to Expect (Beginners)
+
+**For Windows users:**
+- Demo runs automatically for ~4.5 minutes
+- Watch Chrome browser move on its own 
+- AIs will save pages to Kinic automatically
+- You'll see real-time collaboration analysis in the terminal
+- Final result: Complete working API code
+
+**For Mac users:**
+- Demo will pause and prompt you to manually:
+  - Click Kinic extension
+  - Save pages when requested  
+  - Click AI analysis when requested
+- Same collaboration logic, just manual interaction
+- Same amazing final result!
 
 **This breakthrough demo showcases:**
 - **2 AI Agents** (Claude + GPT-4) working together through shared blockchain memory
