@@ -355,7 +355,7 @@ def main():
             return
     except Exception as e:
         show_live_output("Connection", f"Failed: {e}", False)
-        print_colored("\n⚠️  Please start the API: python kinic-api.py", Colors.RED)
+        print_colored("\n⚠️  Please start the API: python ../kinic-api.py", Colors.RED)
         return
     
     print(f"\n{Colors.BOLD}⚠️  Ensure Chrome is open with Kinic extension visible{Colors.END}")

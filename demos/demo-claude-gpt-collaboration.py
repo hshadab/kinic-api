@@ -712,7 +712,7 @@ class ClaudeGPTDemo:
                 raise Exception()
             print("✅ Kinic API connected")
         except:
-            print("❌ Please start Kinic API: python kinic-api.py")
+            print("❌ Please start Kinic API: python ../kinic-api.py")
             return
         
         print("\n🎬 DEMO OVERVIEW:")

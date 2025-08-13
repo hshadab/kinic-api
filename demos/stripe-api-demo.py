@@ -173,7 +173,7 @@ def main():
         print("\n📌 To fix:")
         print("   1. Open PowerShell")
         print("   2. Navigate to kinic folder")
-        print("   3. Run: python kinic-api.py")
+        print("   3. Run: python ../kinic-api.py")
         return
     
     print("\n⚠️ IMPORTANT: Make sure Chrome is open with Kinic extension visible")
@@ -194,7 +194,7 @@ def main():
         print("\n⚠️ No documents were saved. Please check:")
         print("   • Chrome is open and active")
         print("   • Kinic extension is installed and visible")
-        print("   • Coordinates are correct (run capture-mouse-windows.py)")
+        print("   • Coordinates are correct (run ../setup-tools/capture-mouse-windows.py)")
         return
     
     print("\n⏸️ Pausing 5 seconds before Agent 2...")
