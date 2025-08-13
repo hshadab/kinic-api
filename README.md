@@ -146,13 +146,13 @@ pip install flask flask-cors pyautogui pyperclip requests
 
 ### Step 4: Capture Kinic Button Position
 ```powershell
-python capture-mouse-windows.py
+python setup-tools/capture-mouse-windows.py
 ```
 Position your mouse over the Kinic extension icon when prompted and wait for countdown.
 
 ### Step 5: Capture AI Response Position
 ```powershell
-python capture-ai-windows.py
+python setup-tools/capture-ai-windows.py
 ```
 1. Open Kinic and do a search
 2. Click the AI button
@@ -166,13 +166,13 @@ python kinic-api.py
 
 That's it! The API is now running at `http://localhost:5006`
 
-## ✅ Test AI Extraction
+## ✅ Test API Access
 
 ```powershell
-python test-ai-extraction-simple.py
+python setup-tools/test-api-keys.py
 ```
 
-You should see the AI-generated text extracted successfully!
+This will verify both Claude and OpenAI API access and model availability.
 
 ## 📡 API Endpoints
 
@@ -238,7 +238,7 @@ print(result.json()['ai_response'])
 See genuine AI-to-AI collaboration in action:
 
 ```powershell
-python demo-claude-gpt-collaboration.py
+python demos/demo-claude-gpt-collaboration.py
 ```
 
 **This breakthrough demo showcases:**

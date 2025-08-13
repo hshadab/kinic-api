@@ -46,7 +46,7 @@ Running on http://localhost:5006
 ### 3. Run the Collaboration Demo
 
 ```powershell
-python demo-claude-gpt-collaboration.py
+python demos/demo-claude-gpt-collaboration.py
 ```
 
 ## 🎬 What Happens During the Demo
@@ -110,8 +110,8 @@ The demo includes real-time analysis to prove genuine collaboration:
 
 **"Mouse automation failing"**
 - Run coordinate capture scripts to update positions:
-  - `python capture-mouse-windows.py` (for Kinic button)
-  - `python capture-ai-windows.py` (for AI response area)
+  - `python setup-tools/capture-mouse-windows.py` (for Kinic button)
+  - `python setup-tools/capture-ai-windows.py` (for AI response area)
 
 **"GPT-5-mini access denied"**
 - Demo automatically falls back to GPT-4o-mini
@@ -121,13 +121,13 @@ The demo includes real-time analysis to prove genuine collaboration:
 
 ```powershell
 # Test API connections
-python test-api-keys.py
+python setup-tools/test-api-keys.py
 
 # List available OpenAI models  
-python list-available-models.py
+python setup-tools/list-available-models.py
 
 # Debug OpenAI access issues
-python debug-openai-access.py
+python setup-tools/debug-openai-access.py
 ```
 
 ## 🎯 Understanding the Results
