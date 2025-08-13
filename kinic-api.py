@@ -100,13 +100,18 @@ def save_page():
         # Step 5: Press Enter to save
         print("5. Saving page (ENTER)...")
         pyautogui.press('enter')
-        print("   ⏳ Waiting 8 seconds for full page save...")
-        time.sleep(8)  # Wait longer to ensure full page is saved
+        print("   ⏳ Waiting for full page save - this is critical for collaboration...")
+        print("   📄 Large HuggingFace pages need time to process completely")
+        print("   ⏱️  Countdown: 12 seconds...")
+        for i in range(12, 0, -1):
+            print(f"      {i}s remaining...")
+            time.sleep(1)
+        print("   ✅ Save should be complete")
         
-        # Step 6: Close Kinic
+        # Step 6: Close Kinic  
         print("6. Closing Kinic (ESC)...")
         pyautogui.press('esc')
-        time.sleep(1)
+        time.sleep(2)  # Increased close delay
         
         print("✓ Page saved successfully")
         return jsonify({'success': True, 'message': 'Page saved to Kinic'})
