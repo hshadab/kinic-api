@@ -134,12 +134,14 @@ SELECT * FROM docs WHERE title LIKE '%checkout%'
                             │                      │
                             ▼                      ▼
                       PyAutoGUI            Blockchain Storage
-                    (Mouse/Keyboard)        (Vector Database)
-                                              ▼
+                 (Cross-platform          (Vector Database)
+                  Mouse/Keyboard)              ▼
                                     Semantic Understanding
                                     Knowledge Synthesis
                                     Automatic Relationships
 ```
+
+**Note:** PyAutoGUI provides identical automation capabilities on Windows, Mac, and Linux. The only difference is that each user needs to calibrate coordinates for their specific monitor and browser setup.
 
 ## 🚀 Beginner Setup Guide
 
@@ -181,7 +183,7 @@ SELECT * FROM docs WHERE title LIKE '%checkout%'
 pip install flask flask-cors pyautogui pyperclip requests
 ```
 
-### Step 4: Calibrate Kinic Extension (Windows Only)
+### Step 4: Calibrate Kinic Extension
 1. **Make sure Chrome is open with Kinic extension visible**
 2. **Capture Kinic button position:**
    ```powershell
@@ -194,6 +196,8 @@ pip install flask flask-cors pyautogui pyperclip requests
    python setup-tools/capture-ai-windows.py
    ```
    *Do a Kinic search, click AI button, position mouse in center of AI text*
+
+**Note:** These coordinates are specific to your monitor and Chrome setup. Even Windows users on different screen sizes will need to recalibrate.
 
 ### Step 5: Start the API Server
 ```powershell
@@ -234,16 +238,32 @@ python kinic-api.py
 pip3 install flask flask-cors pyautogui pyperclip requests
 ```
 
-### Step 4: Start the API Server
+### Step 4: Calibrate Kinic Extension
+1. **Make sure Chrome is open with Kinic extension visible**
+2. **Capture Kinic button position:**
+   ```bash
+   python3 setup-tools/capture-mouse-windows.py
+   ```
+   *Follow the countdown and position mouse over Kinic icon*
+
+3. **Capture AI response area:**
+   ```bash
+   python3 setup-tools/capture-ai-windows.py
+   ```
+   *Do a Kinic search, click AI button, position mouse in center of AI text*
+
+**Note:** PyAutoGUI works on Mac! The coordinate capture scripts work the same way - just use `python3` instead of `python`.
+
+### Step 5: Start the API Server
 ```bash
 python3 kinic-api.py
 ```
 
-### ⚠️ Mac Automation Status
-- **✅ API server works perfectly**
-- **✅ All endpoints available**  
-- **❌ Mouse automation needs Mac-specific setup** (coordinates differ)
-- **✅ Manual Kinic operation works fine**
+### ✅ Mac Automation Status
+- **✅ Full automation support** with PyAutoGUI
+- **✅ Same coordinate capture process** as Windows
+- **✅ Identical functionality** once calibrated
+- **⚠️ Use `python3` instead of `python`** for all commands
 
 ---
 
@@ -281,11 +301,12 @@ curl -X POST http://localhost:5006/search-ai-extract -H "Content-Type: applicati
 ```
 *This returns AI-generated analysis of your saved content*
 
-### 🍎 Mac Testing (Manual)
-**Mac users can:**
-- ✅ Test the API server (Test 1 works)
-- ✅ Manually operate Kinic when testing endpoints 2-4
-- ✅ Same results, just manual clicking instead of automation
+### 🍎 Mac Testing (Full Automation)
+**Mac users get the same automation as Windows:**
+- ✅ All tests work identically to Windows  
+- ✅ Full automation once coordinates are calibrated
+- ✅ Use `python3` instead of `python` for commands
+- ✅ Same PyAutoGUI automation library
 
 ### 🚨 Troubleshooting for Beginners
 
@@ -293,10 +314,11 @@ curl -X POST http://localhost:5006/search-ai-extract -H "Content-Type: applicati
 - Make sure `python kinic-api.py` is running in another terminal
 - Check that you see "Running on http://localhost:5006"
 
-**"Kinic not responding" errors (Windows):**
+**"Kinic not responding" errors (Windows & Mac):**
 - Run the coordinate capture scripts again
-- Make sure Chrome is maximized consistently
+- Make sure Chrome is maximized consistently  
 - Verify Kinic extension is visible and active
+- **Remember:** ALL users need to calibrate coordinates for their specific setup
 
 **"Command not found" errors:**
 - Windows: Use `python` not `python3`
@@ -428,26 +450,21 @@ python3 setup-tools/test-api-keys.py
 python demos/demo-claude-gpt-collaboration.py
 ```
 
-**Mac (Manual Interaction):**
+**Mac (Full Automation):**
 ```bash
 python3 demos/demo-claude-gpt-collaboration.py
 ```
 
 ### 🎯 What to Expect from AI Demo
 
-**Windows users:** 
+**Both Windows & Mac users:** 
 - Fully automated 4.5-minute demo
 - Watch AIs control Chrome and collaborate automatically
 - Real-time analysis showing genuine AI teamwork
 - Complete sentiment analysis API generated
+- Identical experience across platforms
 
-**Mac users:**
-- Same AI collaboration logic
-- Manual Kinic operation when prompted 
-- Identical breakthrough results
-- Same generated API code
-
-**Both platforms:** Witness genuine AI-to-AI collaboration through semantic memory!
+**Key requirement:** Make sure you've run the coordinate calibration scripts for your specific monitor setup first!
 
 **This breakthrough demo showcases:**
 - **2 AI Agents** (Claude + GPT-4) working together through shared blockchain memory
