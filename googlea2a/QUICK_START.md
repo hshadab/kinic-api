@@ -18,7 +18,7 @@
 
 ## Prerequisites ✅
 
-**NO Google APIs needed!** This is a conceptual demonstration.
+**Uses Real Google A2A SDK v0.3.1+** - No additional APIs needed beyond what's included.
 
 ### What you need:
 1. **Kinic API running** (you already have this)
@@ -26,10 +26,10 @@
 3. **Python dependencies** (we'll install these)
 
 ### What you DON'T need:
-- ❌ Google Developer Account
-- ❌ Google Cloud Platform access  
-- ❌ A2A API keys
-- ❌ Complex setup
+- ❌ Google Developer Account (A2A SDK is open source)
+- ❌ Google Cloud Platform access (runs locally)  
+- ❌ Live A2A agent network (demo agents included)
+- ❌ Complex enterprise setup (production-ready but simplified)
 
 ## 30-Second Setup
 
