@@ -1,0 +1,6 @@
+# A2A + Kinic Demo Requirements
+# No Google APIs needed - this is a conceptual demonstration
+
+requests>=2.31.0
+pyautogui>=0.9.54  # Only if running UI automation directly (not needed for API-only mode)
+colorama>=0.4.6    # For colored terminal output

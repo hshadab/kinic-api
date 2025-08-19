@@ -1,0 +1,12 @@
+# Real Google A2A + Kinic Demo Requirements
+
+# Google A2A SDK (real protocol)
+a2a-sdk>=0.3.1
+
+# Existing requirements  
+requests>=2.31.0
+colorama>=0.4.6
+
+# Optional database support for A2A agents
+# a2a-sdk[postgresql]  # If you want PostgreSQL support
+# a2a-sdk[sqlite]      # If you want SQLite support

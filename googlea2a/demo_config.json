@@ -1,0 +1,36 @@
+{
+    "demo_settings": {
+        "kinic_api_url": "http://localhost:5006",
+        "demo_speed": "normal",
+        "verbose_output": true,
+        "simulate_timing": true
+    },
+    "agents": {
+        "code_reviewer": {
+            "name": "Code Reviewer Agent",
+            "capabilities": ["code_review", "style_check", "best_practices"],
+            "knowledge_domains": ["python_standards", "code_quality", "review_practices"]
+        },
+        "security_specialist": {
+            "name": "Security Specialist Agent", 
+            "capabilities": ["security_audit", "vulnerability_scan", "owasp_compliance"],
+            "knowledge_domains": ["sql_injection", "secure_coding", "owasp_guidelines"]
+        }
+    },
+    "demo_scenario": {
+        "pr_title": "Add user authentication function",
+        "pr_author": "junior-developer",
+        "vulnerability_type": "sql_injection",
+        "expected_fix": "parameterized_queries"
+    },
+    "documentation_urls": {
+        "code_standards": [
+            "https://peps.python.org/pep-0008/",
+            "https://github.com/google/eng-practices/blob/master/review/reviewer/looking-for.md"
+        ],
+        "security_guidelines": [
+            "https://owasp.org/www-project-top-ten/2017/A1_2017-Injection",
+            "https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html"
+        ]
+    }
+}
