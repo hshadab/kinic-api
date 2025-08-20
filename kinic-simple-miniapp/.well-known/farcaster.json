@@ -1,0 +1,14 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjEsInR5cGUiOiJjdXN0b2R5IiwibmFtZSI6IktpbmljIEFJIE1lbW9yeSIsImltYWdlIjoiaHR0cHM6Ly9raW5pYy1hcGkudmVyY2VsLmFwcC9mYXZpY29uLmljbyJ9",
+    "payload": "eyJ1cmwiOiJodHRwczovL2tpbmljLWFwaS52ZXJjZWwuYXBwIn0",
+    "signature": "MHhkNGMzNTJmZjQxYzExZTE2OWVhMzhlNDI4ZWM4MDJkNGQyNTM3NzQ4NjNjMjEwN2FmZGM3MDFkNmE1N2NjZDc5"
+  },
+  "appUrl": "https://kinic-api.vercel.app",
+  "name": "Kinic AI Memory",
+  "description": "AI-powered memory and knowledge retrieval system. Save and search your browsing history with semantic understanding.",
+  "iconUrl": "https://kinic-api.vercel.app/favicon.ico",
+  "splashImageUrl": "https://kinic-api.vercel.app/favicon.ico",
+  "version": "1.0.0",
+  "imageUrl": "https://kinic-api.vercel.app/favicon.ico"
+}
