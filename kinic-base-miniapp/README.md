@@ -1,8 +1,5 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Kinic Base Mini App
-AI-powered memory and knowledge retrieval for the Base ecosystem.
-
 ## Getting Started
 
 First, run the development server:

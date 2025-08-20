@@ -1,0 +1,25 @@
+{
+  "name": "Kinic AI Memory",
+  "short_name": "Kinic",
+  "description": "AI memory and collaboration platform on Base blockchain",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["productivity", "developer", "blockchain"],
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "portrait-primary"
+}
