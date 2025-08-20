@@ -1,0 +1,13 @@
+{
+  "name": "Kinic AI Memory",
+  "short_name": "Kinic",
+  "description": "AI memory and collaboration platform - Base Mini App with desktop agent integration",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#3b82f6",
+  "theme_color": "#1e40af",
+  "categories": ["productivity", "ai", "memory", "blockchain"],
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "portrait-primary"
+}
