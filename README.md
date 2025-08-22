@@ -67,7 +67,7 @@
 **Why this beats file sharing:** Dynamic knowledge discovery through vector similarity vs static file organization
 
 **🚀 Run the demo:** `python demos/claude-subagents-semantic-demo.py`
-**📖 Full guide:** [CLAUDE-SUBAGENTS-DEMO.md](CLAUDE-SUBAGENTS-DEMO.md)
+**📖 Full guide:** [CLAUDE-SUBAGENTS-DEMO.md](docs/demos/CLAUDE-SUBAGENTS-DEMO.md)
 
 ---
 
@@ -89,7 +89,7 @@
 - ✅ Both AIs adapted outputs based on the other's specific discoveries
 
 **🚀 Run the demo:** `python demos/demo-claude-gpt-collaboration.py`
-**📖 Full guide:** [COLLABORATION_DEMO.md](COLLABORATION_DEMO.md)
+**📖 Full guide:** [COLLABORATION_DEMO.md](docs/demos/COLLABORATION_DEMO.md)
 
 Transform your Kinic Chrome extension into a collaborative intelligence platform for AI teams.
 
