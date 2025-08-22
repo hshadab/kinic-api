@@ -13,10 +13,12 @@
 **Real-world scenario:** Two specialized developer agents (Code Reviewer + Security Specialist) collaborate to review a pull request with SQL injection vulnerability in **5 minutes** vs traditional **30+ minute** manual process.
 
 **The A2A Agent Team:**
+
 - 🔍 **Code Reviewer Agent**: Python standards, PEP 8 compliance, code quality
 - 🔒 **Security Specialist Agent**: OWASP guidelines, vulnerability detection, secure coding
 
 **How A2A + Kinic collaboration works:**
+
 1. **Agent Specialization**: Each A2A agent saves domain expertise to Kinic
 2. **Protocol Communication**: A2A JSON-RPC 2.0 handles structured task routing
 3. **Semantic Discovery**: Agents find each other's knowledge through meaning:
@@ -25,11 +27,13 @@
 4. **AI-Enhanced Synthesis**: Kinic AI generates working security fixes from discovered knowledge
 
 **Why this transforms enterprise development:**
+
 - **Agent Interoperability**: Standard A2A protocol enables cross-vendor agent collaboration
 - **Persistent Memory**: Kinic provides agents with shared, searchable knowledge base
 - **Production Ready**: Uses real Google A2A SDK v0.3.1+ with official protocol
 
 **Business Impact:**
+
 - ⏱️ **5x faster** security reviews (5 min vs 30+ min)
 - 🎯 **Zero knowledge loss** between agent handoffs
 - 🤖 **AI-powered fixes** with working code examples
@@ -45,12 +49,14 @@
 **Revolutionary achievement:** 4 specialized Claude subagents collaborating through Kinic's semantic vector search to build a complete ML-powered analytics dashboard.
 
 **The Subagent Team:**
+
 - 🔬 **Research Subagent**: ML algorithms & analytics models
 - 🏗️ **Architecture Subagent**: Web framework patterns & API design  
 - 🔐 **Security Subagent**: Authentication & data protection
 - 💻 **Implementation Subagent**: Code synthesis & integration
 
 **How semantic collaboration works:**
+
 1. **Knowledge Gathering**: Each subagent saves specialized documentation to Kinic
 2. **Semantic Discovery**: Subagents find each other's knowledge through meaning:
    - "web dashboard architecture" → finds FastAPI patterns (saved by Architecture)
@@ -70,12 +76,14 @@
 **Just achieved:** Two AI agents (Claude and GPT-4) successfully collaborated to build a complete sentiment analysis API in **4.5 minutes** through Kinic's semantic memory - with **zero direct communication** between the AIs.
 
 **How it worked:**
+
 1. **Research Phase**: Claude saved 2 model research pages, GPT-4 saved 2 implementation guides
 2. **Discovery Phase**: Each AI found the other's knowledge through semantic search 
 3. **Building Phase**: Claude used GPT-4's patterns, GPT-4 used Claude's models
 4. **Result**: Complete working API that neither could build alone
 
 **Proof of genuine collaboration:**
+
 - ✅ Claude implemented exact model from GPT-4's research: `nlptown/bert-base-multilingual`
 - ✅ GPT-4 built API using Claude's exact class: `SentimentAnalyzer`
 - ✅ Both AIs adapted outputs based on the other's specific discoveries
