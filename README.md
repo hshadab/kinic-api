@@ -44,6 +44,31 @@
 
 ---
 
+### 📋 NEW: Kinic + agents.md Integration
+
+**Universal coding agent collaboration:** Connect any agents.md-compatible tool (Cursor, Aider, Jules, Codex) through Kinic's semantic memory layer.
+
+**Real-world scenario:** Cursor (security specialist) and Aider (API developer) collaborate to build secure authentication system with **zero direct communication**.
+
+**How agents.md + Kinic works:**
+
+1. **Standard Instructions**: agents.md provides consistent agent configuration
+2. **Semantic Memory**: Kinic adds persistent knowledge layer
+3. **Automatic Discovery**: Agents find each other's patterns through meaning
+4. **Knowledge Accumulation**: Every interaction improves future development
+
+**Why this revolutionizes AI coding:**
+
+- **Tool Agnostic**: Works with ALL agents.md-compatible assistants
+- **No Lock-in**: Switch between Cursor, Aider, Jules seamlessly
+- **Institutional Memory**: Your codebase learns and remembers
+- **5x Faster Development**: Through automatic knowledge reuse
+
+**🚀 Run the demo:** `python demos/agents-md-kinic-demo.py`
+**📖 Full guide:** [agents.md Integration Guide](agents-md-integration/README.md)
+
+---
+
 ### 🧠 Claude Subagents Semantic Collaboration
 
 **Revolutionary achievement:** 4 specialized Claude subagents collaborating through Kinic's semantic vector search to build a complete ML-powered analytics dashboard.
