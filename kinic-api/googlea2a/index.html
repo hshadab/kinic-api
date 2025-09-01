@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kinic × A2A Atlas — Standalone</title>
+  <style>
+  :root{ --bg:#0b0f14; --bg-soft:#0e141b; --fg:#e7ecf2; --muted:#aab5c0; --primary:#6dd3ff; --accent:#a48fff; --kinic:#4ef6b2; --edge:#66aaff; --card-bg:rgba(255,255,255,0.07); --ring:rgba(255,255,255,0.24); --shadow:0 10px 30px rgba(0,0,0,0.35); }
+  [data-theme='light']{ --bg:#eef3f8; --bg-soft:#f6f9fc; --fg:#0b1220; --muted:#394453; --primary:#0066ff; --accent:#6b42ff; --kinic:#00c37a; --edge:#1e7bff; --card-bg:rgba(255,255,255,0.6); --ring:rgba(0,0,0,0.12); --shadow:0 10px 30px rgba(0,0,0,0.15); }
+  *{ box-sizing:border-box } html,body,#app{ height:100% } body{ margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,"Helvetica Neue",Arial; color:var(--fg); background: radial-gradient(1200px 800px at 80% -20%, rgba(109,211,255,0.08), transparent 60%), radial-gradient(900px 600px at -10% 20%, rgba(164,143,255,0.08), transparent 60%), radial-gradient(600px 400px at 60% 120%, rgba(78,246,178,0.08), transparent 60%), var(--bg); overflow:hidden }
+  .topbar{ height:64px; display:flex; align-items:center; justify-content:space-between; padding: 0 16px; background:linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,0.06) }
+  .brand{ display:flex; align-items:center; gap:12px } .brand-text{ display:flex; flex-direction:column; line-height:1.05 } .subtitle{ font-size:12px; color:var(--muted) } .logo{ width:34px; height:34px; display:block }
+  .controls{ display:flex; align-items:center; gap:10px } .btn{ background:var(--card-bg); border:1px solid rgba(255,255,255,0.12); color:var(--fg); padding:8px 12px; border-radius:12px; backdrop-filter:blur(8px); box-shadow:var(--shadow); cursor:pointer; transition:transform .12s ease, background .2s ease, border-color .2s ease } .btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,0.24) } .btn.primary{ background:linear-gradient(180deg, rgba(109,211,255,0.25), rgba(109,211,255,0.08)); border-color:rgba(109,211,255,0.45) } .btn.small{ padding:6px 10px; font-size:12px } .select{ appearance:none; background:var(--card-bg); color:var(--fg); border:1px solid rgba(255,255,255,0.12); padding:8px 28px 8px 10px; border-radius:10px; backdrop-filter:blur(8px) }
+  .switch{ display:flex; align-items:center; gap:6px } .switch input{ display:none } .switch .slider{ width:44px; height:24px; border-radius:999px; background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.18); position:relative; display:inline-block } .slider::after{ content:""; width:18px; height:18px; border-radius:50%; background:white; position:absolute; top:2px; left:3px; transition:left .2s ease } .switch input:checked + .slider::after{ left:23px } .switch-label{ font-size:12px; color:var(--muted) }
+  #stage{ position:relative; height:calc(100% - 64px - 42px) } #graph{ position:absolute; inset:0; width:100%; height:100% } #cardsLayer{ position:absolute; inset:0; pointer-events:none }
+  .agent-card{ position:absolute; width:220px; pointer-events:auto; background:var(--card-bg); border:1px solid rgba(255,255,255,0.18); box-shadow:var(--shadow); backdrop-filter:blur(14px) saturate(120%); border-radius:16px; padding:12px; transition:transform .18s ease, box-shadow .18s ease, background .2s ease; will-change:transform }
+  .agent-card:hover{ transform:translateY(-2px) } .agent-card.kinic{ border-color:rgba(78,246,178,0.55); box-shadow:0 0 0 1px rgba(78,246,178,0.25), 0 18px 40px rgba(0,0,0,0.45) }
+  .agent-header{ display:flex; align-items:center; gap:10px; margin-bottom:8px } .agent-avatar{ width:36px; height:36px; border-radius:12px; display:grid; place-items:center; background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0.1)); border:1px solid rgba(255,255,255,0.18) } .agent-avatar .dot{ width:8px; height:8px; border-radius:50%; background:var(--kinic); box-shadow:0 0 12px var(--kinic) }
+  .agent-title{ display:flex; flex-direction:column } .agent-title .name{ font-weight:700; letter-spacing:.3px } .agent-title .role{ font-size:12px; color:var(--muted) } .agent-metrics{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px } .metric{ display:flex; flex-direction:column; gap:2px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); border-radius:10px; padding:8px } .metric .label{ font-size:11px; color:var(--muted) } .metric .value{ font-size:14px; font-weight:700 }
+  .ring{ position:absolute; inset:-10px; border-radius:20px; pointer-events:none; box-shadow:0 0 0 2px rgba(255,255,255,0.06), 0 0 40px 6px var(--ring) inset; filter:blur(0.2px); animation:throb 3s ease-in-out infinite } @keyframes throb{ 0%,100%{ box-shadow:0 0 0 2px rgba(255,255,255,0.06), 0 0 38px 6px var(--ring) inset } 50%{ box-shadow:0 0 0 2px rgba(255,255,255,0.12), 0 0 54px 10px var(--ring) inset } }
+  .edge{ stroke:var(--edge); stroke-opacity:.66; stroke-width:2px; fill:none; marker-end:url(#arrow) } .edge-label{ font-size:12px; fill:var(--muted); user-select:none; transform:translateY(-6px) } .edge-arrow{ fill:var(--edge); opacity:.9 } .pulse{ fill:white; opacity:.9; filter:drop-shadow(0 0 8px white) }
+  #legend{ position:absolute; left:16px; bottom:16px; background:var(--card-bg); border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:10px 12px; backdrop-filter:blur(12px); box-shadow:var(--shadow) } .legend-row{ display:flex; align-items:center; gap:8px; margin:4px 0 } .bubble{ width:12px; height:12px; border-radius:50%; display:inline-block } .bubble.msg{ background:#6dd3ff; box-shadow:0 0 12px #6dd3ff } .bubble.task{ background:#a48fff; box-shadow:0 0 12px #a48fff } .bubble.artifact{ background:#4ef6b2; box-shadow:0 0 12px #4ef6b2 } .edge-chip{ font-size:11px; padding:2px 6px; border-radius:999px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.24); color:var(--muted) }
+  #inspector{ position:absolute; right:16px; bottom:16px; width:380px; max-height:60%; display:flex; flex-direction:column; background:var(--card-bg); border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:10px 12px; backdrop-filter:blur(12px); box-shadow:var(--shadow); overflow:hidden } .inspector-header{ display:flex; align-items:center; justify-content:space-between } #agentDetails{ margin:6px 0 8px; font-size:13px; color:var(--muted) } .log{ list-style:none; padding:0; margin:0; overflow:auto; flex:1 } .log li{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; padding:6px 6px; border-bottom:1px dashed rgba(255,255,255,0.08); white-space:nowrap; text-overflow:ellipsis; overflow:hidden } .log .time{ color:var(--muted); margin-right:6px } .log .tag{ padding:2px 6px; border-radius:999px; margin-right:6px } .log .msg .tag{ background:rgba(109,211,255,0.2); color:#6dd3ff } .log .task .tag{ background:rgba(164,143,255,0.2); color:#a48fff } .log .artifact .tag{ background:rgba(78,246,178,0.2); color:#4ef6b2 }
+  .footer{ height:42px; display:flex; align-items:center; justify-content:space-between; padding:0 16px; background:linear-gradient(0deg, rgba(0,0,0,0.25), rgba(0,0,0,0)); border-top:1px solid rgba(255,255,255,0.06) } .link{ color:var(--primary); text-decoration:none }
+  dialog::backdrop{ background:rgba(0,0,0,0.45); backdrop-filter:blur(4px) } .dialog{ background:var(--bg-soft); color:var(--fg); border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:16px; min-width:420px } .dialog label{ display:block; margin:10px 0 } .dialog input{ width:100%; padding:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:var(--card-bg); color:var(--fg) } .dialog .hint{ font-size:12px; color:var(--muted) } .dialog menu{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px } .dialog .btn.primary{ background:linear-gradient(180deg, rgba(78,246,178,0.25), rgba(78,246,178,0.08)); border-color:rgba(78,246,178,0.45) }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="topbar" role="banner">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 256 256" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4ef6b2"/><stop offset="100%" stop-color="#6dd3ff"/></linearGradient></defs><rect width="256" height="256" rx="48" fill="#0b0f14"></rect><circle cx="128" cy="128" r="70" fill="none" stroke="url(#g)" stroke-width="18"></circle><circle cx="128" cy="128" r="14" fill="url(#g)"></circle><path d="M128 44 L128 84" stroke="url(#g)" stroke-width="10" stroke-linecap="round"></path><path d="M128 212 L128 172" stroke="url(#g)" stroke-width="10" stroke-linecap="round"></path><path d="M44 128 L84 128" stroke="url(#g)" stroke-width="10" stroke-linecap="round"></path><path d="M212 128 L172 128" stroke="url(#g)" stroke-width="10" stroke-linecap="round"></path></svg>
+        <div class="brand-text"><strong>Kinic × A2A Atlas</strong><span class="subtitle">Standalone agent collaboration map</span></div>
+      </div>
+      <div class="controls" role="toolbar" aria-label="Graph controls">
+        <button id="connectBtn" class="btn primary">Connect</button>
+        <button id="demoBtn" class="btn">Demo</button>
+        <select id="layoutSelect" class="select" aria-label="Layout">
+          <option value="force">Force</option>
+          <option value="ring" selected>Ring</option>
+          <option value="grid">Grid</option>
+        </select>
+        <button id="pauseBtn" class="btn" aria-pressed="false">Pause</button>
+        <button id="resetViewBtn" class="btn">Reset View</button>
+        <label class="switch"><input type="checkbox" id="themeToggle" /><span class="slider"></span><span class="switch-label">Dark</span></label>
+      </div>
+    </header>
+
+    <main id="stage" aria-label="A2A topology">
+      <svg id="graph" aria-hidden="true">
+        <defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="8" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="edge-arrow"></path></marker></defs>
+        <g id="zoomRoot"><g id="edgesLayer"></g><g id="pulsesLayer"></g></g>
+      </svg>
+      <div id="cardsLayer" aria-live="polite"></div>
+
+      <aside id="legend"><div class="legend-row"><span class="bubble msg"></span><span>Message</span></div><div class="legend-row"><span class="bubble task"></span><span>Task</span></div><div class="legend-row"><span class="bubble artifact"></span><span>Artifact</span></div><div class="legend-row"><span class="edge-chip">A2A</span><span>Protocol link</span></div></aside>
+
+      <section id="inspector" tabindex="0"><div class="inspector-header"><h2 id="inspectorTitle">Inspector</h2><button id="clearLogBtn" class="btn small">Clear</button></div><div id="agentDetails" class="agent-details"></div><ol id="eventLog" class="log"></ol></section>
+    </main>
+
+    <footer class="footer"><span>Standalone build. Drag nodes, click cards, and watch A2A packets pulse along links.</span><a href="#" id="downloadPng" class="link">Export PNG</a></footer>
+  </div>
+
+  <dialog id="connectDialog"><form method="dialog" class="dialog"><h3>Connect to A2A WebSocket</h3><label>ws:// or wss:// endpoint<input type="url" id="wsUrl" placeholder="wss://your-host/a2a/stream" required /></label><p class="hint">Expects JSON like <code>{"type":"task","source":"planner","target":"kinic","latencyMs":132}</code></p><menu><button value="cancel" class="btn">Cancel</button><button id="confirmConnect" value="default" class="btn primary">Connect</button></menu></form></dialog>
+
+  <script>
+  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const Transform={k:1,tx:0,ty:0,applyX(x){return this.k*x+this.tx},applyY(y){return this.k*y+this.ty},invertX(x){return (x-this.tx)/this.k},invertY(y){return (y-this.ty)/this.k},toString(){return `translate(${this.tx},${this.ty}) scale(${this.k})`}};
+  const svg=$("#graph"), zoomRoot=$("#zoomRoot"), edgesLayer=$("#edgesLayer"), pulsesLayer=$("#pulsesLayer"), cardsLayer=$("#cardsLayer");
+  const themeToggle=$("#themeToggle"), layoutSelect=$("#layoutSelect"), pauseBtn=$("#pauseBtn"), resetViewBtn=$("#resetViewBtn"), demoBtn=$("#demoBtn"), connectBtn=$("#connectBtn"), connectDialog=$("#connectDialog"), confirmConnect=$("#confirmConnect"), wsUrlInput=$("#wsUrl"), eventLog=$("#eventLog"), clearLogBtn=$("#clearLogBtn"), agentDetails=$("#agentDetails"), downloadPng=$("#downloadPng");
+
+  let running=true, demoMode=true, layoutMode="ring", ws=null;
+  let pan={panning:false,lastX:0,lastY:0};
+  const graph={nodes:[],links:[]};
+  const seedAgents=[{id:"kinic",name:"Kinic Memory",role:"Shared Semantic Memory",kind:"kinic"},{id:"planner",name:"Planner",role:"Orchestrator Agent",kind:"agent"},{id:"researcher",name:"Researcher",role:"Web + RAG",kind:"agent"},{id:"reviewer",name:"Reviewer",role:"Critic",kind:"agent"},{id:"toolsmith",name:"Toolsmith",role:"MCP Tools",kind:"agent"},{id:"concierge",name:"Concierge",role:"A2A Client",kind:"agent"}];
+  const seedLinks=[{source:"planner",target:"kinic"},{source:"researcher",target:"kinic"},{source:"reviewer",target:"kinic"},{source:"toolsmith",target:"kinic"},{source:"concierge",target:"kinic"},{source:"planner",target:"researcher"},{source:"planner",target:"reviewer"},{source:"planner",target:"toolsmith"},{source:"researcher",target:"reviewer"}];
+
+  function ensureNode(id, attrs={}){
+    let n=graph.nodes.find(n=>n.id===id);
+    if(!n){ n=Object.assign({id,name:id,role:"Agent",kind:"agent",rps:0,latency:0,rag:0,x:0,y:0,vx:0,vy:0,fx:null,fy:null}, attrs); graph.nodes.push(n); mountCard(n); }
+    else Object.assign(n, attrs);
+    return n;
+  }
+  function ensureLink(aId,bId){ const id=`${aId}->${bId}`; let l=graph.links.find(l=>l.id===id); if(!l){ const a=ensureNode(aId), b=ensureNode(bId); l={id,source:a,target:b}; graph.links.push(l); renderEdges(); } return l; }
+
+  seedAgents.forEach(a=>ensureNode(a.id,a)); seedLinks.forEach(e=>ensureLink(e.source,e.target));
+
+  function renderEdges(){ const seen=new Set(); for(const link of graph.links){ seen.add(link.id); let p=edgesLayer.querySelector(`path[data-edge-id="${link.id}"]`); if(!p){ p=document.createElementNS("http://www.w3.org/2000/svg","path"); p.setAttribute("class","edge"); p.setAttribute("data-edge-id",link.id); p.setAttribute("marker-end","url(#arrow)"); edgesLayer.appendChild(p); const lbl=document.createElementNS("http://www.w3.org/2000/svg","text"); lbl.textContent="A2A"; lbl.setAttribute("class","edge-label"); lbl.setAttribute("data-edge-label-id",`lbl-${link.id}`); edgesLayer.appendChild(lbl);} } $$("path.edge",edgesLayer).forEach(p=>{const id=p.getAttribute("data-edge-id"); if(!seen.has(id)) p.remove()}); $$("text.edge-label",edgesLayer).forEach(t=>{const id=t.getAttribute("data-edge-label-id").slice(4); if(!seen.has(id)) t.remove()}); }
+
+  function mountCard(n){ const card=document.createElement("div"); card.className="agent-card"+(n.kind==="kinic"?" kinic":""); card.setAttribute("data-id",n.id); card.setAttribute("role","group"); card.innerHTML=`<div class="ring"></div><div class="agent-header"><div class="agent-avatar"><span class="dot"></span></div><div class="agent-title"><span class="name">${n.name}</span><span class="role">${n.role}</span></div></div><div class="agent-metrics"><div class="metric"><span class="label">RPS</span><span class="value" data-k="rps">0.0</span></div><div class="metric"><span class="label">p95</span><span class="value" data-k="latency">0 ms</span></div><div class="metric"><span class="label">RAG</span><span class="value" data-k="rag">0</span></div></div>`; cardsLayer.appendChild(card);
+    card.addEventListener("pointerdown",e=>{ e.preventDefault(); card.setPointerCapture(e.pointerId); n.fx=Transform.invertX(e.clientX); n.fy=Transform.invertY(e.clientY); n._dragging=true; });
+    card.addEventListener("pointermove",e=>{ if(!n._dragging) return; n.fx=Transform.invertX(e.clientX); n.fy=Transform.invertY(e.clientY); });
+    card.addEventListener("pointerup",e=>{ n._dragging=false; card.releasePointerCapture(e.pointerId); if(layoutMode==="force"){ n.fx=null; n.fy=null; } });
+    card.addEventListener("click",()=>select(n.id));
+  }
+  function select(id){ const n=graph.nodes.find(n=>n.id===id); if(!n) return; $$(".agent-card").forEach(el=>el.style.outline=""); const el=$(`.agent-card[data-id="${id}"]`); if(el) el.style.outline="2px solid rgba(109,211,255,0.6)"; $("#inspectorTitle").textContent=`Inspector — ${n.name}`; agentDetails.innerHTML=`<div><strong>Role:</strong> ${n.role}</div><div><strong>ID:</strong> ${n.id}</div><div><strong>Kind:</strong> ${n.kind}</div><div><strong>RPS:</strong> ${n.rps.toFixed(2)} · <strong>p95:</strong> ${Math.round(n.latency)} ms · <strong>RAG hits/min:</strong> ${Math.round(n.rag)}</div>`; }
+
+  const physics={ linkDist(l){ return (l.source.id==="kinic"||l.target.id==="kinic")?200:260 }, step(dt){ const nodes=graph.nodes, links=graph.links; const kLink=0.0018, kCharge=1400, kCenter=0.01, damp=0.9, radius=150; for(const l of links){ const a=l.source,b=l.target; let dx=b.x-a.x, dy=b.y-a.y, dist=Math.hypot(dx,dy)||0.001; const d0=this.linkDist(l), f=kLink*(dist-d0); dx/=dist; dy/=dist; const fx=f*dx, fy=f*dy; a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy; } for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){ const a=nodes[i], b=nodes[j]; let dx=b.x-a.x, dy=b.y-a.y, d2=dx*dx+dy*dy+0.01, d=Math.sqrt(d2); const f=kCharge/d2, fx=f*dx/d, fy=f*dy/d; a.vx-=fx; a.vy-=fy; b.vx+=fx; b.vy+=fy; if(d<radius){ const push=(radius-d)*0.02, px=push*dx/d, py=push*dy/d; a.vx-=px; a.vy-=py; b.vx+=px; b.vy+=py; } } const rect=svg.getBoundingClientRect(), cx=Transform.invertX(rect.width/2), cy=Transform.invertY(rect.height/2); for(const p of nodes){ if(p.fx!=null&&p.fy!=null){ p.vx+=(p.fx-p.x)*0.06; p.vy+=(p.fy-p.y)*0.06; } else { p.vx+=(cx-p.x)*kCenter; p.vy+=(cy-p.y)*kCenter; } p.vx*=damp; p.vy*=damp; p.x+=p.vx*dt; p.y+=p.vy*dt; } } };
+  let last=performance.now(); function loop(){ const now=performance.now(), dt=Math.min(1/30,(now-last)/16.67); last=now; if(running) physics.step(dt); draw(); requestAnimationFrame(loop) }
+  function draw(){ for(const l of graph.links){ const p=edgesLayer.querySelector(`path[data-edge-id="${l.id}"]`); if(p) p.setAttribute("d",`M${l.source.x},${l.source.y} L${l.target.x},${l.target.y}`); const t=edgesLayer.querySelector(`text[data-edge-label-id="lbl-${l.id}"]`); if(t){ const x=(l.source.x+l.target.x)/2, y=(l.source.y+l.target.y)/2-4; t.setAttribute("x",x); t.setAttribute("y",y); } } positionCards(); zoomRoot.setAttribute("transform", Transform.toString()); }
+  function positionCards(){ for(const n of graph.nodes){ const el=$(`.agent-card[data-id="${n.id}"]`); if(!el) continue; const x=Transform.applyX(n.x)-110, y=Transform.applyY(n.y)-60; el.style.transform=`translate(${x}px, ${y}px)`; } }
+
+  // Apply ring layout at startup for clear spacing
+  (function initialRing(){
+    const rect=svg.getBoundingClientRect();
+    const cx=Transform.invertX(rect.width/2), cy=Transform.invertY(rect.height/2);
+    const others=graph.nodes.filter(n=>n.id!=="kinic");
+    const R=Math.min(rect.width,rect.height)/Transform.k/3;
+    others.forEach((n,i)=>{ const ang=(i/others.length)*Math.PI*2; n.x=cx+Math.cos(ang)*R; n.y=cy+Math.sin(ang)*R; n.fx=n.x; n.fy=n.y; });
+    const k=graph.nodes.find(n=>n.id==="kinic"); k.x=cx; k.y=cy; k.fx=cx; k.fy=cy;
+    draw();
+  })();
+
+  // UI
+  themeToggle.addEventListener("change",e=>{ if(e.target.checked) document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme","light") });
+  pauseBtn.addEventListener("click",()=>{ running=!running; pauseBtn.setAttribute("aria-pressed", String(!running)); pauseBtn.textContent=running?"Pause":"Resume" });
+  resetViewBtn.addEventListener("click",()=>{ Transform.k=1; Transform.tx=0; Transform.ty=0; draw() });
+  clearLogBtn.addEventListener("click",()=> eventLog.innerHTML="");
+
+  layoutSelect.addEventListener("change",e=>{
+    layoutMode=e.target.value;
+    if(layoutMode==="force"){ graph.nodes.forEach(n=>{ n.fx=null; n.fy=null; }); }
+    else if(layoutMode==="ring"){
+      const rect=svg.getBoundingClientRect(), cx=Transform.invertX(rect.width/2), cy=Transform.invertY(rect.height/2);
+      const others=graph.nodes.filter(n=>n.id!=="kinic"), R=Math.min(rect.width,rect.height)/Transform.k/3;
+      others.forEach((n,i)=>{ const a=(i/others.length)*Math.PI*2; n.fx=cx+Math.cos(a)*R; n.fy=cy+Math.sin(a)*R; });
+      const k=graph.nodes.find(n=>n.id==="kinic"); k.fx=cx; k.fy=cy;
+    }else if(layoutMode==="grid"){
+      const rect=svg.getBoundingClientRect(), cols=Math.ceil(Math.sqrt(graph.nodes.length));
+      const cw=(rect.width/Transform.k)/(cols+1), ch=(rect.height/Transform.k)/(cols+1);
+      graph.nodes.forEach((n,i)=>{ const r=Math.floor(i/cols)+1, c=(i%cols)+1; n.fx=c*cw; n.fy=r*ch; });
+    }
+  });
+
+  svg.addEventListener("wheel",e=>{ e.preventDefault(); const s=Math.exp(-e.deltaY*0.001), mx=e.clientX, my=e.clientY, wx=Transform.invertX(mx), wy=Transform.invertY(my); Transform.k=Math.min(2.5,Math.max(0.4,Transform.k*s)); Transform.tx=mx-wx*Transform.k; Transform.ty=my-wy*Transform.k; draw() }, {passive:false});
+  svg.addEventListener("pointerdown",e=>{ if(e.target.closest(".agent-card")) return; pan.panning=true; pan.lastX=e.clientX; pan.lastY=e.clientY; svg.setPointerCapture(e.pointerId) });
+  svg.addEventListener("pointermove",e=>{ if(!pan.panning) return; const dx=e.clientX-pan.lastX, dy=e.clientY-pan.lastY; pan.lastX=e.clientX; pan.lastY=e.clientY; Transform.tx+=dx; Transform.ty+=dy; draw() });
+  svg.addEventListener("pointerup",e=>{ pan.panning=false; svg.releasePointerCapture(e.pointerId) });
+
+  connectBtn.addEventListener("click",()=> connectDialog.showModal());
+  confirmConnect.addEventListener("click",e=>{ e.preventDefault(); const url=wsUrlInput.value.trim(); if(!url) return; connectDialog.close(); connect(url) });
+  let socket=null;
+  function connect(url){ if(socket){ try{ socket.close() }catch{} socket=null } try{ socket=new WebSocket(url) }catch(err){ log("error","socket","connect","Error: "+err.message); return } socket.addEventListener("open",()=>log("msg","socket","open","Connected "+url)); socket.addEventListener("close",()=>log("msg","socket","close","Connection closed")); socket.addEventListener("message",e=>{ try{ const evt=JSON.parse(e.data); onA2A(evt) }catch(err){ log("error","socket","parse","Bad JSON: "+String(e.data).slice(0,120)) } }); }
+
+  function onA2A(evt){ const {type="msg",source,target,latencyMs=Math.random()*200+40}=evt; if(!source||!target) return; ensureLink(source,target); const a=graph.nodes.find(n=>n.id===source), b=graph.nodes.find(n=>n.id===target); a.rps=Math.max(0,a.rps+(Math.random()*0.4)); a.latency=latencyMs*0.8+a.latency*0.2; if(target==="kinic") a.rag+=1; update(a); update(b); pulse(a.id,b.id,type,latencyMs); log(type,source,target,"lat="+Math.round(latencyMs)+"ms"); }
+  function update(n){ const el=$('.agent-card[data-id="'+n.id+'"]'); if(!el) return; el.querySelector('[data-k="rps"]').textContent=n.rps.toFixed(2); el.querySelector('[data-k="latency"]').textContent=Math.round(n.latency)+" ms"; el.querySelector('[data-k="rag"]').textContent=Math.round(n.rag); }
+  function pulse(srcId,tgtId,kind="msg",lat=160){ const l=graph.links.find(l=>l.source.id===srcId && l.target.id===tgtId); if(!l) return; const p=edgesLayer.querySelector('path[data-edge-id="'+l.id+'"]'); if(!p) return; const total=p.getTotalLength(); const dot=document.createElementNS("http://www.w3.org/2000/svg","circle"); dot.setAttribute("class","pulse"); dot.setAttribute("r","4"); const color=kind==="task"?"#a48fff":(kind==="artifact"?"#4ef6b2":"#6dd3ff"); dot.style.fill=color; dot.style.filter=`drop-shadow(0 0 10px ${color})`; pulsesLayer.appendChild(dot); const start=performance.now(); function step(now){ const t=Math.min(1,(now-start)/Math.max(80,lat)); const pt=p.getPointAtLength(t*total); dot.setAttribute("cx",pt.x); dot.setAttribute("cy",pt.y); if(t<1 && running) requestAnimationFrame(step); else dot.remove() } requestAnimationFrame(step) }
+  function log(kind,src,tgt,msg){ const li=document.createElement("li"); li.className=kind; const time=new Date().toLocaleTimeString([], {hour12:false}); li.innerHTML=`<span class="time">${time}</span><span class="tag">${kind.toUpperCase()}</span>${src} → ${tgt} — ${msg}`; eventLog.prepend(li); while(eventLog.children.length>120) eventLog.removeChild(eventLog.lastChild) }
+
+  demoBtn.addEventListener("click",()=>{ demoMode=!demoMode; demoBtn.classList.toggle("primary",demoMode) });
+  setInterval(()=>{ if(!demoMode||!running) return; const ids=graph.nodes.map(n=>n.id); const s=ids[Math.floor(Math.random()*ids.length)]; let t=ids[Math.floor(Math.random()*ids.length)]; if(t===s) t="kinic"; const types=["msg","task","artifact"]; const k=types[Math.floor(Math.random()*types.length)]; onA2A({type:k,source:s,target:t,latencyMs:(Math.random()*300)+50}) }, 750);
+  setInterval(()=>{ for(const n of graph.nodes){ if(n.id!=="kinic"){ n.rps=Math.max(0,n.rps+(Math.random()-0.48)); n.latency=Math.max(0,n.latency+(Math.random()*10-5)); n.rag=Math.max(0,n.rag+(Math.random()>0.8?1:0)); update(n) } } }, 1200);
+
+  downloadPng.addEventListener("click",e=>{ e.preventDefault(); exportPNG() });
+  async function exportPNG(){ const w=svg.clientWidth,h=svg.clientHeight,canvas=document.createElement("canvas"); canvas.width=w; canvas.height=h; const ctx=canvas.getContext("2d"); ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--bg'); ctx.fillRect(0,0,w,h); const clone=svg.cloneNode(true), ser=new XMLSerializer(), str=ser.serializeToString(clone); const url=URL.createObjectURL(new Blob([str],{type:"image/svg+xml;charset=utf-8"})), img=new Image(); await new Promise(res=>{ img.onload=()=>{ ctx.drawImage(img,0,0); URL.revokeObjectURL(url); res() }; img.src=url }); for(const card of $$(".agent-card")){ const rect=card.getBoundingClientRect(), wrap=document.createElement("div"); wrap.appendChild(card.cloneNode(true)); const xhtml=new XMLSerializer().serializeToString(wrap); const data=`<svg xmlns="http://www.w3.org/2000/svg" width="${rect.width}" height="${rect.height}"><foreignObject width="100%" height="100%">${xhtml}</foreignObject></svg>`; const u=URL.createObjectURL(new Blob([data],{type:"image/svg+xml;charset=utf-8"})), img2=new Image(); await new Promise(res=>{ img2.onload=()=>{ ctx.drawImage(img2, rect.left, rect.top); URL.revokeObjectURL(u); res() }; img2.src=u }) } const a=document.createElement("a"); a.href=canvas.toDataURL("image/png"); a.download="kinic-a2a-atlas.png"; a.click() }
+
+  select("kinic"); loop();
+  </script>
+</body>
+</html>
