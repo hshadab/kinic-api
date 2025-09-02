@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google A2A + Kinic Demo - Code Review Visualization</title>
+  <style>
+  :root{ 
+    --bg:#0b0f14; --bg-soft:#0e141b; --fg:#e7ecf2; --muted:#7a8a9c; 
+    --primary:#6dd3ff; --kinic:#4ef6b2; --security:#ff6b6b; --reviewer:#6b9fff;
+    --edge:#4a7c99; --card-bg:rgba(255,255,255,0.05); 
+    --shadow:0 12px 32px rgba(0,0,0,0.4); --ring:rgba(255,255,255,0.15);
+  }
+  *{ box-sizing:border-box; margin:0; padding:0 }
+  html,body,#app{ height:100%; font-family:'Inter',system-ui,sans-serif }
+  body{ 
+    color:var(--fg); 
+    background: linear-gradient(135deg, #0b0f14 0%, #0e141b 50%, #0b0f14 100%);
+    overflow:hidden;
+  }
+  
+  /* Header */
+  .header{ 
+    height:80px; padding:0 24px; 
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(0,0,0,0.3); backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .title-section{ display:flex; align-items:center; gap:16px }
+  .logo{ width:40px; height:40px }
+  .title{ font-size:20px; font-weight:600 }
+  .subtitle{ font-size:13px; color:var(--muted); margin-top:2px }
+  .status{ 
+    padding:6px 12px; border-radius:20px; font-size:12px;
+    background:rgba(78,246,178,0.1); border:1px solid rgba(78,246,178,0.3);
+    color:var(--kinic);
+  }
+  
+  /* Control Panel */
+  .controls{ 
+    display:flex; gap:12px; align-items:center;
+  }
+  .btn{ 
+    padding:8px 16px; border-radius:8px; border:1px solid rgba(255,255,255,0.2);
+    background:var(--card-bg); color:var(--fg); cursor:pointer;
+    backdrop-filter:blur(8px); transition:all 0.2s;
+  }
+  .btn:hover{ transform:translateY(-1px); border-color:rgba(255,255,255,0.4) }
+  .btn.primary{ 
+    background:linear-gradient(135deg, rgba(109,211,255,0.2), rgba(78,246,178,0.15));
+    border-color:rgba(109,211,255,0.4);
+  }
+  
+  /* Main Stage */
+  #stage{ 
+    height:calc(100% - 80px - 60px); 
+    position:relative; overflow:hidden;
+  }
+  
+  /* Agent Cards */
+  .agent-card{ 
+    position:absolute; width:280px;
+    background:var(--card-bg); backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.1); border-radius:16px;
+    padding:20px; box-shadow:var(--shadow);
+    transition:transform 0.3s, box-shadow 0.3s;
+  }
+  .agent-card:hover{ 
+    transform:translateY(-4px) scale(1.02);
+    box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  }
+  .agent-card.kinic{ 
+    background:linear-gradient(135deg, rgba(78,246,178,0.08), rgba(109,211,255,0.05));
+    border-color:rgba(78,246,178,0.4);
+    box-shadow:0 0 40px rgba(78,246,178,0.2), var(--shadow);
+  }
+  .agent-card.security{ 
+    background:linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,143,164,0.05));
+    border-color:rgba(255,107,107,0.4);
+  }
+  .agent-card.reviewer{ 
+    background:linear-gradient(135deg, rgba(107,159,255,0.08), rgba(164,143,255,0.05));
+    border-color:rgba(107,159,255,0.4);
+  }
+  
+  .agent-header{ 
+    display:flex; align-items:flex-start; gap:12px; margin-bottom:16px;
+  }
+  .agent-icon{ 
+    width:48px; height:48px; border-radius:12px;
+    display:grid; place-items:center;
+    background:linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border:1px solid rgba(255,255,255,0.2);
+  }
+  .agent-icon.kinic{ background:linear-gradient(135deg, #4ef6b2, #6dd3ff) }
+  .agent-icon.security{ background:linear-gradient(135deg, #ff6b6b, #ff8fa4) }
+  .agent-icon.reviewer{ background:linear-gradient(135deg, #6b9fff, #a48fff) }
+  
+  .agent-info{ flex:1 }
+  .agent-name{ font-size:16px; font-weight:600; margin-bottom:4px }
+  .agent-role{ font-size:12px; color:var(--muted) }
+  .agent-version{ 
+    font-size:10px; padding:2px 6px; border-radius:4px;
+    background:rgba(255,255,255,0.1); display:inline-block; margin-top:4px;
+  }
+  
+  .capabilities{ 
+    margin-top:12px; padding-top:12px; 
+    border-top:1px solid rgba(255,255,255,0.1);
+  }
+  .capabilities-title{ 
+    font-size:11px; text-transform:uppercase; 
+    color:var(--muted); margin-bottom:8px; letter-spacing:0.5px;
+  }
+  .capability{ 
+    display:inline-block; padding:4px 8px; margin:2px;
+    border-radius:6px; font-size:11px;
+    background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+  }
+  
+  .metrics{ 
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-top:12px;
+  }
+  .metric{ 
+    text-align:center; padding:8px;
+    background:rgba(255,255,255,0.04); border-radius:8px;
+    border:1px solid rgba(255,255,255,0.1);
+  }
+  .metric-value{ font-size:18px; font-weight:600 }
+  .metric-label{ font-size:10px; color:var(--muted); margin-top:2px }
+  
+  /* SVG Connection Lines */
+  #connections{ 
+    position:absolute; inset:0; pointer-events:none;
+  }
+  .connection-line{ 
+    stroke:var(--edge); stroke-width:2; fill:none; 
+    stroke-dasharray:5,5; opacity:0.4;
+  }
+  .connection-line.active{ 
+    stroke:var(--kinic); stroke-width:3; opacity:1;
+    stroke-dasharray:none; filter:drop-shadow(0 0 6px var(--kinic));
+  }
+  
+  /* Message Flow */
+  .message-pulse{ 
+    position:absolute; width:120px; 
+    padding:8px; border-radius:8px;
+    background:rgba(109,211,255,0.9); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,0.3);
+    box-shadow:0 4px 12px rgba(109,211,255,0.4);
+    font-size:11px; color:white; text-align:center;
+    pointer-events:none; z-index:100;
+  }
+  .message-pulse.task{ background:rgba(164,143,255,0.9) }
+  .message-pulse.response{ background:rgba(78,246,178,0.9) }
+  
+  /* Protocol Inspector */
+  .protocol-inspector{ 
+    position:absolute; right:20px; top:20px; width:400px;
+    background:var(--card-bg); backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.1); border-radius:12px;
+    padding:16px; max-height:calc(100% - 40px); overflow:auto;
+  }
+  .inspector-title{ 
+    font-size:14px; font-weight:600; margin-bottom:12px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .protocol-badge{ 
+    padding:2px 8px; border-radius:4px; font-size:10px;
+    background:rgba(109,211,255,0.2); color:var(--primary);
+  }
+  .json-display{ 
+    background:rgba(0,0,0,0.3); border-radius:8px; padding:12px;
+    font-family:'Monaco','Consolas',monospace; font-size:11px;
+    color:#a8e6cf; max-height:300px; overflow:auto; margin-top:8px;
+  }
+  .json-key{ color:#ffd54f }
+  .json-string{ color:#81c784 }
+  .json-number{ color:#4fc3f7 }
+  
+  /* Workflow Steps */
+  .workflow{ 
+    position:absolute; left:20px; top:20px; width:300px;
+    background:var(--card-bg); backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,0.1); border-radius:12px;
+    padding:16px;
+  }
+  .workflow-title{ 
+    font-size:14px; font-weight:600; margin-bottom:12px;
+  }
+  .workflow-step{ 
+    display:flex; align-items:center; gap:12px; margin:8px 0;
+    padding:8px; border-radius:8px; transition:all 0.3s;
+  }
+  .workflow-step.active{ 
+    background:rgba(78,246,178,0.1); 
+    border:1px solid rgba(78,246,178,0.3);
+  }
+  .workflow-step.completed{ opacity:0.6 }
+  .step-number{ 
+    width:24px; height:24px; border-radius:50%;
+    display:grid; place-items:center; font-size:12px;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);
+  }
+  .step-number.active{ 
+    background:var(--kinic); color:var(--bg); border-color:var(--kinic);
+  }
+  .step-text{ font-size:12px; flex:1 }
+  .step-time{ font-size:10px; color:var(--muted) }
+  
+  /* Footer */
+  .footer{ 
+    height:60px; padding:0 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    background:rgba(0,0,0,0.3); border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .stats{ display:flex; gap:24px }
+  .stat{ font-size:12px; color:var(--muted) }
+  .stat-value{ color:var(--fg); font-weight:600 }
+  
+  /* Animations */
+  @keyframes pulse {
+    0%, 100% { transform:scale(1); opacity:1 }
+    50% { transform:scale(1.1); opacity:0.8 }
+  }
+  .pulsing { animation:pulse 2s infinite }
+  
+  @keyframes slide {
+    from { transform:translateX(-100%); opacity:0 }
+    to { transform:translateX(0); opacity:1 }
+  }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="title-section">
+        <svg class="logo" viewBox="0 0 256 256">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4ef6b2"/>
+              <stop offset="100%" stop-color="#6dd3ff"/>
+            </linearGradient>
+          </defs>
+          <rect width="256" height="256" rx="48" fill="#0b0f14"/>
+          <circle cx="128" cy="128" r="70" fill="none" stroke="url(#g)" stroke-width="18"/>
+          <circle cx="128" cy="128" r="14" fill="url(#g)"/>
+        </svg>
+        <div>
+          <div class="title">Google A2A + Kinic Integration</div>
+          <div class="subtitle">Real-time Code Review Security Demo</div>
+        </div>
+      </div>
+      <div class="controls">
+        <span class="status">Protocol: JSON-RPC 2.0</span>
+        <button id="runDemo" class="btn primary">Run Demo Workflow</button>
+        <button id="resetBtn" class="btn">Reset</button>
+      </div>
+    </header>
+    
+    <main id="stage">
+      <!-- Agent Cards -->
+      <div class="agent-card reviewer" style="left:50px; top:50%; transform:translateY(-50%)">
+        <div class="agent-header">
+          <div class="agent-icon reviewer">📝</div>
+          <div class="agent-info">
+            <div class="agent-name">Code Reviewer Agent</div>
+            <div class="agent-role">Python Code Quality & Standards</div>
+            <div class="agent-version">v1.0</div>
+          </div>
+        </div>
+        <div class="capabilities">
+          <div class="capabilities-title">Capabilities</div>
+          <span class="capability">code_review</span>
+          <span class="capability">style_check</span>
+          <span class="capability">best_practices</span>
+          <span class="capability">pep8_compliance</span>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value" id="reviewer-tasks">0</div>
+            <div class="metric-label">Tasks</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="reviewer-latency">0ms</div>
+            <div class="metric-label">Latency</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="reviewer-status">Idle</div>
+            <div class="metric-label">Status</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="agent-card kinic" style="left:50%; top:50%; transform:translate(-50%, -50%)">
+        <div class="agent-header">
+          <div class="agent-icon kinic">🧠</div>
+          <div class="agent-info">
+            <div class="agent-name">Kinic Memory</div>
+            <div class="agent-role">Semantic Memory & AI Extraction</div>
+            <div class="agent-version">Blockchain-backed</div>
+          </div>
+        </div>
+        <div class="capabilities">
+          <div class="capabilities-title">Services</div>
+          <span class="capability">semantic_search</span>
+          <span class="capability">ai_extraction</span>
+          <span class="capability">vector_storage</span>
+          <span class="capability">knowledge_graph</span>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value" id="kinic-queries">0</div>
+            <div class="metric-label">Queries</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="kinic-docs">0</div>
+            <div class="metric-label">Docs</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="kinic-latency">0ms</div>
+            <div class="metric-label">Search</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="agent-card security" style="right:50px; top:50%; transform:translateY(-50%)">
+        <div class="agent-header">
+          <div class="agent-icon security">🔒</div>
+          <div class="agent-info">
+            <div class="agent-name">Security Specialist Agent</div>
+            <div class="agent-role">OWASP Compliance & Vulnerability Detection</div>
+            <div class="agent-version">v1.0</div>
+          </div>
+        </div>
+        <div class="capabilities">
+          <div class="capabilities-title">Capabilities</div>
+          <span class="capability">security_audit</span>
+          <span class="capability">vulnerability_scan</span>
+          <span class="capability">owasp_compliance</span>
+          <span class="capability">sql_injection_detection</span>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value" id="security-vulns">0</div>
+            <div class="metric-label">Vulns</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="security-severity">-</div>
+            <div class="metric-label">Severity</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" id="security-status">Idle</div>
+            <div class="metric-label">Status</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- SVG Connections -->
+      <svg id="connections">
+        <path id="reviewer-kinic" class="connection-line" />
+        <path id="kinic-security" class="connection-line" />
+        <path id="reviewer-security" class="connection-line" />
+      </svg>
+      
+      <!-- Workflow Panel -->
+      <div class="workflow">
+        <div class="workflow-title">Demo Workflow</div>
+        <div class="workflow-step" id="step1">
+          <span class="step-number">1</span>
+          <span class="step-text">Initialize Code Review</span>
+          <span class="step-time"></span>
+        </div>
+        <div class="workflow-step" id="step2">
+          <span class="step-number">2</span>
+          <span class="step-text">Detect SQL Injection</span>
+          <span class="step-time"></span>
+        </div>
+        <div class="workflow-step" id="step3">
+          <span class="step-number">3</span>
+          <span class="step-text">Query Kinic Memory</span>
+          <span class="step-time"></span>
+        </div>
+        <div class="workflow-step" id="step4">
+          <span class="step-number">4</span>
+          <span class="step-text">Escalate to Security</span>
+          <span class="step-time"></span>
+        </div>
+        <div class="workflow-step" id="step5">
+          <span class="step-number">5</span>
+          <span class="step-text">AI-Enhanced Fix</span>
+          <span class="step-time"></span>
+        </div>
+        <div class="workflow-step" id="step6">
+          <span class="step-number">6</span>
+          <span class="step-text">Return Solution</span>
+          <span class="step-time"></span>
+        </div>
+      </div>
+      
+      <!-- Protocol Inspector -->
+      <div class="protocol-inspector">
+        <div class="inspector-title">
+          A2A Protocol Messages
+          <span class="protocol-badge">JSON-RPC 2.0</span>
+        </div>
+        <div id="protocolLog"></div>
+      </div>
+    </main>
+    
+    <footer class="footer">
+      <div class="stats">
+        <span class="stat">Total Messages: <span class="stat-value" id="totalMessages">0</span></span>
+        <span class="stat">Kinic Searches: <span class="stat-value" id="kinicSearches">0</span></span>
+        <span class="stat">Vulnerabilities Found: <span class="stat-value" id="vulnsFound">0</span></span>
+        <span class="stat">Demo Time: <span class="stat-value" id="demoTime">0s</span></span>
+      </div>
+      <div>
+        <span class="stat">Status: <span class="stat-value" id="systemStatus">Ready</span></span>
+      </div>
+    </footer>
+  </div>
+  
+  <script>
+  // DOM Elements
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+  
+  // State
+  let demoRunning = false;
+  let startTime = null;
+  let messageCount = 0;
+  let kinicSearchCount = 0;
+  let vulnerabilityCount = 0;
+  
+  // Update SVG connection paths
+  function updateConnections() {
+    const connections = [
+      { id: 'reviewer-kinic', from: '.reviewer', to: '.kinic' },
+      { id: 'kinic-security', from: '.kinic', to: '.security' },
+      { id: 'reviewer-security', from: '.reviewer', to: '.security' }
+    ];
+    
+    connections.forEach(conn => {
+      const fromEl = $(conn.from);
+      const toEl = $(conn.to);
+      if (!fromEl || !toEl) return;
+      
+      const fromRect = fromEl.getBoundingClientRect();
+      const toRect = toEl.getBoundingClientRect();
+      const svgRect = $('#connections').getBoundingClientRect();
+      
+      const x1 = fromRect.left + fromRect.width / 2 - svgRect.left;
+      const y1 = fromRect.top + fromRect.height / 2 - svgRect.top;
+      const x2 = toRect.left + toRect.width / 2 - svgRect.left;
+      const y2 = toRect.top + toRect.height / 2 - svgRect.top;
+      
+      const path = $(`#${conn.id}`);
+      if (path) {
+        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+      }
+    });
+  }
+  
+  // Create A2A Protocol Message
+  function createA2AMessage(type, from, to, method, params) {
+    return {
+      jsonrpc: "2.0",
+      id: `msg_${++messageCount}`,
+      method: method,
+      params: {
+        task_id: `task_${Date.now()}`,
+        from_agent: from,
+        to_agent: to,
+        task_type: type,
+        ...params
+      }
+    };
+  }
+  
+  // Display protocol message
+  function showProtocolMessage(message, type = 'request') {
+    const log = $('#protocolLog');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'json-display';
+    msgDiv.style.marginBottom = '8px';
+    msgDiv.innerHTML = formatJSON(message);
+    log.insertBefore(msgDiv, log.firstChild);
+    
+    // Keep only last 5 messages
+    while (log.children.length > 5) {
+      log.removeChild(log.lastChild);
+    }
+  }
+  
+  // Format JSON for display
+  function formatJSON(obj) {
+    const json = JSON.stringify(obj, null, 2);
+    return json
+      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+      .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+      .replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
+  }
+  
+  // Animate message between agents
+  async function sendMessage(from, to, text, type = 'task') {
+    const fromEl = $(`.${from}`);
+    const toEl = $(`.${to}`);
+    if (!fromEl || !toEl) return;
+    
+    // Activate connection line
+    const connectionId = `${from}-${to === 'kinic' ? 'kinic' : to === 'security' ? 'security' : 'reviewer'}`;
+    const line = $(`#${connectionId}`);
+    if (line) {
+      line.classList.add('active');
+      setTimeout(() => line.classList.remove('active'), 2000);
+    }
+    
+    // Create message pulse
+    const pulse = document.createElement('div');
+    pulse.className = `message-pulse ${type}`;
+    pulse.textContent = text;
+    $('#stage').appendChild(pulse);
+    
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    
+    pulse.style.left = `${fromRect.left + fromRect.width / 2 - 60}px`;
+    pulse.style.top = `${fromRect.top + fromRect.height / 2 - 20}px`;
+    
+    // Animate to target
+    await new Promise(resolve => {
+      setTimeout(() => {
+        pulse.style.transition = 'all 1s ease-in-out';
+        pulse.style.left = `${toRect.left + toRect.width / 2 - 60}px`;
+        pulse.style.top = `${toRect.top + toRect.height / 2 - 20}px`;
+        
+        setTimeout(() => {
+          pulse.remove();
+          resolve();
+        }, 1000);
+      }, 100);
+    });
+  }
+  
+  // Update workflow step
+  function activateStep(stepNum, timeText = '') {
+    // Deactivate all steps
+    $$('.workflow-step').forEach(step => {
+      step.classList.remove('active');
+      step.querySelector('.step-number').classList.remove('active');
+    });
+    
+    // Activate current step
+    const step = $(`#step${stepNum}`);
+    if (step) {
+      step.classList.add('active');
+      step.querySelector('.step-number').classList.add('active');
+      if (timeText) {
+        step.querySelector('.step-time').textContent = timeText;
+      }
+    }
+    
+    // Mark previous steps as completed
+    for (let i = 1; i < stepNum; i++) {
+      $(`#step${i}`).classList.add('completed');
+    }
+  }
+  
+  // Run the demo workflow
+  async function runDemo() {
+    if (demoRunning) return;
+    demoRunning = true;
+    startTime = Date.now();
+    
+    $('#systemStatus').textContent = 'Running Demo';
+    $('#runDemo').disabled = true;
+    
+    // Reset metrics
+    messageCount = 0;
+    kinicSearchCount = 0;
+    vulnerabilityCount = 0;
+    
+    // Step 1: Initialize Code Review
+    activateStep(1, '0s');
+    $('#reviewer-status').textContent = 'Active';
+    
+    const initMessage = createA2AMessage(
+      'code_review',
+      'user',
+      'code_reviewer',
+      'review_pull_request',
+      {
+        pr_id: 'PR-123',
+        code: 'def authenticate_user(username, password)...',
+        check_security: true
+      }
+    );
+    showProtocolMessage(initMessage);
+    await sendMessage('reviewer', 'kinic', 'Initialize Review');
+    $('#reviewer-tasks').textContent = '1';
+    $('#reviewer-latency').textContent = '45ms';
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Step 2: Detect SQL Injection
+    activateStep(2, '1.5s');
+    vulnerabilityCount = 1;
+    $('#vulnsFound').textContent = vulnerabilityCount;
+    $('#reviewer-status').textContent = 'Analyzing';
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Step 3: Query Kinic Memory
+    activateStep(3, '2.5s');
+    $('#kinic-queries').textContent = '1';
+    kinicSearchCount++;
+    $('#kinicSearches').textContent = kinicSearchCount;
+    
+    const kinicQuery = createA2AMessage(
+      'semantic_search',
+      'code_reviewer',
+      'kinic',
+      'search_and_retrieve',
+      {
+        query: 'SQL injection prevention secure coding practices',
+        context: 'python_security'
+      }
+    );
+    showProtocolMessage(kinicQuery);
+    await sendMessage('reviewer', 'kinic', 'Security Query');
+    $('#kinic-latency').textContent = '120ms';
+    $('#kinic-docs').textContent = '5';
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Step 4: Escalate to Security
+    activateStep(4, '4s');
+    $('#security-status').textContent = 'Active';
+    
+    const escalation = createA2AMessage(
+      'security_review',
+      'code_reviewer',
+      'security_specialist',
+      'execute_task',
+      {
+        vulnerability_type: 'sql_injection',
+        severity: 'HIGH',
+        code_snippet: 'query = f"SELECT * FROM users WHERE..."',
+        kinic_context: 'http://localhost:5006/search-results/sql-injection'
+      }
+    );
+    showProtocolMessage(escalation);
+    await sendMessage('reviewer', 'security', 'TaskRequest');
+    await sendMessage('kinic', 'security', 'Context');
+    $('#security-vulns').textContent = '1';
+    $('#security-severity').textContent = 'HIGH';
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Step 5: AI-Enhanced Fix
+    activateStep(5, '6s');
+    $('#security-status').textContent = 'Generating Fix';
+    kinicSearchCount++;
+    $('#kinicSearches').textContent = kinicSearchCount;
+    $('#kinic-queries').textContent = '2';
+    
+    const aiExtraction = createA2AMessage(
+      'ai_extraction',
+      'security_specialist',
+      'kinic',
+      'search_ai_extract',
+      {
+        query: 'Fix Python SQL injection with parameterized queries',
+        vulnerability: 'CWE-89',
+        generate_code: true
+      }
+    );
+    showProtocolMessage(aiExtraction);
+    await sendMessage('security', 'kinic', 'AI Extract');
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Step 6: Return Solution
+    activateStep(6, '7.5s');
+    
+    const response = {
+      jsonrpc: "2.0",
+      result: {
+        task_id: 'task_completed',
+        status: 'completed',
+        vulnerability_confirmed: true,
+        severity: 'CRITICAL',
+        fixed_code: 'query = "SELECT * FROM users WHERE name=? AND pass=?"\nresult = db.execute(query, (username, password))',
+        remediation_steps: [
+          'Use parameterized queries',
+          'Input validation',
+          'Prepared statements'
+        ]
+      },
+      id: `msg_${messageCount}`
+    };
+    showProtocolMessage(response, 'response');
+    await sendMessage('security', 'reviewer', 'TaskResponse', 'response');
+    
+    $('#security-status').textContent = 'Complete';
+    $('#reviewer-status').textContent = 'Fixed';
+    $('#reviewer-tasks').textContent = '2';
+    
+    // Complete
+    $('#systemStatus').textContent = 'Demo Complete';
+    $('#runDemo').disabled = false;
+    demoRunning = false;
+  }
+  
+  // Update demo timer
+  setInterval(() => {
+    if (demoRunning && startTime) {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      $('#demoTime').textContent = `${elapsed}s`;
+    }
+    $('#totalMessages').textContent = messageCount;
+  }, 100);
+  
+  // Event listeners
+  $('#runDemo').addEventListener('click', runDemo);
+  $('#resetBtn').addEventListener('click', () => {
+    location.reload();
+  });
+  
+  // Initialize connections
+  window.addEventListener('load', updateConnections);
+  window.addEventListener('resize', updateConnections);
+  
+  // Initial setup
+  updateConnections();
+  </script>
+</body>
+</html>
