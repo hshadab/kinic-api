@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kinic: Solving Context Overload with Semantic Memory</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --bg-soft: #0e141b;
+      --fg: #e7ecf2;
+      --muted: #7a8a9c;
+      --primary: #6dd3ff;
+      --accent: #a48fff;
+      --kinic: #4ef6b2;
+      --danger: #ff6b6b;
+      --warning: #ffc146;
+      --success: #4ef6b2;
+      --card-bg: rgba(255,255,255,0.05);
+      --shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--fg);
+      background: linear-gradient(135deg, #0b0f14 0%, #0e141b 50%, #0b0f14 100%);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      position: relative;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #4ef6b2, #6dd3ff);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 60px rgba(78, 246, 178, 0.4);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #4ef6b2, #6dd3ff, #a48fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.4rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    .demo-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 60px;
+    }
+
+    .demo-side {
+      position: relative;
+      min-height: 600px;
+    }
+
+    .demo-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge-danger { background: var(--danger); color: white; }
+    .badge-success { background: var(--success); color: #0b0f14; }
+
+    .ai-brain {
+      width: 100%;
+      height: 400px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .brain-icon {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      position: relative;
+    }
+
+    .context-items {
+      position: absolute;
+      inset: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding-top: 140px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .context-item {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.5s ease-out forwards;
+      opacity: 0;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .context-item.relevant {
+      background: linear-gradient(135deg, rgba(78, 246, 178, 0.2), rgba(109, 211, 255, 0.1));
+      border-color: var(--kinic);
+      box-shadow: 0 0 20px rgba(78, 246, 178, 0.3);
+    }
+
+    .context-item.irrelevant {
+      opacity: 0.4;
+      border-color: rgba(255,255,255,0.05);
+    }
+
+    .tag {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .tag-db { background: #3b82f6; }
+    .tag-api { background: #a855f7; }
+    .tag-doc { background: #f59e0b; }
+    .tag-log { background: #ef4444; }
+    .tag-config { background: #10b981; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .overload-indicator {
+      width: 100%;
+      height: 40px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      margin-top: 20px;
+    }
+
+    .overload-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success), var(--warning), var(--danger));
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      color: white;
+      font-weight: 600;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.05);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: var(--fg);
+      font-size: 1rem;
+      margin-bottom: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: var(--kinic);
+      box-shadow: 0 0 30px rgba(78, 246, 178, 0.3);
+    }
+
+    .search-box::placeholder {
+      color: var(--muted);
+    }
+
+    .vector-visualization {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      pointer-events: none;
+    }
+
+    .vector-point {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+      transition: all 0.5s ease;
+    }
+
+    .vector-point.highlight {
+      width: 12px;
+      height: 12px;
+      background: var(--kinic);
+      box-shadow: 0 0 20px var(--kinic);
+      z-index: 10;
+    }
+
+    .vector-line {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--kinic), transparent);
+      transform-origin: left center;
+      opacity: 0;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.6; }
+    }
+
+    .controls {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 40px 0;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(109, 211, 255, 0.3);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(109, 211, 255, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--card-bg);
+      color: var(--fg);
+      border: 2px solid rgba(255,255,255,0.2);
+      box-shadow: none;
+    }
+
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 60px;
+    }
+
+    .info-card {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--kinic);
+      box-shadow: 0 20px 40px rgba(78, 246, 178, 0.2);
+    }
+
+    .info-card h3 {
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+      color: var(--primary);
+    }
+
+    .info-card p {
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .comparison-table {
+      width: 100%;
+      margin-top: 40px;
+      border-collapse: collapse;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .comparison-table th {
+      background: rgba(255,255,255,0.05);
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .comparison-table tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    .check { color: var(--success); }
+    .cross { color: var(--danger); }
+
+    @media (max-width: 768px) {
+      .demo-container {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .subtitle {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <svg width="50" height="50" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="3" opacity="0.8"/>
+          <circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>
+          <circle cx="50" cy="50" r="20" fill="none" stroke="white" stroke-width="2" opacity="0.4"/>
+          <circle cx="50" cy="50" r="8" fill="white"/>
+        </svg>
+      </div>
+      <h1>Kinic Solves Context Overload</h1>
+      <p class="subtitle">Semantic Vector Memory vs Traditional Context Stuffing</p>
+    </div>
+
+    <div class="demo-container">
+      <!-- Traditional Approach -->
+      <div class="demo-side">
+        <h2 class="demo-title">
+          Traditional Context Stuffing
+          <span class="badge badge-danger">Problem</span>
+        </h2>
+        
+        <div class="ai-brain">
+          <div class="brain-icon">🧠</div>
+          <div class="context-items" id="traditionalContext">
+            <!-- Items will be added dynamically -->
+          </div>
+        </div>
+
+        <div class="overload-indicator">
+          <div class="overload-bar" id="traditionalBar" style="width: 0%">
+            <span id="traditionalPercent">0%</span>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-value" id="traditionalTokens">0</div>
+            <div class="stat-label">Tokens Used</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="traditionalRelevant">0%</div>
+            <div class="stat-label">Relevant</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="traditionalSpeed">0ms</div>
+            <div class="stat-label">Response Time</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kinic Approach -->
+      <div class="demo-side">
+        <h2 class="demo-title">
+          Kinic Semantic Search
+          <span class="badge badge-success">Solution</span>
+        </h2>
+        
+        <input type="text" class="search-box" placeholder="🔍 Search: 'authentication problems'" id="kinicSearch">
+        
+        <div class="ai-brain" style="position: relative;">
+          <div class="brain-icon">✨</div>
+          <div class="vector-visualization" id="vectorSpace">
+            <!-- Vector points will be added dynamically -->
+          </div>
+          <div class="context-items" id="kinicContext">
+            <!-- Items will be added dynamically -->
+          </div>
+        </div>
+
+        <div class="overload-indicator">
+          <div class="overload-bar" id="kinicBar" style="width: 0%; background: linear-gradient(90deg, var(--success), var(--kinic));">
+            <span id="kinicPercent">0%</span>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-value" id="kinicTokens">0</div>
+            <div class="stat-label">Tokens Used</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="kinicRelevant">100%</div>
+            <div class="stat-label">Relevant</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="kinicSpeed">0ms</div>
+            <div class="stat-label">Response Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="startDemo()">Start Live Demo</button>
+      <button class="btn btn-secondary" onclick="resetDemo()">Reset</button>
+      <button class="btn btn-secondary" onclick="showComparison()">Show Comparison</button>
+    </div>
+
+    <div class="info-cards">
+      <div class="info-card">
+        <h3>🎯 Semantic Understanding</h3>
+        <p>Kinic converts content into high-dimensional vectors, understanding meaning not just keywords. When you search for "authentication problems", it finds OAuth flows, JWT issues, and session bugs - even without exact matches.</p>
+      </div>
+      
+      <div class="info-card">
+        <h3>⚡ Just-in-Time Retrieval</h3>
+        <p>Instead of dumping everything into limited context, Kinic retrieves only what's semantically relevant. Your AI gets exactly what it needs, when it needs it, without the noise.</p>
+      </div>
+      
+      <div class="info-card">
+        <h3>🔄 Knowledge Compounds</h3>
+        <p>Every piece of information makes the entire system smarter. Unlike traditional context that resets, Kinic's vector database builds relationships that strengthen over time.</p>
+      </div>
+    </div>
+
+    <table class="comparison-table" id="comparisonTable" style="display: none;">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Traditional Context</th>
+          <th>Kinic Vector Memory</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Context Limit</td>
+          <td><span class="cross">❌</span> 200k tokens max</td>
+          <td><span class="check">✅</span> Unlimited storage</td>
+        </tr>
+        <tr>
+          <td>Relevance</td>
+          <td><span class="cross">❌</span> Everything dumped in</td>
+          <td><span class="check">✅</span> Only semantically relevant</td>
+        </tr>
+        <tr>
+          <td>Understanding</td>
+          <td><span class="cross">❌</span> Keyword matching</td>
+          <td><span class="check">✅</span> Semantic relationships</td>
+        </tr>
+        <tr>
+          <td>Persistence</td>
+          <td><span class="cross">❌</span> Resets each session</td>
+          <td><span class="check">✅</span> Permanent memory</td>
+        </tr>
+        <tr>
+          <td>Performance</td>
+          <td><span class="cross">❌</span> Slower with more context</td>
+          <td><span class="check">✅</span> Consistent speed</td>
+        </tr>
+        <tr>
+          <td>Discovery</td>
+          <td><span class="cross">❌</span> Manual organization</td>
+          <td><span class="check">✅</span> Automatic relationships</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Sample data representing different types of information
+    const allData = [
+      { text: "User authentication flow documentation", tags: ["doc"], relevant: true },
+      { text: "Database schema for products table", tags: ["db"], relevant: false },
+      { text: "OAuth 2.0 implementation guide", tags: ["doc"], relevant: true },
+      { text: "Quarterly sales report Q3 2024", tags: ["doc"], relevant: false },
+      { text: "JWT token expiration handling", tags: ["api"], relevant: true },
+      { text: "Marketing campaign analytics", tags: ["doc"], relevant: false },
+      { text: "Session management best practices", tags: ["doc"], relevant: true },
+      { text: "Inventory management API endpoints", tags: ["api"], relevant: false },
+      { text: "CORS configuration for auth endpoints", tags: ["config"], relevant: true },
+      { text: "Customer support ticket #12345", tags: ["log"], relevant: false },
+      { text: "Rate limiting for login attempts", tags: ["config"], relevant: true },
+      { text: "Product recommendation algorithm", tags: ["api"], relevant: false },
+      { text: "Password reset flow implementation", tags: ["api"], relevant: true },
+      { text: "Monthly revenue calculations", tags: ["db"], relevant: false },
+      { text: "Two-factor authentication setup", tags: ["doc"], relevant: true },
+      { text: "Shipping cost calculator logic", tags: ["api"], relevant: false },
+      { text: "Refresh token rotation strategy", tags: ["doc"], relevant: true },
+      { text: "Email template for newsletters", tags: ["doc"], relevant: false },
+      { text: "SQL injection prevention in auth", tags: ["config"], relevant: true },
+      { text: "Product image optimization rules", tags: ["config"], relevant: false },
+    ];
+
+    let traditionalItems = [];
+    let kinicItems = [];
+    let demoRunning = false;
+
+    function createContextItem(data, delay = 0) {
+      const item = document.createElement('div');
+      item.className = 'context-item';
+      if (data.relevant) {
+        item.classList.add('relevant');
+      } else {
+        item.classList.add('irrelevant');
+      }
+      item.style.animationDelay = `${delay}ms`;
+      
+      const tagHtml = data.tags.map(tag => 
+        `<span class="tag tag-${tag}">${tag}</span>`
+      ).join('');
+      
+      item.innerHTML = `${tagHtml} ${data.text}`;
+      return item;
+    }
+
+    function updateStats(side, tokens, relevant, speed) {
+      if (side === 'traditional') {
+        document.getElementById('traditionalTokens').textContent = tokens.toLocaleString();
+        document.getElementById('traditionalRelevant').textContent = relevant + '%';
+        document.getElementById('traditionalSpeed').textContent = speed + 'ms';
+        
+        const percent = Math.min((tokens / 200000) * 100, 100);
+        document.getElementById('traditionalBar').style.width = percent + '%';
+        document.getElementById('traditionalPercent').textContent = Math.round(percent) + '%';
+      } else {
+        document.getElementById('kinicTokens').textContent = tokens.toLocaleString();
+        document.getElementById('kinicRelevant').textContent = relevant + '%';
+        document.getElementById('kinicSpeed').textContent = speed + 'ms';
+        
+        const percent = (tokens / 200000) * 100;
+        document.getElementById('kinicBar').style.width = Math.min(percent * 10, 30) + '%';
+        document.getElementById('kinicPercent').textContent = Math.round(percent) + '%';
+      }
+    }
+
+    function createVectorVisualization() {
+      const container = document.getElementById('vectorSpace');
+      container.innerHTML = '';
+      
+      // Create vector points
+      for (let i = 0; i < 20; i++) {
+        const point = document.createElement('div');
+        point.className = 'vector-point';
+        
+        const angle = (i / 20) * Math.PI * 2;
+        const radius = 80 + Math.random() * 60;
+        const x = 150 + Math.cos(angle) * radius;
+        const y = 150 + Math.sin(angle) * radius;
+        
+        point.style.left = x + 'px';
+        point.style.top = y + 'px';
+        
+        if (i < 8) {
+          point.classList.add('highlight');
+        }
+        
+        container.appendChild(point);
+      }
+      
+      // Create connection lines
+      const highlights = container.querySelectorAll('.highlight');
+      highlights.forEach((point, i) => {
+        if (i < highlights.length - 1) {
+          const line = document.createElement('div');
+          line.className = 'vector-line';
+          
+          const x1 = parseFloat(point.style.left);
+          const y1 = parseFloat(point.style.top);
+          const x2 = parseFloat(highlights[i + 1].style.left);
+          const y2 = parseFloat(highlights[i + 1].style.top);
+          
+          const distance = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+          const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+          
+          line.style.width = distance + 'px';
+          line.style.left = x1 + 'px';
+          line.style.top = y1 + 'px';
+          line.style.transform = `rotate(${angle}deg)`;
+          
+          container.appendChild(line);
+        }
+      });
+    }
+
+    async function startDemo() {
+      if (demoRunning) return;
+      demoRunning = true;
+      
+      resetDemo();
+      
+      // Traditional approach - dump everything
+      const traditionalContainer = document.getElementById('traditionalContext');
+      let traditionalTokenCount = 0;
+      let traditionalDelay = 0;
+      
+      for (let i = 0; i < allData.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        const item = createContextItem(allData[i], traditionalDelay);
+        traditionalContainer.appendChild(item);
+        traditionalItems.push(item);
+        
+        traditionalTokenCount += Math.floor(allData[i].text.length * 1.3);
+        traditionalDelay += 50;
+        
+        const relevantCount = allData.slice(0, i + 1).filter(d => d.relevant).length;
+        const relevantPercent = Math.round((relevantCount / (i + 1)) * 100);
+        const responseTime = 50 + (i + 1) * 25;
+        
+        updateStats('traditional', traditionalTokenCount, relevantPercent, responseTime);
+      }
+      
+      // Kinic approach - semantic search
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      document.getElementById('kinicSearch').value = 'authentication problems';
+      createVectorVisualization();
+      
+      const kinicContainer = document.getElementById('kinicContext');
+      const relevantData = allData.filter(d => d.relevant);
+      let kinicTokenCount = 0;
+      let kinicDelay = 0;
+      
+      for (let i = 0; i < relevantData.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        const item = createContextItem(relevantData[i], kinicDelay);
+        kinicContainer.appendChild(item);
+        kinicItems.push(item);
+        
+        kinicTokenCount += Math.floor(relevantData[i].text.length * 1.3);
+        kinicDelay += 50;
+        
+        updateStats('kinic', kinicTokenCount, 100, 45);
+      }
+      
+      demoRunning = false;
+    }
+
+    function resetDemo() {
+      document.getElementById('traditionalContext').innerHTML = '';
+      document.getElementById('kinicContext').innerHTML = '';
+      document.getElementById('vectorSpace').innerHTML = '';
+      document.getElementById('kinicSearch').value = '';
+      
+      traditionalItems = [];
+      kinicItems = [];
+      
+      updateStats('traditional', 0, 0, 0);
+      updateStats('kinic', 0, 100, 0);
+      
+      demoRunning = false;
+    }
+
+    function showComparison() {
+      const table = document.getElementById('comparisonTable');
+      table.style.display = table.style.display === 'none' ? 'table' : 'none';
+      
+      if (table.style.display === 'table') {
+        table.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // Auto-start demo on load
+    window.addEventListener('load', () => {
+      setTimeout(() => startDemo(), 1000);
+    });
+  </script>
+</body>
+</html>
