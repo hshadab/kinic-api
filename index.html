@@ -109,42 +109,92 @@
       top: 50%;
       left: 50%;
       width: 280px;
-      height: 220px;
+      height: 240px;
       transform: translate(-50%, -50%);
       background: 
-        radial-gradient(ellipse at 35% 40%, rgba(255, 121, 198, 0.15), transparent 30%),
-        radial-gradient(ellipse at 65% 40%, rgba(189, 147, 249, 0.15), transparent 30%),
-        radial-gradient(ellipse at 30% 70%, rgba(100, 255, 218, 0.2), transparent 40%),
-        radial-gradient(ellipse at 70% 70%, rgba(139, 233, 253, 0.2), transparent 40%),
-        radial-gradient(ellipse at 50% 50%, rgba(100, 255, 218, 0.1), transparent 70%);
-      border-radius: 50% 50% 60% 60% / 60% 60% 40% 40%;
-      filter: blur(0.3px);
+        /* Frontal lobe highlights */
+        radial-gradient(ellipse 100px 60px at 40% 30%, rgba(255, 182, 193, 0.25), transparent),
+        radial-gradient(ellipse 100px 60px at 60% 30%, rgba(255, 218, 185, 0.25), transparent),
+        /* Temporal lobes */
+        radial-gradient(ellipse 80px 50px at 20% 60%, rgba(186, 147, 249, 0.3), transparent),
+        radial-gradient(ellipse 80px 50px at 80% 60%, rgba(186, 147, 249, 0.3), transparent),
+        /* Occipital lobe */
+        radial-gradient(ellipse 120px 40px at 50% 85%, rgba(100, 255, 218, 0.35), transparent),
+        /* Base color */
+        radial-gradient(ellipse at 50% 50%, rgba(255, 192, 203, 0.15), rgba(255, 182, 193, 0.1) 70%);
+      
+      /* Brain-like shape */
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      
+      /* Wrinkled texture effect */
       box-shadow: 
-        0 0 120px rgba(100, 255, 218, 0.6),
-        inset 0 -20px 60px rgba(189, 147, 249, 0.3),
-        inset 0 20px 60px rgba(255, 121, 198, 0.2),
-        inset -30px 0 40px rgba(100, 255, 218, 0.2),
-        inset 30px 0 40px rgba(139, 233, 253, 0.2);
-      animation: brainPulse 4s ease-in-out infinite;
+        /* Glow */
+        0 0 100px rgba(255, 192, 203, 0.4),
+        /* Gyri and sulci shadows */
+        inset 3px -5px 15px rgba(139, 69, 19, 0.2),
+        inset -3px -5px 15px rgba(139, 69, 19, 0.2),
+        inset 0 10px 20px rgba(255, 192, 203, 0.2),
+        inset -15px 0 25px rgba(186, 147, 249, 0.15),
+        inset 15px 0 25px rgba(186, 147, 249, 0.15),
+        inset 0 -15px 30px rgba(100, 255, 218, 0.2);
+      
+      animation: brainPulse 5s ease-in-out infinite;
       position: relative;
     }
 
+    /* Central fissure */
     .brain-core::before {
       content: '';
       position: absolute;
-      top: 50%;
+      top: 10%;
       left: 50%;
-      width: 2px;
+      width: 3px;
       height: 80%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(180deg, transparent, rgba(100, 255, 218, 0.3), transparent);
+      transform: translateX(-50%);
+      background: 
+        linear-gradient(180deg, 
+          transparent,
+          rgba(139, 69, 19, 0.1) 20%,
+          rgba(139, 69, 19, 0.15) 50%,
+          rgba(139, 69, 19, 0.1) 80%,
+          transparent);
       border-radius: 50%;
+      filter: blur(1px);
       animation: brainDivide 6s ease-in-out infinite;
     }
 
-    @keyframes brainDivide {
+    /* Brain wrinkles/gyri */
+    .brain-core::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        repeating-linear-gradient(45deg, 
+          transparent,
+          transparent 10px,
+          rgba(139, 69, 19, 0.05) 10px,
+          rgba(139, 69, 19, 0.05) 11px),
+        repeating-linear-gradient(-45deg, 
+          transparent,
+          transparent 12px,
+          rgba(186, 147, 249, 0.05) 12px,
+          rgba(186, 147, 249, 0.05) 13px);
+      border-radius: inherit;
+      opacity: 0.5;
+      animation: brainTexture 10s ease-in-out infinite;
+    }
+
+    @keyframes brainTexture {
       0%, 100% { opacity: 0.3; }
       50% { opacity: 0.6; }
+    }
+
+    @keyframes brainDivide {
+      0%, 100% { opacity: 0.3; transform: translateX(-50%) scaleY(0.95); }
+      50% { opacity: 0.5; transform: translateX(-50%) scaleY(1); }
     }
 
     @keyframes brainPulse {
@@ -342,11 +392,26 @@
       fill: none;
       stroke-dasharray: 5, 5;
       animation: tendrilFlow 2s linear infinite;
+      filter: drop-shadow(0 0 3px currentColor);
+      opacity: 0.6;
+      transition: all 0.3s ease;
+    }
+
+    .tendril-path.active {
+      stroke-width: 3;
+      opacity: 1;
+      filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 15px currentColor);
+      animation: tendrilGlow 0.5s ease-in-out;
     }
 
     @keyframes tendrilFlow {
       from { stroke-dashoffset: 0; }
       to { stroke-dashoffset: -10; }
+    }
+
+    @keyframes tendrilGlow {
+      0%, 100% { stroke-width: 3; }
+      50% { stroke-width: 5; }
     }
 
     /* Data Particles */
@@ -539,6 +604,83 @@
     <button class="btn" id="speedBtn">Speed: Normal</button>
   </div>
 
+  <!-- User Input Interface -->
+  <div class="command-interface">
+    <input type="text" id="commandInput" class="command-input" placeholder="Enter command: e.g., 'researcher analyze data' or 'all agents sync'" />
+    <button class="btn execute-btn" id="executeBtn">Execute</button>
+    <div class="command-hints">
+      <span class="hint">Try: "researcher discover patterns" | "builder create solution" | "all sync"</span>
+    </div>
+  </div>
+
+  <style>
+    .command-interface {
+      position: absolute;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      z-index: 200;
+      background: rgba(10, 14, 39, 0.8);
+      border: 1px solid rgba(100, 255, 218, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .command-input {
+      width: calc(100% - 100px);
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(100, 255, 218, 0.3);
+      border-radius: 8px;
+      color: #64ffda;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.3s ease;
+    }
+
+    .command-input:focus {
+      outline: none;
+      border-color: #64ffda;
+      box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .command-input::placeholder {
+      color: #8892b0;
+      font-style: italic;
+    }
+
+    .execute-btn {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #64ffda, #00ff88);
+      color: #0a0e27;
+      font-weight: 700;
+    }
+
+    .execute-btn:hover {
+      box-shadow: 0 0 30px rgba(100, 255, 218, 0.5);
+    }
+
+    .command-hints {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #8892b0;
+      text-align: center;
+    }
+
+    .hint {
+      background: rgba(100, 255, 218, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(100, 255, 218, 0.2);
+    }
+  </style>
+
   <div class="main-container">
     <div class="brain-container">
       <!-- Central Brain Core -->
@@ -726,7 +868,8 @@
       path.setAttribute('class', 'tendril-path');
       path.setAttribute('stroke', color);
       path.setAttribute('id', `tendril-${agentId}`);
-      path.style.opacity = '0.3';
+      path.style.opacity = '0.6';
+      path.style.filter = `drop-shadow(0 0 5px ${color})`;
       
       svg.appendChild(path);
     }
@@ -777,15 +920,14 @@
       
       animate();
       
-      // Highlight tendril with glow effect
+      // Highlight tendril with enhanced glow effect
       const tendril = document.getElementById(`tendril-${agentId}`);
-      tendril.style.opacity = '1';
-      tendril.style.strokeWidth = '3';
-      tendril.style.filter = `drop-shadow(0 0 10px ${agentData.color})`;
+      tendril.classList.add('active');
+      tendril.style.filter = `drop-shadow(0 0 15px ${agentData.color}) drop-shadow(0 0 25px ${agentData.color})`;
+      
       setTimeout(() => {
-        tendril.style.opacity = '0.3';
-        tendril.style.strokeWidth = '2';
-        tendril.style.filter = 'none';
+        tendril.classList.remove('active');
+        tendril.style.filter = `drop-shadow(0 0 5px ${agentData.color})`;
       }, duration);
       
       // Update agent metrics
@@ -901,6 +1043,108 @@
 
     // Periodic stats update
     setInterval(updateStats, 5000);
+    
+    // Command System
+    const commands = {
+      'researcher': ['discover', 'analyze', 'find', 'search', 'retrieve'],
+      'builder': ['create', 'build', 'synthesize', 'compile', 'construct'],
+      'analyzer': ['compute', 'extract', 'process', 'evaluate', 'measure'],
+      'security': ['validate', 'encrypt', 'secure', 'audit', 'protect'],
+      'orchestrator': ['coordinate', 'manage', 'organize', 'direct', 'sync'],
+      'connector': ['link', 'connect', 'bridge', 'integrate', 'establish']
+    };
+    
+    function executeCommand(input) {
+      const words = input.toLowerCase().trim().split(' ');
+      
+      // Check for "all" commands
+      if (words.includes('all') && (words.includes('sync') || words.includes('synchronize'))) {
+        // Sync all agents
+        agents.forEach((agent, i) => {
+          setTimeout(() => {
+            animateParticle(agent.id, true);
+            setTimeout(() => animateParticle(agent.id, false), 1500);
+          }, i * 300);
+        });
+        addLogEntry({ agent: 'System', action: 'synchronized all agents', target: 'with central brain' });
+        createKnowledgeBurst();
+        return true;
+      }
+      
+      // Check for specific agent commands
+      for (const [agentId, actions] of Object.entries(commands)) {
+        if (words.includes(agentId) || words.includes(agents.find(a => a.id === agentId)?.name.toLowerCase())) {
+          for (const action of actions) {
+            if (words.includes(action)) {
+              // Execute agent action
+              animateParticle(agentId, true);
+              setTimeout(() => animateParticle(agentId, false), 1500);
+              
+              const agent = agents.find(a => a.id === agentId);
+              addLogEntry({ 
+                agent: agent.name, 
+                action: action + ' command executed', 
+                target: words.slice(words.indexOf(action) + 1).join(' ') || 'neural network'
+              });
+              
+              return true;
+            }
+          }
+        }
+      }
+      
+      return false;
+    }
+    
+    // Input handling
+    const commandInput = document.getElementById('commandInput');
+    const executeBtn = document.getElementById('executeBtn');
+    
+    function handleCommand() {
+      const input = commandInput.value;
+      if (input.trim()) {
+        if (executeCommand(input)) {
+          commandInput.style.borderColor = '#50fa7b';
+          setTimeout(() => {
+            commandInput.style.borderColor = 'rgba(100, 255, 218, 0.3)';
+          }, 1000);
+        } else {
+          commandInput.style.borderColor = '#ff5555';
+          setTimeout(() => {
+            commandInput.style.borderColor = 'rgba(100, 255, 218, 0.3)';
+          }, 1000);
+        }
+        commandInput.value = '';
+      }
+    }
+    
+    executeBtn.addEventListener('click', handleCommand);
+    commandInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        handleCommand();
+      }
+    });
+    
+    // Modified addLogEntry to accept custom entries
+    function addLogEntry(customActivity = null) {
+      const log = document.getElementById('logEntries');
+      const activity = customActivity || activities[Math.floor(Math.random() * activities.length)];
+      
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <span class="agent-name">${activity.agent}</span>
+        <span class="action"> ${activity.action}</span>
+        <span> ${activity.target}</span>
+      `;
+      
+      log.insertBefore(entry, log.firstChild);
+      
+      // Keep only last 5 entries
+      while (log.children.length > 5) {
+        log.removeChild(log.lastChild);
+      }
+    }
   </script>
 </body>
 </html>
