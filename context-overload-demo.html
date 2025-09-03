@@ -52,16 +52,12 @@
     }
 
     .logo {
-      width: 80px;
-      height: 80px;
+      width: 120px;
+      height: 50px;
       margin: 0 auto 20px;
-      background: linear-gradient(135deg, #00ff88, #64ffda, #8be9fd);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--glow) rgba(0, 255, 136, 0.5);
-      animation: float 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(0, 255, 136, 0.5));
+      animation: float 3s ease-in-out infinite;
     }
 
     @keyframes float {
@@ -69,19 +65,16 @@
       50% { transform: translateY(-10px); }
     }
 
-    @keyframes pulse-glow {
-      0%, 100% { box-shadow: var(--glow) rgba(0, 255, 136, 0.5); }
-      50% { box-shadow: var(--glow) rgba(100, 255, 218, 0.8); }
-    }
 
     h1 {
-      font-size: 3rem;
+      font-size: 2.5rem;
       font-weight: 800;
       background: linear-gradient(135deg, #00ff88, #64ffda, #f06292, #bd93f9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 10px;
+      margin-top: -10px;
       filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.3));
     }
 
@@ -526,15 +519,8 @@
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">
-        <svg width="50" height="50" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="40" fill="none" stroke="white" stroke-width="3" opacity="0.8"/>
-          <circle cx="50" cy="50" r="30" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>
-          <circle cx="50" cy="50" r="20" fill="none" stroke="white" stroke-width="2" opacity="0.4"/>
-          <circle cx="50" cy="50" r="8" fill="white"/>
-        </svg>
-      </div>
-      <h1>Kinic Solves Context Overload</h1>
+      <img src="https://cdn.prod.website-files.com/6712749157ea3bf4a781f309/671bbee00d9198b08a63cb40_kinic-logo.svg" alt="Kinic" class="logo">
+      <h1>Solves Context Overload</h1>
       <p class="subtitle">Semantic Vector Memory vs Traditional Context Stuffing</p>
     </div>
 
