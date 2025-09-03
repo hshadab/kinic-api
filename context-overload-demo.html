@@ -6,18 +6,23 @@
   <title>Kinic: Solving Context Overload with Semantic Memory</title>
   <style>
     :root {
-      --bg: #0b0f14;
-      --bg-soft: #0e141b;
-      --fg: #e7ecf2;
-      --muted: #7a8a9c;
-      --primary: #6dd3ff;
-      --accent: #a48fff;
-      --kinic: #4ef6b2;
-      --danger: #ff6b6b;
-      --warning: #ffc146;
-      --success: #4ef6b2;
-      --card-bg: rgba(255,255,255,0.05);
-      --shadow: 0 20px 60px rgba(0,0,0,0.4);
+      --bg: #0a0e27;
+      --bg-soft: #0f1538;
+      --fg: #ffffff;
+      --muted: #8892b0;
+      --primary: #64ffda;
+      --accent: #f06292;
+      --kinic: #00ff88;
+      --danger: #ff5555;
+      --warning: #ffb86c;
+      --success: #50fa7b;
+      --purple: #bd93f9;
+      --cyan: #8be9fd;
+      --pink: #ff79c6;
+      --yellow: #f1fa8c;
+      --card-bg: rgba(255,255,255,0.03);
+      --shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      --glow: 0 0 40px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,7 +30,11 @@
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       color: var(--fg);
-      background: linear-gradient(135deg, #0b0f14 0%, #0e141b 50%, #0b0f14 100%);
+      background: 
+        radial-gradient(ellipse at top left, rgba(100, 255, 218, 0.1), transparent 50%),
+        radial-gradient(ellipse at top right, rgba(240, 98, 146, 0.1), transparent 50%),
+        radial-gradient(ellipse at bottom, rgba(139, 233, 253, 0.1), transparent 50%),
+        linear-gradient(135deg, #0a0e27 0%, #0f1538 50%, #0a0e27 100%);
       overflow-x: hidden;
       min-height: 100vh;
     }
@@ -46,13 +55,13 @@
       width: 80px;
       height: 80px;
       margin: 0 auto 20px;
-      background: linear-gradient(135deg, #4ef6b2, #6dd3ff);
+      background: linear-gradient(135deg, #00ff88, #64ffda, #8be9fd);
       border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 60px rgba(78, 246, 178, 0.4);
-      animation: float 3s ease-in-out infinite;
+      box-shadow: var(--glow) rgba(0, 255, 136, 0.5);
+      animation: float 3s ease-in-out infinite, pulse-glow 2s ease-in-out infinite;
     }
 
     @keyframes float {
@@ -60,14 +69,20 @@
       50% { transform: translateY(-10px); }
     }
 
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: var(--glow) rgba(0, 255, 136, 0.5); }
+      50% { box-shadow: var(--glow) rgba(100, 255, 218, 0.8); }
+    }
+
     h1 {
       font-size: 3rem;
       font-weight: 800;
-      background: linear-gradient(135deg, #4ef6b2, #6dd3ff, #a48fff);
+      background: linear-gradient(135deg, #00ff88, #64ffda, #f06292, #bd93f9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 10px;
+      filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.3));
     }
 
     .subtitle {
@@ -105,19 +120,32 @@
       text-transform: uppercase;
     }
 
-    .badge-danger { background: var(--danger); color: white; }
-    .badge-success { background: var(--success); color: #0b0f14; }
+    .badge-danger { 
+      background: linear-gradient(135deg, #ff5555, #ff79c6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 85, 85, 0.4);
+    }
+    .badge-success { 
+      background: linear-gradient(135deg, #50fa7b, #00ff88);
+      color: #0a0e27;
+      box-shadow: 0 4px 15px rgba(80, 250, 123, 0.4);
+    }
 
     .ai-brain {
       width: 100%;
       height: 400px;
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: 
+        radial-gradient(ellipse at center, rgba(100, 255, 218, 0.02), transparent 70%),
+        var(--card-bg);
+      border: 1px solid rgba(100, 255, 218, 0.2);
       border-radius: 20px;
       padding: 30px;
       position: relative;
       overflow: hidden;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(20px) saturate(1.5);
+      box-shadow: 
+        inset 0 0 40px rgba(100, 255, 218, 0.05),
+        var(--shadow);
     }
 
     .brain-icon {
@@ -145,16 +173,23 @@
     }
 
     .context-item {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 0.85rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       animation: slideIn 0.5s ease-out forwards;
       opacity: 0;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .context-item:hover {
+      transform: translateX(5px);
+      border-color: rgba(100, 255, 218, 0.3);
     }
 
     @keyframes slideIn {
@@ -169,9 +204,11 @@
     }
 
     .context-item.relevant {
-      background: linear-gradient(135deg, rgba(78, 246, 178, 0.2), rgba(109, 211, 255, 0.1));
-      border-color: var(--kinic);
-      box-shadow: 0 0 20px rgba(78, 246, 178, 0.3);
+      background: linear-gradient(135deg, rgba(0, 255, 136, 0.15), rgba(100, 255, 218, 0.1));
+      border: 1px solid rgba(100, 255, 218, 0.5);
+      box-shadow: 
+        inset 0 0 20px rgba(100, 255, 218, 0.1),
+        0 0 30px rgba(0, 255, 136, 0.2);
     }
 
     .context-item.irrelevant {
@@ -180,18 +217,48 @@
     }
 
     .tag {
-      padding: 2px 6px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 20px;
       font-size: 0.7rem;
       font-weight: 600;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-width: 60px;
+      justify-content: center;
     }
 
-    .tag-db { background: #3b82f6; }
-    .tag-api { background: #a855f7; }
-    .tag-doc { background: #f59e0b; }
-    .tag-log { background: #ef4444; }
-    .tag-config { background: #10b981; }
+    .tag-icon {
+      font-size: 0.9rem;
+    }
+
+    .tag-db { 
+      background: linear-gradient(135deg, #8be9fd, #64ffda);
+      color: #0a0e27;
+      box-shadow: 0 2px 10px rgba(139, 233, 253, 0.3);
+    }
+    .tag-api { 
+      background: linear-gradient(135deg, #bd93f9, #ff79c6);
+      color: white;
+      box-shadow: 0 2px 10px rgba(189, 147, 249, 0.3);
+    }
+    .tag-doc { 
+      background: linear-gradient(135deg, #ffb86c, #f1fa8c);
+      color: #0a0e27;
+      box-shadow: 0 2px 10px rgba(255, 184, 108, 0.3);
+    }
+    .tag-log { 
+      background: linear-gradient(135deg, #ff5555, #ff79c6);
+      color: white;
+      box-shadow: 0 2px 10px rgba(255, 85, 85, 0.3);
+    }
+    .tag-config { 
+      background: linear-gradient(135deg, #50fa7b, #00ff88);
+      color: #0a0e27;
+      box-shadow: 0 2px 10px rgba(80, 250, 123, 0.3);
+    }
 
     .stats {
       display: grid;
@@ -201,18 +268,37 @@
     }
 
     .stat-card {
-      background: var(--card-bg);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 16px;
+      background: 
+        radial-gradient(ellipse at top, rgba(100, 255, 218, 0.05), transparent 50%),
+        var(--card-bg);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 16px;
+      padding: 20px;
       text-align: center;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(20px) saturate(1.2);
+      box-shadow: 
+        inset 0 0 20px rgba(100, 255, 218, 0.05),
+        0 10px 30px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(100, 255, 218, 0.4);
+      box-shadow: 
+        inset 0 0 30px rgba(100, 255, 218, 0.1),
+        0 15px 40px rgba(0, 0, 0, 0.4);
     }
 
     .stat-value {
-      font-size: 2rem;
+      font-size: 2.2rem;
       font-weight: 800;
       margin-bottom: 4px;
+      background: linear-gradient(135deg, #64ffda, #8be9fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 10px rgba(100, 255, 218, 0.5));
     }
 
     .stat-label {
@@ -277,33 +363,48 @@
 
     .vector-point {
       position: absolute;
-      width: 8px;
-      height: 8px;
-      background: var(--primary);
+      width: 6px;
+      height: 6px;
+      background: radial-gradient(circle, #64ffda, #8be9fd);
       border-radius: 50%;
       transition: all 0.5s ease;
+      animation: twinkle 3s ease-in-out infinite;
     }
 
     .vector-point.highlight {
-      width: 12px;
-      height: 12px;
-      background: var(--kinic);
-      box-shadow: 0 0 20px var(--kinic);
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #00ff88, #64ffda);
+      box-shadow: 
+        0 0 30px #00ff88,
+        0 0 60px rgba(0, 255, 136, 0.5);
       z-index: 10;
+      animation: pulse-point 1.5s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    @keyframes pulse-point {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 30px #00ff88, 0 0 60px rgba(0, 255, 136, 0.5); }
+      50% { transform: scale(1.3); box-shadow: 0 0 40px #00ff88, 0 0 80px rgba(0, 255, 136, 0.7); }
     }
 
     .vector-line {
       position: absolute;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--kinic), transparent);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00ff88, #64ffda, #00ff88, transparent);
       transform-origin: left center;
       opacity: 0;
-      animation: pulse 2s ease-in-out infinite;
+      animation: pulse-line 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 3px #00ff88);
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 0.6; }
+    @keyframes pulse-line {
+      0%, 100% { opacity: 0; transform: scaleX(0.8); }
+      50% { opacity: 0.8; transform: scaleX(1); }
     }
 
     .controls {
@@ -314,21 +415,27 @@
     }
 
     .btn {
-      padding: 12px 24px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: white;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #64ffda, #00ff88, #8be9fd);
+      color: #0a0e27;
       border: none;
-      border-radius: 10px;
+      border-radius: 50px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 10px 30px rgba(109, 211, 255, 0.3);
+      box-shadow: 
+        0 10px 40px rgba(100, 255, 218, 0.4),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 15px 40px rgba(109, 211, 255, 0.4);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 
+        0 15px 50px rgba(100, 255, 218, 0.6),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
     }
 
     .btn:active {
@@ -336,10 +443,20 @@
     }
 
     .btn-secondary {
-      background: var(--card-bg);
+      background: linear-gradient(135deg, rgba(189, 147, 249, 0.2), rgba(255, 121, 198, 0.2));
       color: var(--fg);
-      border: 2px solid rgba(255,255,255,0.2);
-      box-shadow: none;
+      border: 2px solid rgba(189, 147, 249, 0.5);
+      box-shadow: 
+        0 5px 20px rgba(189, 147, 249, 0.2),
+        inset 0 0 20px rgba(189, 147, 249, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      border-color: rgba(255, 121, 198, 0.7);
+      box-shadow: 
+        0 8px 30px rgba(255, 121, 198, 0.3),
+        inset 0 0 30px rgba(255, 121, 198, 0.2);
     }
 
     .info-cards {
@@ -577,28 +694,28 @@
   </div>
 
   <script>
-    // Sample data representing different types of information
+    // Sample data representing different types of information with icons
     const allData = [
-      { text: "User authentication flow documentation", tags: ["doc"], relevant: true },
-      { text: "Database schema for products table", tags: ["db"], relevant: false },
-      { text: "OAuth 2.0 implementation guide", tags: ["doc"], relevant: true },
-      { text: "Quarterly sales report Q3 2024", tags: ["doc"], relevant: false },
-      { text: "JWT token expiration handling", tags: ["api"], relevant: true },
-      { text: "Marketing campaign analytics", tags: ["doc"], relevant: false },
-      { text: "Session management best practices", tags: ["doc"], relevant: true },
-      { text: "Inventory management API endpoints", tags: ["api"], relevant: false },
-      { text: "CORS configuration for auth endpoints", tags: ["config"], relevant: true },
-      { text: "Customer support ticket #12345", tags: ["log"], relevant: false },
-      { text: "Rate limiting for login attempts", tags: ["config"], relevant: true },
-      { text: "Product recommendation algorithm", tags: ["api"], relevant: false },
-      { text: "Password reset flow implementation", tags: ["api"], relevant: true },
-      { text: "Monthly revenue calculations", tags: ["db"], relevant: false },
-      { text: "Two-factor authentication setup", tags: ["doc"], relevant: true },
-      { text: "Shipping cost calculator logic", tags: ["api"], relevant: false },
-      { text: "Refresh token rotation strategy", tags: ["doc"], relevant: true },
-      { text: "Email template for newsletters", tags: ["doc"], relevant: false },
-      { text: "SQL injection prevention in auth", tags: ["config"], relevant: true },
-      { text: "Product image optimization rules", tags: ["config"], relevant: false },
+      { text: "User authentication flow documentation", tags: ["doc"], icon: "📚", relevant: true },
+      { text: "Database schema for products table", tags: ["db"], icon: "🗄️", relevant: false },
+      { text: "OAuth 2.0 implementation guide", tags: ["doc"], icon: "📚", relevant: true },
+      { text: "Quarterly sales report Q3 2024", tags: ["doc"], icon: "📚", relevant: false },
+      { text: "JWT token expiration handling", tags: ["api"], icon: "🔌", relevant: true },
+      { text: "Marketing campaign analytics", tags: ["doc"], icon: "📚", relevant: false },
+      { text: "Session management best practices", tags: ["doc"], icon: "📚", relevant: true },
+      { text: "Inventory management API endpoints", tags: ["api"], icon: "🔌", relevant: false },
+      { text: "CORS configuration for auth endpoints", tags: ["config"], icon: "⚙️", relevant: true },
+      { text: "Customer support ticket #12345", tags: ["log"], icon: "📝", relevant: false },
+      { text: "Rate limiting for login attempts", tags: ["config"], icon: "⚙️", relevant: true },
+      { text: "Product recommendation algorithm", tags: ["api"], icon: "🔌", relevant: false },
+      { text: "Password reset flow implementation", tags: ["api"], icon: "🔌", relevant: true },
+      { text: "Monthly revenue calculations", tags: ["db"], icon: "🗄️", relevant: false },
+      { text: "Two-factor authentication setup", tags: ["doc"], icon: "📚", relevant: true },
+      { text: "Shipping cost calculator logic", tags: ["api"], icon: "🔌", relevant: false },
+      { text: "Refresh token rotation strategy", tags: ["doc"], icon: "📚", relevant: true },
+      { text: "Email template for newsletters", tags: ["doc"], icon: "📚", relevant: false },
+      { text: "SQL injection prevention in auth", tags: ["config"], icon: "⚙️", relevant: true },
+      { text: "Product image optimization rules", tags: ["config"], icon: "⚙️", relevant: false },
     ];
 
     let traditionalItems = [];
@@ -615,8 +732,16 @@
       }
       item.style.animationDelay = `${delay}ms`;
       
+      const tagIconMap = {
+        'db': '🗄️',
+        'api': '🔌',
+        'doc': '📚',
+        'log': '📝',
+        'config': '⚙️'
+      };
+      
       const tagHtml = data.tags.map(tag => 
-        `<span class="tag tag-${tag}">${tag}</span>`
+        `<span class="tag tag-${tag}"><span class="tag-icon">${tagIconMap[tag]}</span>${tag}</span>`
       ).join('');
       
       item.innerHTML = `${tagHtml} ${data.text}`;
