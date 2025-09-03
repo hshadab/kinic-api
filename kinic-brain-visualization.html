@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kinic: The Shared AI Brain</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: radial-gradient(ellipse at center, #0a0e27 0%, #000511 100%);
+      color: #ffffff;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .universe {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(100, 255, 218, 0.03), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(189, 147, 249, 0.03), transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(255, 121, 198, 0.02), transparent 50%);
+      animation: universeRotate 60s linear infinite;
+    }
+
+    @keyframes universeRotate {
+      from { transform: rotate(0deg) scale(1.2); }
+      to { transform: rotate(360deg) scale(1.2); }
+    }
+
+    .header {
+      position: absolute;
+      top: 30px;
+      text-align: center;
+      z-index: 100;
+      animation: fadeIn 2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      width: 140px;
+      height: 60px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.6));
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #64ffda, #00ff88, #bd93f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      color: #8892b0;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .main-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1000px;
+    }
+
+    /* Central Brain */
+    .brain-container {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      transform-style: preserve-3d;
+      animation: brainFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes brainFloat {
+      0%, 100% { transform: rotateY(0deg) translateY(0); }
+      25% { transform: rotateY(10deg) translateY(-10px); }
+      50% { transform: rotateY(0deg) translateY(-20px); }
+      75% { transform: rotateY(-10deg) translateY(-10px); }
+    }
+
+    .brain-core {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 250px;
+      height: 250px;
+      transform: translate(-50%, -50%);
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(100, 255, 218, 0.4), transparent 60%),
+        radial-gradient(circle at 70% 60%, rgba(189, 147, 249, 0.3), transparent 60%),
+        radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.2), transparent 70%);
+      border-radius: 50%;
+      filter: blur(0.5px);
+      box-shadow: 
+        0 0 100px rgba(100, 255, 218, 0.5),
+        inset 0 0 60px rgba(100, 255, 218, 0.2),
+        inset 0 0 40px rgba(189, 147, 249, 0.2);
+      animation: brainPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes brainPulse {
+      0%, 100% { 
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 
+          0 0 100px rgba(100, 255, 218, 0.5),
+          inset 0 0 60px rgba(100, 255, 218, 0.2),
+          inset 0 0 40px rgba(189, 147, 249, 0.2);
+      }
+      50% { 
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 
+          0 0 150px rgba(100, 255, 218, 0.7),
+          inset 0 0 80px rgba(100, 255, 218, 0.3),
+          inset 0 0 60px rgba(189, 147, 249, 0.3);
+      }
+    }
+
+    /* Neural Network Lines Inside Brain */
+    .neural-network {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    .synapse {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.6), transparent);
+      transform-origin: left center;
+      animation: synapseFlow 3s ease-in-out infinite;
+    }
+
+    @keyframes synapseFlow {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Agent Nodes */
+    .agents-container {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .agent {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .agent:hover {
+      transform: scale(1.1);
+      z-index: 50;
+    }
+
+    .agent-node {
+      width: 80px;
+      height: 80px;
+      margin: 20px;
+      background: 
+        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 70%);
+      border: 2px solid;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      animation: agentFloat 4s ease-in-out infinite;
+    }
+
+    .agent-label {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8892b0;
+    }
+
+    @keyframes agentFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Tendrils connecting agents to brain */
+    .tendril {
+      position: absolute;
+      transform-origin: center;
+      pointer-events: none;
+    }
+
+    .tendril-path {
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 5, 5;
+      animation: tendrilFlow 2s linear infinite;
+    }
+
+    @keyframes tendrilFlow {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: -10; }
+    }
+
+    /* Data Particles */
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+      box-shadow: 0 0 10px currentColor;
+    }
+
+    /* Activity Log */
+    .activity-log {
+      position: absolute;
+      bottom: 30px;
+      left: 30px;
+      width: 350px;
+      background: rgba(10, 14, 39, 0.8);
+      border: 1px solid rgba(100, 255, 218, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .activity-log h3 {
+      color: #64ffda;
+      font-size: 14px;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .log-entry {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+      font-size: 12px;
+      color: #8892b0;
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .log-entry .agent-name {
+      color: #64ffda;
+      font-weight: 600;
+    }
+
+    .log-entry .action {
+      color: #bd93f9;
+    }
+
+    /* Stats Panel */
+    .stats-panel {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      width: 280px;
+      background: rgba(10, 14, 39, 0.8);
+      border: 1px solid rgba(189, 147, 249, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat {
+      margin-bottom: 15px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #8892b0;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #64ffda, #bd93f9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Control Buttons */
+    .controls {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background: rgba(100, 255, 218, 0.1);
+      border: 1px solid rgba(100, 255, 218, 0.5);
+      color: #64ffda;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn:hover {
+      background: rgba(100, 255, 218, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(100, 255, 218, 0.3);
+    }
+
+    .btn.active {
+      background: rgba(100, 255, 218, 0.3);
+      border-color: #64ffda;
+    }
+
+    /* Knowledge Burst Animation */
+    @keyframes knowledgeBurst {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+
+    .knowledge-burst {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px solid #64ffda;
+      animation: knowledgeBurst 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .brain-container {
+        width: 300px;
+        height: 300px;
+      }
+      
+      .brain-core {
+        width: 180px;
+        height: 180px;
+      }
+      
+      .agents-container {
+        width: 600px;
+        height: 600px;
+      }
+      
+      .activity-log, .stats-panel {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="universe"></div>
+  
+  <div class="header">
+    <img src="https://cdn.prod.website-files.com/6712749157ea3bf4a781f309/671bbee00d9198b08a63cb40_kinic-logo.svg" alt="Kinic" class="logo">
+    <h1>The Shared AI Brain</h1>
+    <p class="subtitle">Collective Intelligence Through Semantic Memory</p>
+  </div>
+
+  <div class="controls">
+    <button class="btn active" id="autoBtn">Auto Mode</button>
+    <button class="btn" id="manualBtn">Manual</button>
+    <button class="btn" id="speedBtn">Speed: Normal</button>
+  </div>
+
+  <div class="main-container">
+    <div class="brain-container">
+      <!-- Central Brain Core -->
+      <div class="brain-core"></div>
+      
+      <!-- Neural Network Inside Brain -->
+      <svg class="neural-network" width="400" height="400">
+        <!-- Dynamic synapses will be added here -->
+      </svg>
+    </div>
+
+    <!-- Agent Nodes Around Brain -->
+    <div class="agents-container" id="agentsContainer">
+      <!-- Agents will be dynamically added -->
+    </div>
+
+    <!-- SVG for Tendrils -->
+    <svg style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;">
+      <defs>
+        <linearGradient id="tendrilGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#64ffda;stop-opacity:0" />
+          <stop offset="50%" style="stop-color:#64ffda;stop-opacity:0.6" />
+          <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0.8" />
+        </linearGradient>
+        <linearGradient id="tendrilGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#bd93f9;stop-opacity:0" />
+          <stop offset="50%" style="stop-color:#bd93f9;stop-opacity:0.6" />
+          <stop offset="100%" style="stop-color:#ff79c6;stop-opacity:0.8" />
+        </linearGradient>
+      </defs>
+      <g id="tendrils"></g>
+    </svg>
+  </div>
+
+  <!-- Activity Log -->
+  <div class="activity-log">
+    <h3>Neural Activity</h3>
+    <div id="logEntries"></div>
+  </div>
+
+  <!-- Stats Panel -->
+  <div class="stats-panel">
+    <div class="stat">
+      <div class="stat-label">Knowledge Nodes</div>
+      <div class="stat-value" id="nodeCount">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Connections/Sec</div>
+      <div class="stat-value" id="connectionsPerSec">0</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Memory Utilization</div>
+      <div class="stat-value" id="memoryUtil">0%</div>
+    </div>
+  </div>
+
+  <script>
+    // Agent definitions with emojis and colors
+    const agents = [
+      { id: 'researcher', name: 'Researcher', emoji: '🔬', color: '#64ffda', angle: 0 },
+      { id: 'builder', name: 'Builder', emoji: '🔨', color: '#bd93f9', angle: 60 },
+      { id: 'analyzer', name: 'Analyzer', emoji: '📊', color: '#ff79c6', angle: 120 },
+      { id: 'security', name: 'Security', emoji: '🔒', color: '#50fa7b', angle: 180 },
+      { id: 'orchestrator', name: 'Orchestrator', emoji: '🎭', color: '#ffb86c', angle: 240 },
+      { id: 'connector', name: 'Connector', emoji: '🔗', color: '#8be9fd', angle: 300 }
+    ];
+
+    // Activity messages
+    const activities = [
+      { agent: 'Researcher', action: 'discovered new patterns', target: 'in user behavior data' },
+      { agent: 'Builder', action: 'synthesized solution', target: 'for API optimization' },
+      { agent: 'Analyzer', action: 'extracted insights', target: 'from performance metrics' },
+      { agent: 'Security', action: 'validated protocols', target: 'for authentication flow' },
+      { agent: 'Orchestrator', action: 'coordinated tasks', target: 'across 4 agents' },
+      { agent: 'Connector', action: 'established link', target: 'with external knowledge base' },
+      { agent: 'Researcher', action: 'retrieved context', target: 'for machine learning models' },
+      { agent: 'Builder', action: 'compiled artifacts', target: 'into production build' },
+      { agent: 'Analyzer', action: 'computed similarity', target: 'between code patterns' },
+      { agent: 'Security', action: 'encrypted memory', target: 'with quantum-safe algorithms' }
+    ];
+
+    let autoMode = true;
+    let speed = 1;
+    let nodeCount = 42;
+    let connectionsPerSec = 0;
+    let memoryUtil = 0;
+
+    // Initialize Brain
+    function initBrain() {
+      // Create internal synapses
+      const neuralNetwork = document.querySelector('.neural-network');
+      for (let i = 0; i < 20; i++) {
+        const synapse = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        synapse.classList.add('synapse');
+        const x1 = Math.random() * 400;
+        const y1 = Math.random() * 400;
+        const x2 = Math.random() * 400;
+        const y2 = Math.random() * 400;
+        synapse.setAttribute('x1', x1);
+        synapse.setAttribute('y1', y1);
+        synapse.setAttribute('x2', x2);
+        synapse.setAttribute('y2', y2);
+        synapse.style.animationDelay = `${Math.random() * 3}s`;
+        neuralNetwork.appendChild(synapse);
+      }
+
+      // Create agents
+      const container = document.getElementById('agentsContainer');
+      const centerX = 400;
+      const centerY = 400;
+      const radius = 300;
+
+      agents.forEach((agent, index) => {
+        const angleRad = (agent.angle * Math.PI) / 180;
+        const x = centerX + Math.cos(angleRad) * radius - 60;
+        const y = centerY + Math.sin(angleRad) * radius - 60;
+
+        const agentDiv = document.createElement('div');
+        agentDiv.className = 'agent';
+        agentDiv.id = agent.id;
+        agentDiv.style.left = `${x}px`;
+        agentDiv.style.top = `${y}px`;
+        agentDiv.style.animationDelay = `${index * 0.5}s`;
+
+        agentDiv.innerHTML = `
+          <div class="agent-node" style="border-color: ${agent.color}; box-shadow: 0 0 30px ${agent.color}40;">
+            <span>${agent.emoji}</span>
+          </div>
+          <div class="agent-label" style="color: ${agent.color};">${agent.name}</div>
+        `;
+
+        container.appendChild(agentDiv);
+
+        // Create tendril
+        createTendril(agent.id, centerX, centerY, x + 60, y + 60, agent.color);
+      });
+    }
+
+    // Create tendril connection
+    function createTendril(agentId, x1, y1, x2, y2, color) {
+      const svg = document.getElementById('tendrils');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      
+      // Create curved path
+      const midX = (x1 + x2) / 2;
+      const midY = (y1 + y2) / 2;
+      const curveX = midX + (Math.random() - 0.5) * 100;
+      const curveY = midY + (Math.random() - 0.5) * 100;
+      
+      path.setAttribute('d', `M ${x1} ${y1} Q ${curveX} ${curveY} ${x2} ${y2}`);
+      path.setAttribute('class', 'tendril-path');
+      path.setAttribute('stroke', color);
+      path.setAttribute('id', `tendril-${agentId}`);
+      path.style.opacity = '0.3';
+      
+      svg.appendChild(path);
+    }
+
+    // Animate data particle
+    function animateParticle(agentId, toBrain = true) {
+      const agent = document.getElementById(agentId);
+      const agentData = agents.find(a => a.id === agentId);
+      const brain = document.querySelector('.brain-core');
+      
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particle.style.background = agentData.color;
+      particle.style.color = agentData.color;
+      
+      const startRect = toBrain ? agent.getBoundingClientRect() : brain.getBoundingClientRect();
+      const endRect = toBrain ? brain.getBoundingClientRect() : agent.getBoundingClientRect();
+      
+      particle.style.left = startRect.left + startRect.width / 2 + 'px';
+      particle.style.top = startRect.top + startRect.height / 2 + 'px';
+      
+      document.body.appendChild(particle);
+      
+      // Animate along tendril path
+      const duration = 1000 / speed;
+      const startTime = Date.now();
+      
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const x = startRect.left + (endRect.left - startRect.left) * progress + startRect.width / 2;
+        const y = startRect.top + (endRect.top - startRect.top) * progress + startRect.height / 2;
+        
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          particle.remove();
+          if (toBrain) {
+            createKnowledgeBurst();
+            updateStats();
+          }
+        }
+      }
+      
+      animate();
+      
+      // Highlight tendril
+      const tendril = document.getElementById(`tendril-${agentId}`);
+      tendril.style.opacity = '0.8';
+      tendril.style.strokeWidth = '3';
+      setTimeout(() => {
+        tendril.style.opacity = '0.3';
+        tendril.style.strokeWidth = '2';
+      }, duration);
+    }
+
+    // Create knowledge burst effect
+    function createKnowledgeBurst() {
+      const brain = document.querySelector('.brain-core');
+      const rect = brain.getBoundingClientRect();
+      
+      const burst = document.createElement('div');
+      burst.className = 'knowledge-burst';
+      burst.style.left = rect.left + rect.width / 2 - 50 + 'px';
+      burst.style.top = rect.top + rect.height / 2 - 50 + 'px';
+      
+      document.body.appendChild(burst);
+      
+      setTimeout(() => burst.remove(), 1000);
+    }
+
+    // Add log entry
+    function addLogEntry() {
+      const log = document.getElementById('logEntries');
+      const activity = activities[Math.floor(Math.random() * activities.length)];
+      
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `
+        <span class="agent-name">${activity.agent}</span>
+        <span class="action"> ${activity.action}</span>
+        <span> ${activity.target}</span>
+      `;
+      
+      log.insertBefore(entry, log.firstChild);
+      
+      // Keep only last 5 entries
+      while (log.children.length > 5) {
+        log.removeChild(log.lastChild);
+      }
+    }
+
+    // Update stats
+    function updateStats() {
+      nodeCount += Math.floor(Math.random() * 3) + 1;
+      document.getElementById('nodeCount').textContent = nodeCount;
+      
+      connectionsPerSec = Math.floor(Math.random() * 20) + 5;
+      document.getElementById('connectionsPerSec').textContent = connectionsPerSec;
+      
+      memoryUtil = Math.min(memoryUtil + Math.random() * 5, 95).toFixed(0);
+      document.getElementById('memoryUtil').textContent = memoryUtil + '%';
+    }
+
+    // Auto animation
+    function autoAnimate() {
+      if (!autoMode) return;
+      
+      const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+      const toBrain = Math.random() > 0.3;
+      
+      animateParticle(randomAgent.id, toBrain);
+      
+      if (Math.random() > 0.5) {
+        addLogEntry();
+      }
+      
+      setTimeout(autoAnimate, (2000 + Math.random() * 3000) / speed);
+    }
+
+    // Initialize controls
+    document.getElementById('autoBtn').addEventListener('click', function() {
+      autoMode = true;
+      this.classList.add('active');
+      document.getElementById('manualBtn').classList.remove('active');
+      autoAnimate();
+    });
+
+    document.getElementById('manualBtn').addEventListener('click', function() {
+      autoMode = false;
+      this.classList.add('active');
+      document.getElementById('autoBtn').classList.remove('active');
+    });
+
+    document.getElementById('speedBtn').addEventListener('click', function() {
+      const speeds = [1, 2, 0.5];
+      const labels = ['Normal', 'Fast', 'Slow'];
+      const currentIndex = speeds.indexOf(speed);
+      const nextIndex = (currentIndex + 1) % speeds.length;
+      speed = speeds[nextIndex];
+      this.textContent = `Speed: ${labels[nextIndex]}`;
+    });
+
+    // Manual interaction
+    document.querySelectorAll('.agent').forEach(agent => {
+      agent.addEventListener('click', function() {
+        if (!autoMode) {
+          animateParticle(this.id, true);
+          setTimeout(() => animateParticle(this.id, false), 1500);
+          addLogEntry();
+        }
+      });
+    });
+
+    // Initialize
+    initBrain();
+    updateStats();
+    setTimeout(autoAnimate, 1000);
+
+    // Periodic stats update
+    setInterval(updateStats, 5000);
+  </script>
+</body>
+</html>
