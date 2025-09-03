@@ -108,36 +108,69 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 250px;
-      height: 250px;
+      width: 280px;
+      height: 220px;
       transform: translate(-50%, -50%);
       background: 
-        radial-gradient(circle at 30% 30%, rgba(100, 255, 218, 0.4), transparent 60%),
-        radial-gradient(circle at 70% 60%, rgba(189, 147, 249, 0.3), transparent 60%),
-        radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.2), transparent 70%);
-      border-radius: 50%;
-      filter: blur(0.5px);
+        radial-gradient(ellipse at 35% 40%, rgba(255, 121, 198, 0.15), transparent 30%),
+        radial-gradient(ellipse at 65% 40%, rgba(189, 147, 249, 0.15), transparent 30%),
+        radial-gradient(ellipse at 30% 70%, rgba(100, 255, 218, 0.2), transparent 40%),
+        radial-gradient(ellipse at 70% 70%, rgba(139, 233, 253, 0.2), transparent 40%),
+        radial-gradient(ellipse at 50% 50%, rgba(100, 255, 218, 0.1), transparent 70%);
+      border-radius: 50% 50% 60% 60% / 60% 60% 40% 40%;
+      filter: blur(0.3px);
       box-shadow: 
-        0 0 100px rgba(100, 255, 218, 0.5),
-        inset 0 0 60px rgba(100, 255, 218, 0.2),
-        inset 0 0 40px rgba(189, 147, 249, 0.2);
-      animation: brainPulse 3s ease-in-out infinite;
+        0 0 120px rgba(100, 255, 218, 0.6),
+        inset 0 -20px 60px rgba(189, 147, 249, 0.3),
+        inset 0 20px 60px rgba(255, 121, 198, 0.2),
+        inset -30px 0 40px rgba(100, 255, 218, 0.2),
+        inset 30px 0 40px rgba(139, 233, 253, 0.2);
+      animation: brainPulse 4s ease-in-out infinite;
+      position: relative;
+    }
+
+    .brain-core::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2px;
+      height: 80%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(180deg, transparent, rgba(100, 255, 218, 0.3), transparent);
+      border-radius: 50%;
+      animation: brainDivide 6s ease-in-out infinite;
+    }
+
+    @keyframes brainDivide {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.6; }
     }
 
     @keyframes brainPulse {
       0%, 100% { 
-        transform: translate(-50%, -50%) scale(1);
+        transform: translate(-50%, -50%) scale(1) rotateX(5deg);
         box-shadow: 
-          0 0 100px rgba(100, 255, 218, 0.5),
-          inset 0 0 60px rgba(100, 255, 218, 0.2),
-          inset 0 0 40px rgba(189, 147, 249, 0.2);
+          0 0 120px rgba(100, 255, 218, 0.6),
+          inset 0 -20px 60px rgba(189, 147, 249, 0.3),
+          inset 0 20px 60px rgba(255, 121, 198, 0.2),
+          inset -30px 0 40px rgba(100, 255, 218, 0.2),
+          inset 30px 0 40px rgba(139, 233, 253, 0.2);
+      }
+      25% {
+        transform: translate(-50%, -50%) scale(1.03) rotateX(8deg) rotateY(-5deg);
       }
       50% { 
-        transform: translate(-50%, -50%) scale(1.05);
+        transform: translate(-50%, -50%) scale(1.06) rotateX(5deg);
         box-shadow: 
-          0 0 150px rgba(100, 255, 218, 0.7),
-          inset 0 0 80px rgba(100, 255, 218, 0.3),
-          inset 0 0 60px rgba(189, 147, 249, 0.3);
+          0 0 160px rgba(100, 255, 218, 0.8),
+          inset 0 -30px 80px rgba(189, 147, 249, 0.4),
+          inset 0 30px 80px rgba(255, 121, 198, 0.3),
+          inset -40px 0 60px rgba(100, 255, 218, 0.3),
+          inset 40px 0 60px rgba(139, 233, 253, 0.3);
+      }
+      75% {
+        transform: translate(-50%, -50%) scale(1.03) rotateX(8deg) rotateY(5deg);
       }
     }
 
@@ -153,14 +186,37 @@
     .synapse {
       position: absolute;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.6), transparent);
+      background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.8), rgba(255, 121, 198, 0.6), transparent);
       transform-origin: left center;
-      animation: synapseFlow 3s ease-in-out infinite;
+      animation: synapseFlow 2s ease-in-out infinite;
+      filter: blur(0.5px);
     }
 
     @keyframes synapseFlow {
-      0%, 100% { opacity: 0.2; }
-      50% { opacity: 0.8; }
+      0%, 100% { 
+        opacity: 0.1;
+        filter: blur(1px);
+      }
+      50% { 
+        opacity: 0.9;
+        filter: blur(0px);
+        box-shadow: 0 0 10px currentColor;
+      }
+    }
+
+    .neural-pulse {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: radial-gradient(circle, #64ffda, transparent);
+      border-radius: 50%;
+      animation: neuralPulse 3s linear infinite;
+      box-shadow: 0 0 10px #64ffda;
+    }
+
+    @keyframes neuralPulse {
+      0% { transform: scale(0); opacity: 1; }
+      100% { transform: scale(20); opacity: 0; }
     }
 
     /* Agent Nodes */
@@ -176,45 +232,97 @@
 
     .agent {
       position: absolute;
-      width: 120px;
-      height: 120px;
+      width: 200px;
       pointer-events: auto;
       cursor: pointer;
-      transition: transform 0.3s ease;
+      transition: all 0.3s ease;
     }
 
     .agent:hover {
-      transform: scale(1.1);
+      transform: translateY(-5px);
       z-index: 50;
     }
 
-    .agent-node {
-      width: 80px;
-      height: 80px;
-      margin: 20px;
-      background: 
-        radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 70%);
-      border: 2px solid;
-      border-radius: 20px;
+    .agent-card {
+      background: rgba(10, 14, 39, 0.6);
+      border: 1px solid;
+      border-radius: 16px;
+      padding: 16px;
+      backdrop-filter: blur(14px) saturate(120%);
+      box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      animation: agentFloat 5s ease-in-out infinite;
+    }
+
+    .agent:hover .agent-card {
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .agent-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .agent-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      animation: agentFloat 4s ease-in-out infinite;
+      font-size: 24px;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .agent-label {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .agent-info {
+      flex: 1;
+    }
+
+    .agent-name {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .agent-role {
+      font-size: 11px;
       color: #8892b0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .agent-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .metric-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+    }
+
+    .metric-value {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .metric-label {
+      font-size: 9px;
+      color: #8892b0;
+      text-transform: uppercase;
+      margin-top: 2px;
     }
 
     @keyframes agentFloat {
@@ -520,22 +628,39 @@
 
     // Initialize Brain
     function initBrain() {
-      // Create internal synapses
+      // Create internal synapses with organic curves
       const neuralNetwork = document.querySelector('.neural-network');
-      for (let i = 0; i < 20; i++) {
-        const synapse = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        synapse.classList.add('synapse');
-        const x1 = Math.random() * 400;
-        const y1 = Math.random() * 400;
-        const x2 = Math.random() * 400;
-        const y2 = Math.random() * 400;
-        synapse.setAttribute('x1', x1);
-        synapse.setAttribute('y1', y1);
-        synapse.setAttribute('x2', x2);
-        synapse.setAttribute('y2', y2);
-        synapse.style.animationDelay = `${Math.random() * 3}s`;
-        neuralNetwork.appendChild(synapse);
+      for (let i = 0; i < 30; i++) {
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.classList.add('synapse');
+        
+        // Create curved paths for more organic look
+        const x1 = 200 + (Math.random() - 0.5) * 180;
+        const y1 = 200 + (Math.random() - 0.5) * 140;
+        const x2 = 200 + (Math.random() - 0.5) * 180;
+        const y2 = 200 + (Math.random() - 0.5) * 140;
+        const cx = (x1 + x2) / 2 + (Math.random() - 0.5) * 50;
+        const cy = (y1 + y2) / 2 + (Math.random() - 0.5) * 50;
+        
+        path.setAttribute('d', `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2}`);
+        path.style.stroke = `rgba(100, 255, 218, ${0.3 + Math.random() * 0.4})`;
+        path.style.animationDelay = `${Math.random() * 4}s`;
+        path.style.animationDuration = `${2 + Math.random() * 2}s`;
+        neuralNetwork.appendChild(path);
       }
+      
+      // Add neural pulse points
+      setInterval(() => {
+        if (Math.random() > 0.7) {
+          const pulse = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          pulse.classList.add('neural-pulse');
+          pulse.setAttribute('cx', 200 + (Math.random() - 0.5) * 150);
+          pulse.setAttribute('cy', 200 + (Math.random() - 0.5) * 120);
+          pulse.setAttribute('r', 2);
+          neuralNetwork.appendChild(pulse);
+          setTimeout(() => pulse.remove(), 3000);
+        }
+      }, 500);
 
       // Create agents
       const container = document.getElementById('agentsContainer');
@@ -545,8 +670,8 @@
 
       agents.forEach((agent, index) => {
         const angleRad = (agent.angle * Math.PI) / 180;
-        const x = centerX + Math.cos(angleRad) * radius - 60;
-        const y = centerY + Math.sin(angleRad) * radius - 60;
+        const x = centerX + Math.cos(angleRad) * radius - 100;
+        const y = centerY + Math.sin(angleRad) * radius - 40;
 
         const agentDiv = document.createElement('div');
         agentDiv.className = 'agent';
@@ -556,16 +681,33 @@
         agentDiv.style.animationDelay = `${index * 0.5}s`;
 
         agentDiv.innerHTML = `
-          <div class="agent-node" style="border-color: ${agent.color}; box-shadow: 0 0 30px ${agent.color}40;">
-            <span>${agent.emoji}</span>
+          <div class="agent-card" style="border-color: ${agent.color}; background: linear-gradient(135deg, ${agent.color}15, ${agent.color}08);">
+            <div class="agent-header">
+              <div class="agent-avatar" style="background: linear-gradient(135deg, ${agent.color}30, ${agent.color}10); border-color: ${agent.color};">
+                ${agent.emoji}
+              </div>
+              <div class="agent-info">
+                <div class="agent-name" style="color: ${agent.color}">${agent.name}</div>
+                <div class="agent-role">Neural Agent</div>
+              </div>
+            </div>
+            <div class="agent-metrics">
+              <div class="metric-item">
+                <div class="metric-value" style="color: ${agent.color}">0</div>
+                <div class="metric-label">Synapses</div>
+              </div>
+              <div class="metric-item">
+                <div class="metric-value" style="color: ${agent.color}">0ms</div>
+                <div class="metric-label">Latency</div>
+              </div>
+            </div>
           </div>
-          <div class="agent-label" style="color: ${agent.color};">${agent.name}</div>
         `;
 
         container.appendChild(agentDiv);
 
         // Create tendril
-        createTendril(agent.id, centerX, centerY, x + 60, y + 60, agent.color);
+        createTendril(agent.id, centerX, centerY, x + 100, y + 40, agent.color);
       });
     }
 
@@ -635,14 +777,23 @@
       
       animate();
       
-      // Highlight tendril
+      // Highlight tendril with glow effect
       const tendril = document.getElementById(`tendril-${agentId}`);
-      tendril.style.opacity = '0.8';
+      tendril.style.opacity = '1';
       tendril.style.strokeWidth = '3';
+      tendril.style.filter = `drop-shadow(0 0 10px ${agentData.color})`;
       setTimeout(() => {
         tendril.style.opacity = '0.3';
         tendril.style.strokeWidth = '2';
+        tendril.style.filter = 'none';
       }, duration);
+      
+      // Update agent metrics
+      const agentEl = document.getElementById(agentId);
+      const synapseCount = agentEl.querySelector('.metric-value');
+      const latency = agentEl.querySelectorAll('.metric-value')[1];
+      synapseCount.textContent = Math.floor(Math.random() * 50) + 10;
+      latency.textContent = Math.floor(Math.random() * 100) + 20 + 'ms';
     }
 
     // Create knowledge burst effect
