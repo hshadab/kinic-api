@@ -4,6 +4,12 @@
 
 **Control the Kinic Chrome Extension programmatically to enable genuine AI agent collaboration through persistent blockchain memory.**
 
+## 🎯 Live Demo: Context Overload Prevention
+
+**See how Kinic solves AI context overload:** [**Interactive Visualization →**](https://hshadab.github.io/kinic-api/)
+
+Watch Kinic's semantic vector search retrieve only relevant information vs traditional context stuffing that dumps everything into limited AI context windows.
+
 ## ⚡ AI COLLABORATION BREAKTHROUGH DEMOS
 
 ### 🌟 NEWEST: Google A2A + Kinic Developer Collaboration
@@ -165,6 +171,17 @@ You know how frustrating it is when:
 - **Proof of Learning** - Cryptographic evidence of what your AI learned from
 - **Zero Vendor Lock-in** - No API fees, no service shutdowns, no data hostage
 - **Censorship Resistant** - Your knowledge can't be deleted or restricted
+
+## 📊 Context Overload Visualization
+
+**Interactive Demo:** [https://hshadab.github.io/kinic-api/](https://hshadab.github.io/kinic-api/)
+
+The visualization demonstrates:
+- **Left Panel**: Traditional approach dumps ALL 20 items (relevant + irrelevant) causing context overload
+- **Center Search**: Query for "authentication problems" 
+- **Right Panel**: Kinic uses semantic search to retrieve ONLY the 10 relevant items
+- **Real-time Stats**: Watch token usage, relevance %, and response times update live
+- **Visual Impact**: 5x fewer tokens, 100% relevance, faster responses
 
 ## 🧠 Why Vector Database Memory Changes Everything
 
