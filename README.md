@@ -258,7 +258,7 @@ SELECT * FROM docs WHERE title LIKE '%checkout%'
 1. **Open PowerShell** (search for "PowerShell" in Start menu)
 2. **Copy and paste this command:**
    ```powershell
-   git clone https://bitbucket.org/houmanshadab/kinic-api.git
+   git clone https://github.com/hshadab/kinic-api.git
    cd kinic-api
    ```
    *If you get "git not found", install Git from [git-scm.com](https://git-scm.com)*
@@ -312,7 +312,7 @@ python kinic-api.py
 1. **Open Terminal** (search for "Terminal" in Spotlight)
 2. **Copy and paste this command:**
    ```bash
-   git clone https://bitbucket.org/houmanshadab/kinic-api.git
+   git clone https://github.com/hshadab/kinic-api.git
    cd kinic-api
    ```
 

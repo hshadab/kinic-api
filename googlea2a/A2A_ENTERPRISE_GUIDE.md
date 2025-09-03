@@ -144,7 +144,7 @@ fix_code = kinic.ai_extract("Generate parameterized query fix for Python")
 ### **Immediate Demo (30 minutes)**
 ```bash
 # 1. Clone repository
-git clone https://bitbucket.org/houmanshadab/kinic-api.git
+git clone https://github.com/hshadab/kinic-api.git
 cd kinic-api/googlea2a
 
 # 2. Install real A2A SDK

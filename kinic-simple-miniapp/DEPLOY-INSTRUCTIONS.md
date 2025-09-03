@@ -1,17 +1,17 @@
 # Deploy Your Kinic Base Mini App
 
-## Quick Deployment via Bitbucket + Vercel (Recommended)
+## Quick Deployment via GitHub + Vercel (Recommended)
 
 ### Step 1: Repository Ready! ✅
 Your code is already in your existing kinic-api repository.
 
 ### Step 2: Already Pushed! ✅
-Your code is now live at: **https://bitbucket.org/houmanshadab/kinic-api**
+Your code is now live at: **https://github.com/hshadab/kinic-api**
 
 ### Step 3: Deploy via Vercel
 1. Go to [Vercel](https://vercel.com)
 2. Click "New Project" 
-3. **Select "Continue with Bitbucket"**
+3. **Select "Continue with GitHub"**
 4. Import your `kinic-api` repository
 5. **Set root directory to: `kinic-simple-miniapp`**
 6. Vercel will auto-detect Next.js and deploy
