@@ -112,33 +112,21 @@
       height: 280px;
       transform: translate(-50%, -50%);
       
-      /* Organic brain tissue gradient with pink-purple hues */
-      background: 
-        /* Neural activity zones */
-        radial-gradient(ellipse 100px 80px at 35% 35%, rgba(219, 112, 147, 0.25), transparent),
-        radial-gradient(ellipse 90px 70px at 65% 35%, rgba(147, 112, 219, 0.25), transparent),
-        radial-gradient(ellipse 70px 50px at 30% 65%, rgba(255, 182, 193, 0.2), transparent),
-        radial-gradient(ellipse 80px 60px at 70% 65%, rgba(186, 147, 249, 0.2), transparent),
-        /* Base organic tissue with living tissue colors */
-        radial-gradient(ellipse at 50% 50%, 
-          rgba(255, 192, 203, 0.18),
-          rgba(221, 160, 221, 0.15) 35%,
-          rgba(186, 147, 249, 0.12) 60%,
-          rgba(255, 218, 225, 0.08) 85%);
+      /* Use the polygonal brain image */
+      background-image: url('brain-poly.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
       
-      /* Organic brain shape */
-      border-radius: 47% 53% 52% 48% / 58% 57% 43% 42%;
+      /* Keep rounded shape for container */
+      border-radius: 20px;
       
-      /* Deep tissue shadows */
+      /* Glow effects around the brain image */
       box-shadow: 
-        /* Outer glow */
-        0 0 80px rgba(100, 255, 218, 0.5),
-        0 0 120px rgba(189, 147, 249, 0.3),
-        /* Tissue depth */
-        inset 0 0 60px rgba(100, 255, 218, 0.15),
-        inset -20px -10px 40px rgba(189, 147, 249, 0.2),
-        inset 20px -10px 40px rgba(255, 121, 198, 0.2),
-        inset 0 20px 30px rgba(255, 182, 193, 0.25);
+        /* Outer glow matching polygonal colors */
+        0 0 100px rgba(255, 105, 180, 0.4),
+        0 0 150px rgba(100, 180, 255, 0.3),
+        0 0 200px rgba(255, 200, 100, 0.2);
       
       animation: organicPulse 6s ease-in-out infinite;
       position: relative;
@@ -167,25 +155,26 @@
     /* Memory data nodes floating in brain */
     .memory-node {
       position: absolute;
-      padding: 6px 10px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(147, 112, 219, 0.4);
-      border-radius: 8px;
-      font-size: 11px;
-      font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
-      color: #5a4570;
+      padding: 5px 10px;
+      background: rgba(10, 14, 39, 0.85);
+      border: 1px solid;
+      border-radius: 6px;
+      font-size: 10px;
+      font-family: 'JetBrains Mono', 'SF Mono', monospace;
+      color: #64ffda;
       white-space: nowrap;
       backdrop-filter: blur(10px);
       box-shadow: 
-        0 2px 8px rgba(147, 112, 219, 0.2),
-        0 0 20px rgba(255, 182, 193, 0.15);
+        0 2px 10px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(100, 255, 218, 0.1);
       animation: floatMemory 15s ease-in-out infinite;
       opacity: 0;
       pointer-events: none;
-      max-width: 160px;
+      max-width: 140px;
       overflow: hidden;
       text-overflow: ellipsis;
       transform-origin: center;
+      border-image: linear-gradient(135deg, #64ffda, #bd93f9) 1;
     }
 
     @keyframes floatMemory {
@@ -210,28 +199,12 @@
       }
     }
 
-    /* Central fissure */
+    /* Remove central fissure as we have the image now */
     .brain-core::before {
-      content: '';
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      width: 3px;
-      height: 80%;
-      transform: translateX(-50%);
-      background: 
-        linear-gradient(180deg, 
-          transparent,
-          rgba(139, 69, 19, 0.1) 20%,
-          rgba(139, 69, 19, 0.15) 50%,
-          rgba(139, 69, 19, 0.1) 80%,
-          transparent);
-      border-radius: 50%;
-      filter: blur(1px);
-      animation: brainDivide 6s ease-in-out infinite;
+      display: none;
     }
 
-    /* Organic neural tissue texture */
+    /* Subtle overlay for depth */
     .brain-core::after {
       content: '';
       position: absolute;
@@ -239,26 +212,12 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: 
-        /* Neural pathways */
-        repeating-linear-gradient(30deg, 
-          transparent,
-          transparent 15px,
-          rgba(100, 255, 218, 0.03) 15px,
-          rgba(100, 255, 218, 0.03) 16px),
-        repeating-linear-gradient(-30deg, 
-          transparent,
-          transparent 18px,
-          rgba(189, 147, 249, 0.03) 18px,
-          rgba(189, 147, 249, 0.03) 19px),
-        /* Organic tissue pattern */
-        radial-gradient(circle at 20% 30%, rgba(255, 121, 198, 0.05) 20px, transparent 21px),
-        radial-gradient(circle at 60% 70%, rgba(139, 233, 253, 0.05) 25px, transparent 26px),
-        radial-gradient(circle at 80% 20%, rgba(100, 255, 218, 0.05) 15px, transparent 16px);
+      background: radial-gradient(ellipse at center, 
+        transparent 30%,
+        rgba(10, 14, 39, 0.1) 70%,
+        rgba(10, 14, 39, 0.2) 100%);
       border-radius: inherit;
-      mix-blend-mode: screen;
-      opacity: 0.6;
-      animation: tissueFlow 15s ease-in-out infinite;
+      pointer-events: none;
     }
 
     @keyframes tissueFlow {
@@ -770,15 +729,15 @@
     <div class="brain-container">
       <!-- Central Brain Core with Memory Nodes -->
       <div class="brain-core">
-        <!-- Memory nodes floating in brain tissue -->
-        <div class="memory-node" style="top: 25%; left: 20%; animation-delay: 0s;">bert-multilingual</div>
-        <div class="memory-node" style="top: 35%; right: 25%; animation-delay: 2s;">transformers.pipeline</div>
-        <div class="memory-node" style="bottom: 35%; left: 30%; animation-delay: 4s;">sentiment-analysis</div>
-        <div class="memory-node" style="top: 45%; left: 45%; animation-delay: 6s;">distilbert-uncased</div>
-        <div class="memory-node" style="bottom: 30%; right: 20%; animation-delay: 8s;">roberta-base</div>
-        <div class="memory-node" style="top: 60%; right: 35%; animation-delay: 10s;">sequence_class</div>
-        <div class="memory-node" style="top: 20%; right: 38%; animation-delay: 12s;">twitter-sentiment</div>
-        <div class="memory-node" style="bottom: 45%; left: 40%; animation-delay: 14s;">nlptown/bert</div>
+        <!-- Memory nodes floating around polygonal brain -->
+        <div class="memory-node" style="top: 15%; left: 25%; animation-delay: 0s; border-color: #ffeb3b;">bert-multilingual</div>
+        <div class="memory-node" style="top: 20%; right: 20%; animation-delay: 2s; border-color: #ff69b4;">transformers.pipeline</div>
+        <div class="memory-node" style="bottom: 25%; left: 20%; animation-delay: 4s; border-color: #00bcd4;">sentiment-analysis</div>
+        <div class="memory-node" style="top: 50%; left: 10%; animation-delay: 6s; border-color: #4caf50;">distilbert-uncased</div>
+        <div class="memory-node" style="bottom: 20%; right: 25%; animation-delay: 8s; border-color: #9c27b0;">roberta-base</div>
+        <div class="memory-node" style="top: 70%; right: 30%; animation-delay: 10s; border-color: #ff5722;">sequence_class</div>
+        <div class="memory-node" style="top: 10%; left: 50%; animation-delay: 12s; border-color: #ffc107;">twitter-sentiment</div>
+        <div class="memory-node" style="bottom: 50%; right: 10%; animation-delay: 14s; border-color: #2196f3;">nlptown/bert</div>
       </div>
       
       <!-- Neural Network Inside Brain -->
