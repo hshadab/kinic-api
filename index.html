@@ -907,7 +907,7 @@
     </div>
 
     <!-- SVG for Tendrils -->
-    <svg style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;">
+    <svg style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none; z-index: 5;">
       <defs>
         <linearGradient id="tendrilGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" style="stop-color:#64ffda;stop-opacity:0" />
@@ -1325,39 +1325,15 @@
         `;
 
         container.appendChild(agentDiv);
-
-        // Create tendril (pass agent center position)
-        const agentCenterX = x + 100;  // Center of agent card
-        const agentCenterY = y + 40;   // Center of agent card
-        createTendril(agent.id, agentCenterX, agentCenterY, agent.color);
       });
+      
+      // Create tendrils after all agents are placed
+      setTimeout(updateTendrils, 50);
     }
 
-    // Create tendril connection
+    // Create tendril connection (deprecated - using dynamic update instead)
     function createTendril(agentId, agentX, agentY, color) {
-      const svg = document.getElementById('tendrils');
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      
-      // Get brain center position relative to viewport
-      const brainCore = document.querySelector('.brain-core');
-      const brainRect = brainCore.getBoundingClientRect();
-      const brainCenterX = brainRect.left + brainRect.width / 2;
-      const brainCenterY = brainRect.top + brainRect.height / 2;
-      
-      // Create curved path from agent to brain center
-      const midX = (brainCenterX + agentX) / 2;
-      const midY = (brainCenterY + agentY) / 2;
-      const curveX = midX + (Math.random() - 0.5) * 50;
-      const curveY = midY + (Math.random() - 0.5) * 50;
-      
-      path.setAttribute('d', `M ${agentX} ${agentY} Q ${curveX} ${curveY} ${brainCenterX} ${brainCenterY}`);
-      path.setAttribute('class', 'tendril-path');
-      path.setAttribute('stroke', color);
-      path.setAttribute('id', `tendril-${agentId}`);
-      path.style.opacity = '0.6';
-      path.style.filter = `drop-shadow(0 0 5px ${color})`;
-      
-      svg.appendChild(path);
+      // This function is now just a placeholder - tendrils are created in updateTendrils()
     }
 
     // Animate data particle
@@ -1408,13 +1384,18 @@
       
       // Highlight tendril with enhanced glow effect
       const tendril = document.getElementById(`tendril-${agentId}`);
-      tendril.classList.add('active');
-      tendril.style.filter = `drop-shadow(0 0 15px ${agentData.color}) drop-shadow(0 0 25px ${agentData.color})`;
+      if (tendril) {
+        tendril.classList.add('active');
+        tendril.style.filter = `drop-shadow(0 0 15px ${agentData.color}) drop-shadow(0 0 25px ${agentData.color})`;
+        
+        setTimeout(() => {
+          tendril.classList.remove('active');
+          tendril.style.filter = `drop-shadow(0 0 5px ${agentData.color})`;
+        }, duration);
+      }
       
-      setTimeout(() => {
-        tendril.classList.remove('active');
-        tendril.style.filter = `drop-shadow(0 0 5px ${agentData.color})`;
-      }, duration);
+      // Update tendrils after animation
+      setTimeout(updateTendrils, 50);
       
       // Update agent metrics
       const agentEl = document.getElementById(agentId);
@@ -1534,42 +1515,52 @@
       updateAgentVisualStatus(agentId, agentConfigs[agentId]);
     });
     
-    // Redraw tendrils after page load to ensure correct positions
-    setTimeout(() => {
-      // Clear existing tendrils
-      document.getElementById('tendrils').innerHTML = '';
+    // Function to update all tendrils dynamically
+    function updateTendrils() {
+      const svg = document.getElementById('tendrils');
+      svg.innerHTML = ''; // Clear existing
       
-      // Recreate tendrils with correct positions
       agents.forEach(agent => {
         const agentEl = document.getElementById(agent.id);
-        if (agentEl) {
-          const agentRect = agentEl.getBoundingClientRect();
+        const brainCore = document.querySelector('.brain-core');
+        
+        if (agentEl && brainCore) {
+          // Get agent card center
+          const agentCard = agentEl.querySelector('.agent-card');
+          const agentRect = agentCard.getBoundingClientRect();
           const agentCenterX = agentRect.left + agentRect.width / 2;
           const agentCenterY = agentRect.top + agentRect.height / 2;
           
-          const svg = document.getElementById('tendrils');
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          
           // Get brain center
-          const brainCore = document.querySelector('.brain-core');
           const brainRect = brainCore.getBoundingClientRect();
           const brainCenterX = brainRect.left + brainRect.width / 2;
           const brainCenterY = brainRect.top + brainRect.height / 2;
           
+          // Get SVG position for coordinate conversion
+          const svgRect = svg.getBoundingClientRect();
+          
           // Convert to SVG coordinates
-          const svgRect = svg.parentElement.getBoundingClientRect();
           const startX = agentCenterX - svgRect.left;
           const startY = agentCenterY - svgRect.top;
           const endX = brainCenterX - svgRect.left;
           const endY = brainCenterY - svgRect.top;
           
-          // Create curved path
-          const midX = (startX + endX) / 2;
-          const midY = (startY + endY) / 2;
-          const curveX = midX + (Math.random() - 0.5) * 50;
-          const curveY = midY + (Math.random() - 0.5) * 50;
+          // Create path element
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
           
-          path.setAttribute('d', `M ${startX} ${startY} Q ${curveX} ${curveY} ${endX} ${endY}`);
+          // Calculate control points for smooth curve
+          const dx = endX - startX;
+          const dy = endY - startY;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Create natural curve based on distance
+          const curveAmount = distance * 0.2;
+          const angle = Math.atan2(dy, dx) + Math.PI / 2;
+          const controlX = (startX + endX) / 2 + Math.cos(angle) * curveAmount;
+          const controlY = (startY + endY) / 2 + Math.sin(angle) * curveAmount;
+          
+          // Set path attributes
+          path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
           path.setAttribute('class', 'tendril-path');
           path.setAttribute('stroke', agent.color);
           path.setAttribute('id', `tendril-${agent.id}`);
@@ -1579,7 +1570,17 @@
           svg.appendChild(path);
         }
       });
-    }, 100);
+    }
+    
+    // Update tendrils on window resize or scroll
+    window.addEventListener('resize', updateTendrils);
+    window.addEventListener('scroll', updateTendrils);
+    
+    // Initial tendril update
+    setTimeout(updateTendrils, 100);
+    
+    // Update tendrils periodically to handle any DOM changes
+    setInterval(updateTendrils, 2000);
 
     // Periodic stats update
     setInterval(updateStats, 5000);
