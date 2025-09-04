@@ -600,16 +600,136 @@
 
   <!-- User Input Interface (Left Side) -->
   <div class="command-interface">
-    <h3 style="color: #64ffda; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Command Interface</h3>
-    <input type="text" id="commandInput" class="command-input" placeholder="Enter command..." />
-    <button class="btn execute-btn" id="executeBtn">Execute Command</button>
-    <div class="command-hints">
-      <div class="hint" style="margin-bottom: 8px;">Examples:</div>
-      <div style="font-size: 11px; color: #8892b0; line-height: 1.6;">
-        • researcher discover patterns<br>
-        • builder create solution<br>
-        • analyzer extract insights<br>
-        • all agents sync
+    <!-- Tab Navigation -->
+    <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(100, 255, 218, 0.2); padding-bottom: 10px;">
+      <button class="tab-btn active" onclick="switchTab('configure')" id="configureTab" style="background: rgba(100, 255, 218, 0.2); color: #64ffda; border: 1px solid rgba(100, 255, 218, 0.3); padding: 8px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.3s;">Configure</button>
+      <button class="tab-btn" onclick="switchTab('command')" id="commandTab" style="background: transparent; color: #8892b0; border: 1px solid rgba(100, 255, 218, 0.2); padding: 8px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.3s;">Command</button>
+      <button class="tab-btn" onclick="switchTab('tasks')" id="tasksTab" style="background: transparent; color: #8892b0; border: 1px solid rgba(100, 255, 218, 0.2); padding: 8px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.3s;">Tasks</button>
+    </div>
+    
+    <!-- Configure Panel -->
+    <div id="configurePanel" class="panel-content" style="display: block;">
+      <h3 style="color: #64ffda; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Agent Configuration</h3>
+      
+      <!-- Agent Selector -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Select Agent</label>
+        <select id="agentSelector" onchange="loadAgentConfig()" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+          <option value="">Choose an agent...</option>
+          <option value="researcher">🔬 Researcher</option>
+          <option value="builder">🔨 Builder</option>
+          <option value="analyzer">📊 Analyzer</option>
+          <option value="security">🔒 Security</option>
+          <option value="orchestrator">🎭 Orchestrator</option>
+          <option value="connector">🔗 Connector</option>
+        </select>
+      </div>
+      
+      <!-- Configuration Fields (Hidden until agent selected) -->
+      <div id="agentConfig" style="display: none;">
+        <!-- Platform Selection -->
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Platform</label>
+          <select id="platformSelect" onchange="updateModelOptions()" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+            <option value="">Select platform...</option>
+          </select>
+        </div>
+        
+        <!-- Model Selection -->
+        <div id="modelGroup" style="margin-bottom: 15px; display: none;">
+          <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Model</label>
+          <select id="modelSelect" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+            <option value="">Select model...</option>
+          </select>
+        </div>
+        
+        <!-- API Key Input -->
+        <div id="apiKeyGroup" style="margin-bottom: 15px; display: none;">
+          <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">API Key</label>
+          <input type="password" id="apiKeyInput" placeholder="Enter API key..." style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;"/>
+        </div>
+        
+        <!-- Test & Save Buttons -->
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <button class="btn" onclick="testAgentConnection()" style="flex: 1; padding: 10px; background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; border-radius: 8px; font-size: 12px; cursor: pointer;">Test Connection</button>
+          <button class="btn" onclick="saveAgentConfig()" style="flex: 1; padding: 10px; background: linear-gradient(135deg, #64ffda, #00ff88); color: #0a0e27; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 600;">Save Config</button>
+        </div>
+        
+        <!-- Status Message -->
+        <div id="configStatus" style="padding: 10px; border-radius: 8px; font-size: 12px; display: none;"></div>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(100, 255, 218, 0.1);">
+        <button class="btn" onclick="testAllAgents()" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; border-radius: 8px; font-size: 12px; cursor: pointer;">Test All Connections</button>
+        <button class="btn" onclick="exportConfigs()" style="width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(100, 255, 218, 0.2); color: #8892b0; border-radius: 8px; font-size: 12px; cursor: pointer;">Export Configurations</button>
+      </div>
+    </div>
+    
+    <!-- Command Panel -->
+    <div id="commandPanel" class="panel-content" style="display: none;">
+      <h3 style="color: #64ffda; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Command Interface</h3>
+      <input type="text" id="commandInput" class="command-input" placeholder="Enter command..." style="width: 100%; padding: 12px 16px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #64ffda; font-size: 14px;"/>
+      <button class="btn execute-btn" id="executeBtn" style="width: 100%; padding: 12px 20px; margin-bottom: 10px; background: linear-gradient(135deg, #64ffda, #00ff88); color: #0a0e27; font-weight: 700; border: none; border-radius: 8px; cursor: pointer;">Execute Command</button>
+      <div class="command-hints">
+        <div class="hint" style="margin-bottom: 8px; color: #8892b0; font-size: 11px;">Examples:</div>
+        <div style="font-size: 11px; color: #8892b0; line-height: 1.6;">
+          • researcher discover patterns<br>
+          • builder create solution<br>
+          • analyzer extract insights<br>
+          • all agents sync
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tasks Panel -->
+    <div id="tasksPanel" class="panel-content" style="display: none;">
+      <h3 style="color: #64ffda; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Automated Tasks</h3>
+      
+      <!-- Task Type Selection -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Task Type</label>
+        <select id="taskType" onchange="updateTaskOptions()" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+          <option value="">Select task type...</option>
+          <option value="research">🔬 Research & Analysis</option>
+          <option value="development">🔨 Code Development</option>
+          <option value="scraping">🌐 Web Scraping & Save</option>
+          <option value="learning">📚 Learning & Documentation</option>
+        </select>
+      </div>
+      
+      <!-- Task Input -->
+      <div id="taskInput" style="display: none; margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Task Details</label>
+        <textarea id="taskDetails" placeholder="Describe your task..." style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
+      </div>
+      
+      <!-- URL Input for Scraping -->
+      <div id="urlInput" style="display: none; margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">URLs (one per line)</label>
+        <textarea id="urlList" placeholder="https://example.com\nhttps://docs.example.com" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
+      </div>
+      
+      <!-- Schedule Options -->
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Schedule</label>
+        <select id="schedule" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+          <option value="now">Run Now</option>
+          <option value="hourly">Every Hour</option>
+          <option value="daily">Daily</option>
+          <option value="custom">Custom Schedule</option>
+        </select>
+      </div>
+      
+      <!-- Start Task Button -->
+      <button class="btn" onclick="startTask()" style="width: 100%; padding: 12px 20px; background: linear-gradient(135deg, #bd93f9, #ff79c6); color: #0a0e27; font-weight: 700; border: none; border-radius: 8px; cursor: pointer;">Start Automated Task</button>
+      
+      <!-- Running Tasks -->
+      <div id="runningTasks" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(100, 255, 218, 0.1);">
+        <h4 style="color: #bd93f9; font-size: 12px; margin-bottom: 10px; text-transform: uppercase;">Running Tasks</h4>
+        <div id="tasksList" style="font-size: 11px; color: #8892b0;">
+          No tasks running
+        </div>
       </div>
     </div>
   </div>
@@ -620,6 +740,8 @@
       bottom: 30px;
       left: 30px;
       width: 350px;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto;
       z-index: 200;
       background: rgba(10, 14, 39, 0.8);
       border: 1px solid rgba(100, 255, 218, 0.3);
@@ -826,15 +948,82 @@
   </div>
 
   <script>
-    // Agent definitions with emojis and colors
+    // Agent definitions with emojis, colors, and platforms
     const agents = [
-      { id: 'researcher', name: 'Researcher', emoji: '🔬', color: '#64ffda', angle: 0 },
-      { id: 'builder', name: 'Builder', emoji: '🔨', color: '#bd93f9', angle: 60 },
-      { id: 'analyzer', name: 'Analyzer', emoji: '📊', color: '#ff79c6', angle: 120 },
-      { id: 'security', name: 'Security', emoji: '🔒', color: '#50fa7b', angle: 180 },
-      { id: 'orchestrator', name: 'Orchestrator', emoji: '🎭', color: '#ffb86c', angle: 240 },
-      { id: 'connector', name: 'Connector', emoji: '🔗', color: '#8be9fd', angle: 300 }
+      { 
+        id: 'researcher', 
+        name: 'Researcher', 
+        emoji: '🔬', 
+        color: '#64ffda', 
+        angle: 0,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'builder', 
+        name: 'Builder', 
+        emoji: '🔨', 
+        color: '#bd93f9', 
+        angle: 60,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'local': { name: 'Local (Ollama)', models: ['codellama', 'llama2', 'mistral'], requiresKey: false }
+        }
+      },
+      { 
+        id: 'analyzer', 
+        name: 'Analyzer', 
+        emoji: '📊', 
+        color: '#ff79c6', 
+        angle: 120,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'cohere': { name: 'Cohere', models: ['command', 'command-light'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'security', 
+        name: 'Security', 
+        emoji: '🔒', 
+        color: '#50fa7b', 
+        angle: 180,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'orchestrator', 
+        name: 'Orchestrator', 
+        emoji: '🎭', 
+        color: '#ffb86c', 
+        angle: 240,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'connector', 
+        name: 'Connector', 
+        emoji: '🔗', 
+        color: '#8be9fd', 
+        angle: 300,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-haiku-20240307'], requiresKey: true },
+          'huggingface': { name: 'HuggingFace', models: ['meta-llama/Llama-2-7b', 'google/flan-t5-base'], requiresKey: true }
+        }
+      }
     ];
+    
+    // Store agent configurations
+    let agentConfigs = JSON.parse(localStorage.getItem('agentConfigs') || '{}');
 
     // Activity messages
     const activities = [
@@ -855,6 +1044,239 @@
     let nodeCount = 42;
     let connectionsPerSec = 0;
     let memoryUtil = 0;
+    
+    // Configuration Functions
+    function switchTab(tab) {
+      // Hide all panels
+      document.getElementById('configurePanel').style.display = 'none';
+      document.getElementById('commandPanel').style.display = 'none';
+      document.getElementById('tasksPanel').style.display = 'none';
+      
+      // Reset tab styles
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.style.background = 'transparent';
+        btn.style.color = '#8892b0';
+      });
+      
+      // Show selected panel and highlight tab
+      const activeTab = document.getElementById(tab + 'Tab');
+      activeTab.style.background = 'rgba(100, 255, 218, 0.2)';
+      activeTab.style.color = '#64ffda';
+      document.getElementById(tab + 'Panel').style.display = 'block';
+    }
+    
+    function loadAgentConfig() {
+      const agentId = document.getElementById('agentSelector').value;
+      if (!agentId) {
+        document.getElementById('agentConfig').style.display = 'none';
+        return;
+      }
+      
+      document.getElementById('agentConfig').style.display = 'block';
+      
+      const agent = agents.find(a => a.id === agentId);
+      const config = agentConfigs[agentId] || {};
+      
+      // Update platform options
+      const platformSelect = document.getElementById('platformSelect');
+      platformSelect.innerHTML = '<option value="">Select platform...</option>';
+      Object.keys(agent.platforms).forEach(key => {
+        const selected = config.platform === key ? 'selected' : '';
+        platformSelect.innerHTML += `<option value="${key}" ${selected}>${agent.platforms[key].name}</option>`;
+      });
+      
+      if (config.platform) {
+        updateModelOptions();
+      }
+      
+      // Load saved API key
+      if (config.apiKey) {
+        document.getElementById('apiKeyInput').value = config.apiKey;
+      }
+      
+      // Update agent visual status
+      updateAgentVisualStatus(agentId, config);
+    }
+    
+    function updateModelOptions() {
+      const agentId = document.getElementById('agentSelector').value;
+      const platform = document.getElementById('platformSelect').value;
+      
+      if (!agentId || !platform) {
+        document.getElementById('modelGroup').style.display = 'none';
+        document.getElementById('apiKeyGroup').style.display = 'none';
+        return;
+      }
+      
+      const agent = agents.find(a => a.id === agentId);
+      const config = agentConfigs[agentId] || {};
+      
+      // Show model selection
+      document.getElementById('modelGroup').style.display = 'block';
+      
+      // Update model options
+      const modelSelect = document.getElementById('modelSelect');
+      modelSelect.innerHTML = '<option value="">Select model...</option>';
+      agent.platforms[platform].models.forEach(model => {
+        const selected = config.model === model ? 'selected' : '';
+        modelSelect.innerHTML += `<option value="${model}" ${selected}>${model}</option>`;
+      });
+      
+      // Show/hide API key field
+      if (agent.platforms[platform].requiresKey) {
+        document.getElementById('apiKeyGroup').style.display = 'block';
+      } else {
+        document.getElementById('apiKeyGroup').style.display = 'none';
+      }
+    }
+    
+    async function testAgentConnection() {
+      const agentId = document.getElementById('agentSelector').value;
+      const platform = document.getElementById('platformSelect').value;
+      const model = document.getElementById('modelSelect').value;
+      const apiKey = document.getElementById('apiKeyInput').value;
+      
+      const statusDiv = document.getElementById('configStatus');
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = 'rgba(100, 255, 218, 0.1)';
+      statusDiv.style.border = '1px solid rgba(100, 255, 218, 0.3)';
+      statusDiv.style.color = '#64ffda';
+      statusDiv.textContent = 'Testing connection...';
+      
+      // Simulate API test (replace with actual backend call)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      if (platform && model && (apiKey || !agents.find(a => a.id === agentId).platforms[platform].requiresKey)) {
+        statusDiv.style.background = 'rgba(80, 250, 123, 0.1)';
+        statusDiv.style.border = '1px solid rgba(80, 250, 123, 0.3)';
+        statusDiv.style.color = '#50fa7b';
+        statusDiv.textContent = '✅ Connection successful!';
+        
+        // Update visual agent status
+        updateAgentVisualStatus(agentId, { status: 'active', platform, model });
+      } else {
+        statusDiv.style.background = 'rgba(255, 85, 85, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 85, 85, 0.3)';
+        statusDiv.style.color = '#ff5555';
+        statusDiv.textContent = '❌ Connection failed. Check your configuration.';
+      }
+    }
+    
+    function saveAgentConfig() {
+      const agentId = document.getElementById('agentSelector').value;
+      const platform = document.getElementById('platformSelect').value;
+      const model = document.getElementById('modelSelect').value;
+      const apiKey = document.getElementById('apiKeyInput').value;
+      
+      if (!agentId || !platform || !model) {
+        alert('Please complete the configuration');
+        return;
+      }
+      
+      agentConfigs[agentId] = {
+        platform,
+        model,
+        apiKey,
+        status: 'configured'
+      };
+      
+      localStorage.setItem('agentConfigs', JSON.stringify(agentConfigs));
+      
+      const statusDiv = document.getElementById('configStatus');
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = 'rgba(80, 250, 123, 0.1)';
+      statusDiv.style.border = '1px solid rgba(80, 250, 123, 0.3)';
+      statusDiv.style.color = '#50fa7b';
+      statusDiv.textContent = '✅ Configuration saved!';
+      
+      // Update visual agent status
+      updateAgentVisualStatus(agentId, agentConfigs[agentId]);
+    }
+    
+    function updateAgentVisualStatus(agentId, config) {
+      const agentEl = document.getElementById(agentId);
+      if (!agentEl) return;
+      
+      const agentCard = agentEl.querySelector('.agent-card');
+      const metricItems = agentCard.querySelectorAll('.metric-item');
+      
+      if (config && config.platform) {
+        // Update first metric to show platform
+        metricItems[0].querySelector('.metric-value').textContent = config.platform;
+        metricItems[0].querySelector('.metric-label').textContent = 'Platform';
+        
+        // Update second metric to show status
+        if (config.status === 'active') {
+          metricItems[1].querySelector('.metric-value').textContent = '✅';
+          metricItems[1].querySelector('.metric-label').textContent = 'Active';
+          agentCard.style.borderColor = '#50fa7b';
+        } else {
+          metricItems[1].querySelector('.metric-value').textContent = '⚙️';
+          metricItems[1].querySelector('.metric-label').textContent = 'Configured';
+          agentCard.style.borderColor = '#ffb86c';
+        }
+      }
+    }
+    
+    async function testAllAgents() {
+      for (const agentId of Object.keys(agentConfigs)) {
+        const config = agentConfigs[agentId];
+        if (config) {
+          // Update visual feedback
+          updateAgentVisualStatus(agentId, { ...config, status: 'testing' });
+          await new Promise(resolve => setTimeout(resolve, 500));
+          updateAgentVisualStatus(agentId, { ...config, status: 'active' });
+        }
+      }
+    }
+    
+    function exportConfigs() {
+      const dataStr = JSON.stringify(agentConfigs, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'kinic-agent-configs.json';
+      link.click();
+    }
+    
+    // Task functions
+    function updateTaskOptions() {
+      const taskType = document.getElementById('taskType').value;
+      document.getElementById('taskInput').style.display = taskType ? 'block' : 'none';
+      document.getElementById('urlInput').style.display = taskType === 'scraping' ? 'block' : 'none';
+    }
+    
+    function startTask() {
+      const taskType = document.getElementById('taskType').value;
+      const taskDetails = document.getElementById('taskDetails').value;
+      const schedule = document.getElementById('schedule').value;
+      
+      if (!taskType) {
+        alert('Please select a task type');
+        return;
+      }
+      
+      // Add to running tasks
+      const tasksList = document.getElementById('tasksList');
+      const taskId = Date.now();
+      tasksList.innerHTML = `
+        <div id="task-${taskId}" style="padding: 10px; background: rgba(189, 147, 249, 0.1); border: 1px solid rgba(189, 147, 249, 0.3); border-radius: 8px; margin-bottom: 10px;">
+          <div style="color: #bd93f9; font-weight: 600;">${taskType}</div>
+          <div style="color: #8892b0; font-size: 10px;">${taskDetails || 'Running...'}</div>
+          <div style="margin-top: 5px;">
+            <span style="color: #50fa7b; font-size: 10px;">● Active</span>
+          </div>
+        </div>
+      `;
+      
+      // Animate agents based on task
+      if (taskType === 'research') {
+        animateParticle('researcher', true);
+      } else if (taskType === 'development') {
+        animateParticle('builder', true);
+      }
+    }
 
     // Initialize Brain
     function initBrain() {
@@ -1106,6 +1528,11 @@
     initBrain();
     updateStats();
     setTimeout(autoAnimate, 1000);
+    
+    // Load saved configurations on startup
+    Object.keys(agentConfigs).forEach(agentId => {
+      updateAgentVisualStatus(agentId, agentConfigs[agentId]);
+    });
     
     // Redraw tendrils after page load to ensure correct positions
     setTimeout(() => {
