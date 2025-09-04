@@ -808,93 +808,88 @@
       <!-- Central Brain Core with SVG -->
       <div class="brain-core">
         <svg width="380" height="380" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg">
-          <!-- Define gradients for abstract sphere -->
+          <!-- Define gradients for unified sphere -->
           <defs>
-            <!-- Main sphere gradient with subtle color transitions -->
-            <radialGradient id="sphereGradient" cx="45%" cy="40%">
-              <stop offset="0%" style="stop-color:#fff8e1;stop-opacity:0.9" />
-              <stop offset="20%" style="stop-color:#ffe082;stop-opacity:0.9" />
-              <stop offset="40%" style="stop-color:#ffb74d;stop-opacity:0.95" />
+            <!-- Main unified sphere gradient -->
+            <radialGradient id="sphereGradient" cx="45%" cy="35%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+              <stop offset="15%" style="stop-color:#fff9c4;stop-opacity:0.8" />
+              <stop offset="30%" style="stop-color:#ffeb3b;stop-opacity:0.9" />
+              <stop offset="45%" style="stop-color:#ffb74d;stop-opacity:0.95" />
               <stop offset="60%" style="stop-color:#f48fb1;stop-opacity:0.95" />
-              <stop offset="80%" style="stop-color:#ce93d8;stop-opacity:0.9" />
-              <stop offset="100%" style="stop-color:#9575cd;stop-opacity:0.85" />
+              <stop offset="75%" style="stop-color:#ce93d8;stop-opacity:0.9" />
+              <stop offset="90%" style="stop-color:#9575cd;stop-opacity:0.85" />
+              <stop offset="100%" style="stop-color:#7e57c2;stop-opacity:0.8" />
             </radialGradient>
             
-            <!-- Left side accent gradient -->
-            <radialGradient id="leftAccent" cx="30%" cy="40%">
-              <stop offset="0%" style="stop-color:#fff59d;stop-opacity:0.6" />
-              <stop offset="50%" style="stop-color:#ffcc80;stop-opacity:0.5" />
-              <stop offset="100%" style="stop-color:#ff9800;stop-opacity:0.4" />
+            <!-- Inner glow gradient -->
+            <radialGradient id="innerGlow" cx="50%" cy="50%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+              <stop offset="50%" style="stop-color:#fff59d;stop-opacity:0.2" />
+              <stop offset="100%" style="stop-color:#ffb74d;stop-opacity:0.1" />
             </radialGradient>
             
-            <!-- Right side accent gradient -->
-            <radialGradient id="rightAccent" cx="70%" cy="40%">
-              <stop offset="0%" style="stop-color:#f8bbd0;stop-opacity:0.6" />
-              <stop offset="50%" style="stop-color:#e1bee7;stop-opacity:0.5" />
-              <stop offset="100%" style="stop-color:#ba68c8;stop-opacity:0.4" />
-            </radialGradient>
-            
-            <!-- Highlight gradient for shine -->
-            <radialGradient id="highlight" cx="40%" cy="30%">
-              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.8" />
-              <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.3" />
+            <!-- Highlight for 3D shine -->
+            <radialGradient id="highlight" cx="35%" cy="25%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+              <stop offset="40%" style="stop-color:#ffffff;stop-opacity:0.4" />
               <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
             </radialGradient>
             
             <!-- Shadow gradient -->
             <radialGradient id="shadow">
               <stop offset="0%" style="stop-color:#000000;stop-opacity:0" />
-              <stop offset="70%" style="stop-color:#000000;stop-opacity:0.1" />
-              <stop offset="100%" style="stop-color:#000000;stop-opacity:0.25" />
+              <stop offset="60%" style="stop-color:#000000;stop-opacity:0.15" />
+              <stop offset="100%" style="stop-color:#000000;stop-opacity:0.3" />
             </radialGradient>
           </defs>
           
-          <!-- Abstract spherical form -->
+          <!-- Unified spherical form -->
           <g class="sphere-body">
-            <!-- Main sphere - composed of polygons for low-poly effect -->
-            <!-- Top section -->
-            <polygon points="190,40 220,45 250,60 270,80 280,105 275,130 260,150 240,165 210,175 190,180 170,175 140,165 120,150 105,130 100,105 110,80 130,60 160,45" 
-                     fill="url(#sphereGradient)" opacity="1"/>
+            <!-- Main sphere base -->
+            <circle cx="190" cy="145" r="120" fill="url(#sphereGradient)" opacity="1"/>
             
-            <!-- Left facets -->
-            <polygon points="100,105 120,85 140,75 160,70 180,75 190,90 190,110 180,125 160,135 140,140 120,135 105,125" 
-                     fill="url(#leftAccent)" opacity="0.7"/>
-            <polygon points="105,130 120,150 140,165 160,170 180,165 190,150 190,130 180,140 160,145 140,145 120,140" 
-                     fill="url(#leftAccent)" opacity="0.6"/>
+            <!-- Inner glow layer -->
+            <circle cx="190" cy="145" r="110" fill="url(#innerGlow)" opacity="0.7"/>
             
-            <!-- Right facets -->
-            <polygon points="280,105 260,85 240,75 220,70 200,75 190,90 190,110 200,125 220,135 240,140 260,135 275,125" 
-                     fill="url(#rightAccent)" opacity="0.7"/>
-            <polygon points="275,130 260,150 240,165 220,170 200,165 190,150 190,130 200,140 220,145 240,145 260,140" 
-                     fill="url(#rightAccent)" opacity="0.6"/>
+            <!-- Polygonal facets for texture -->
+            <g opacity="0.4">
+              <!-- Top facets -->
+              <polygon points="190,45 210,55 225,70 220,85 200,90 180,85 175,70 190,55" fill="#fff8e1"/>
+              <polygon points="155,65 175,70 180,85 165,95 150,90 145,75" fill="#ffe082"/>
+              <polygon points="225,70 240,80 245,95 230,105 215,95 210,80" fill="#ffeb3b"/>
+              
+              <!-- Middle ring facets -->
+              <polygon points="130,115 150,110 165,120 160,135 140,140 125,130" fill="#ffb74d"/>
+              <polygon points="210,110 230,115 245,130 240,145 220,140 205,125" fill="#ff9800"/>
+              <polygon points="165,120 185,115 200,120 195,135 180,140 160,135" fill="#ff7043"/>
+              
+              <!-- Lower facets -->
+              <polygon points="150,165 170,160 185,170 180,185 160,190 145,180" fill="#f48fb1"/>
+              <polygon points="195,160 215,165 230,180 225,195 205,190 190,175" fill="#e91e63"/>
+              <polygon points="175,195 195,200 210,210 195,220 175,215 160,205" fill="#ce93d8"/>
+            </g>
             
-            <!-- Bottom section -->
-            <polygon points="190,180 210,175 230,170 250,165 265,155 275,145 280,135 275,160 260,180 240,195 210,205 190,210 170,205 140,195 120,180 105,160 100,135 105,145 115,155 130,165 150,170 170,175" 
-                     fill="url(#sphereGradient)" opacity="0.9"/>
+            <!-- Subtle texture polygons -->
+            <g opacity="0.25">
+              <polygon points="160,80 175,85 170,95 158,90" fill="#ffd54f"/>
+              <polygon points="210,85 225,90 220,100 208,95" fill="#ffcc80"/>
+              <polygon points="140,125 155,130 150,140 138,135" fill="#ffb74d"/>
+              <polygon points="235,125 250,130 245,140 233,135" fill="#ff9800"/>
+              <polygon points="165,170 180,175 175,185 163,180" fill="#f8bbd0"/>
+              <polygon points="200,170 215,175 210,185 198,180" fill="#e1bee7"/>
+            </g>
             
-            <!-- Subtle division line suggesting hemispheres -->
-            <polygon points="190,70 188,90 189,110 190,130 191,150 190,170 192,150 191,130 190,110 189,90 191,70" 
-                     fill="rgba(255,255,255,0.2)" opacity="0.5"/>
+            <!-- Top highlight for 3D effect -->
+            <ellipse cx="165" cy="85" rx="45" ry="40" fill="url(#highlight)" opacity="0.7"/>
+            
+            <!-- Additional smaller highlights -->
+            <ellipse cx="150" cy="100" rx="20" ry="18" fill="rgba(255,255,255,0.3)" opacity="0.5"/>
+            <ellipse cx="210" cy="95" rx="15" ry="13" fill="rgba(255,255,255,0.2)" opacity="0.4"/>
           </g>
           
-          <!-- Geometric accents for abstract brain suggestion -->
-          <g opacity="0.25">
-            <!-- Left side patterns -->
-            <polygon points="130,90 145,95 140,105 128,100" fill="#ffd54f"/>
-            <polygon points="150,120 165,125 160,135 148,130" fill="#ffb74d"/>
-            <polygon points="125,145 140,140 138,150 126,155" fill="#ff9800"/>
-            
-            <!-- Right side patterns -->
-            <polygon points="250,90 235,95 240,105 252,100" fill="#e1bee7"/>
-            <polygon points="230,120 215,125 220,135 232,130" fill="#ce93d8"/>
-            <polygon points="255,145 240,140 242,150 254,155" fill="#ba68c8"/>
-          </g>
-          
-          <!-- Highlight for 3D effect -->
-          <ellipse cx="160" cy="90" rx="40" ry="35" fill="url(#highlight)" opacity="0.6"/>
-          
-          <!-- Bottom shadow -->
-          <ellipse cx="190" cy="250" rx="90" ry="25" fill="url(#shadow)" opacity="0.6"/>
+          <!-- Bottom shadow for floating effect -->
+          <ellipse cx="190" cy="280" rx="95" ry="25" fill="url(#shadow)" opacity="0.7"/>
         </svg>
       </div>
       
