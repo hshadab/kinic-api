@@ -614,14 +614,14 @@
       <!-- Agent Selector -->
       <div style="margin-bottom: 15px;">
         <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Select Agent</label>
-        <select id="agentSelector" onchange="loadAgentConfig()" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
-          <option value="">Choose an agent...</option>
-          <option value="researcher">🔬 Researcher</option>
-          <option value="builder">🔨 Builder</option>
-          <option value="analyzer">📊 Analyzer</option>
-          <option value="security">🔒 Security</option>
-          <option value="orchestrator">🎭 Orchestrator</option>
-          <option value="connector">🔗 Connector</option>
+        <select id="agentSelector" onchange="loadAgentConfig()" style="width: 100%; padding: 10px; background: rgba(10, 14, 39, 0.95); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #64ffda; font-size: 14px;">
+          <option value="" style="background: #0a0e27; color: #64ffda;">Choose an agent...</option>
+          <option value="researcher" style="background: #0a0e27; color: #64ffda;">🔬 Researcher</option>
+          <option value="builder" style="background: #0a0e27; color: #64ffda;">🔨 Builder</option>
+          <option value="analyzer" style="background: #0a0e27; color: #64ffda;">📊 Analyzer</option>
+          <option value="security" style="background: #0a0e27; color: #64ffda;">🔒 Security</option>
+          <option value="orchestrator" style="background: #0a0e27; color: #64ffda;">🎭 Orchestrator</option>
+          <option value="connector" style="background: #0a0e27; color: #64ffda;">🔗 Connector</option>
         </select>
       </div>
       
@@ -630,7 +630,7 @@
         <!-- Platform Selection -->
         <div style="margin-bottom: 15px;">
           <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Platform</label>
-          <select id="platformSelect" onchange="updateModelOptions()" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+          <select id="platformSelect" onchange="updateModelOptions()" style="width: 100%; padding: 10px; background: rgba(10, 14, 39, 0.95); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #64ffda; font-size: 14px;">
             <option value="">Select platform...</option>
           </select>
         </div>
@@ -638,7 +638,7 @@
         <!-- Model Selection -->
         <div id="modelGroup" style="margin-bottom: 15px; display: none;">
           <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Model</label>
-          <select id="modelSelect" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+          <select id="modelSelect" style="width: 100%; padding: 10px; background: rgba(10, 14, 39, 0.95); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #64ffda; font-size: 14px;">
             <option value="">Select model...</option>
           </select>
         </div>
@@ -689,7 +689,7 @@
       <!-- Task Type Selection -->
       <div style="margin-bottom: 15px;">
         <label style="display: block; margin-bottom: 6px; font-size: 11px; color: #8892b0; text-transform: uppercase;">Task Type</label>
-        <select id="taskType" onchange="updateTaskOptions()" style="width: 100%; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #fff; font-size: 14px;">
+        <select id="taskType" onchange="updateTaskOptions()" style="width: 100%; padding: 10px; background: rgba(10, 14, 39, 0.95); border: 1px solid rgba(100, 255, 218, 0.2); border-radius: 8px; color: #64ffda; font-size: 14px;">
           <option value="">Select task type...</option>
           <option value="research">🔬 Research & Analysis</option>
           <option value="development">🔨 Code Development</option>
@@ -1074,10 +1074,10 @@
       
       // Update platform options
       const platformSelect = document.getElementById('platformSelect');
-      platformSelect.innerHTML = '<option value="">Select platform...</option>';
+      platformSelect.innerHTML = '<option value="" style="background: #0a0e27; color: #64ffda;">Select platform...</option>';
       Object.keys(agent.platforms).forEach(key => {
         const selected = config.platform === key ? 'selected' : '';
-        platformSelect.innerHTML += `<option value="${key}" ${selected}>${agent.platforms[key].name}</option>`;
+        platformSelect.innerHTML += `<option value="${key}" ${selected} style="background: #0a0e27; color: #64ffda;">${agent.platforms[key].name}</option>`;
       });
       
       if (config.platform) {
@@ -1111,10 +1111,10 @@
       
       // Update model options
       const modelSelect = document.getElementById('modelSelect');
-      modelSelect.innerHTML = '<option value="">Select model...</option>';
+      modelSelect.innerHTML = '<option value="" style="background: #0a0e27; color: #64ffda;">Select model...</option>';
       agent.platforms[platform].models.forEach(model => {
         const selected = config.model === model ? 'selected' : '';
-        modelSelect.innerHTML += `<option value="${model}" ${selected}>${model}</option>`;
+        modelSelect.innerHTML += `<option value="${model}" ${selected} style="background: #0a0e27; color: #64ffda;">${model}</option>`;
       });
       
       // Show/hide API key field
@@ -1138,22 +1138,42 @@
       statusDiv.style.color = '#64ffda';
       statusDiv.textContent = 'Testing connection...';
       
-      // Simulate API test (replace with actual backend call)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      if (platform && model && (apiKey || !agents.find(a => a.id === agentId).platforms[platform].requiresKey)) {
-        statusDiv.style.background = 'rgba(80, 250, 123, 0.1)';
-        statusDiv.style.border = '1px solid rgba(80, 250, 123, 0.3)';
-        statusDiv.style.color = '#50fa7b';
-        statusDiv.textContent = '✅ Connection successful!';
+      // Make real API call to backend
+      try {
+        const response = await fetch('http://localhost:5000/api/test-connection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            platform: platform,
+            model: model,
+            apiKey: apiKey
+          })
+        });
         
-        // Update visual agent status
-        updateAgentVisualStatus(agentId, { status: 'active', platform, model });
-      } else {
-        statusDiv.style.background = 'rgba(255, 85, 85, 0.1)';
-        statusDiv.style.border = '1px solid rgba(255, 85, 85, 0.3)';
-        statusDiv.style.color = '#ff5555';
-        statusDiv.textContent = '❌ Connection failed. Check your configuration.';
+        const data = await response.json();
+        
+        if (data.success) {
+          statusDiv.style.background = 'rgba(80, 250, 123, 0.1)';
+          statusDiv.style.border = '1px solid rgba(80, 250, 123, 0.3)';
+          statusDiv.style.color = '#50fa7b';
+          statusDiv.innerHTML = `✅ Connection successful!<br><small style="opacity: 0.8">${data.response || data.message}</small>`;
+          
+          // Update visual agent status
+          updateAgentVisualStatus(agentId, { status: 'active', platform, model });
+        } else {
+          statusDiv.style.background = 'rgba(255, 85, 85, 0.1)';
+          statusDiv.style.border = '1px solid rgba(255, 85, 85, 0.3)';
+          statusDiv.style.color = '#ff5555';
+          statusDiv.innerHTML = `❌ Connection failed<br><small style="opacity: 0.8">${data.error}</small>`;
+        }
+      } catch (error) {
+        // If backend is not running, show helpful message
+        statusDiv.style.background = 'rgba(255, 204, 0, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 204, 0, 0.3)';
+        statusDiv.style.color = '#ffcc00';
+        statusDiv.innerHTML = `⚠️ Backend not running<br><small style="opacity: 0.8">Run: python kinic-agent-api.py</small>`;
       }
     }
     

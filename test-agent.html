@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Agent Connection</title>
+  <style>
+    body {
+      font-family: monospace;
+      background: #0a0e27;
+      color: #64ffda;
+      padding: 40px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      background: linear-gradient(135deg, #64ffda, #00ff88);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 30px;
+    }
+    
+    .test-form {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #8892b0;
+      text-transform: uppercase;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 8px;
+      color: #fff;
+      font-family: monospace;
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #64ffda, #00ff88);
+      color: #0a0e27;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: monospace;
+      text-transform: uppercase;
+    }
+    
+    button:hover {
+      opacity: 0.9;
+    }
+    
+    #result {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+    
+    .success {
+      background: rgba(80, 250, 123, 0.1) !important;
+      border-color: rgba(80, 250, 123, 0.3) !important;
+      color: #50fa7b;
+    }
+    
+    .error {
+      background: rgba(255, 85, 85, 0.1) !important;
+      border-color: rgba(255, 85, 85, 0.3) !important;
+      color: #ff5555;
+    }
+    
+    .info {
+      font-size: 11px;
+      color: #8892b0;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(100, 255, 218, 0.05);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 Kinic Agent Connection Test</h1>
+  
+  <div class="test-form">
+    <div class="form-group">
+      <label>Platform</label>
+      <select id="platform" onchange="updateModels()">
+        <option value="">Select platform...</option>
+        <option value="openai">OpenAI</option>
+        <option value="anthropic">Anthropic</option>
+        <option value="perplexity">Perplexity</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label>Model</label>
+      <select id="model">
+        <option value="">Select model...</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label>API Key</label>
+      <input type="password" id="apiKey" placeholder="Enter your API key...">
+    </div>
+    
+    <button onclick="testConnection()">Test Connection</button>
+  </div>
+  
+  <div id="result"></div>
+  
+  <div class="info">
+    <strong>Instructions:</strong><br>
+    1. Select a platform (OpenAI, Anthropic, or Perplexity)<br>
+    2. Choose a model from the dropdown<br>
+    3. Enter your API key<br>
+    4. Click "Test Connection" to verify the setup<br><br>
+    
+    <strong>Backend Status:</strong> <span id="backendStatus">Checking...</span>
+  </div>
+  
+  <script>
+    const models = {
+      openai: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'],
+      anthropic: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'],
+      perplexity: ['llama-3.1-sonar-large-128k-online', 'llama-3.1-sonar-small-128k-online']
+    };
+    
+    function updateModels() {
+      const platform = document.getElementById('platform').value;
+      const modelSelect = document.getElementById('model');
+      
+      modelSelect.innerHTML = '<option value="">Select model...</option>';
+      
+      if (platform && models[platform]) {
+        models[platform].forEach(model => {
+          const option = document.createElement('option');
+          option.value = model;
+          option.textContent = model;
+          modelSelect.appendChild(option);
+        });
+      }
+    }
+    
+    async function testConnection() {
+      const platform = document.getElementById('platform').value;
+      const model = document.getElementById('model').value;
+      const apiKey = document.getElementById('apiKey').value;
+      const resultDiv = document.getElementById('result');
+      
+      if (!platform || !model || !apiKey) {
+        resultDiv.className = 'error';
+        resultDiv.textContent = 'Please fill in all fields';
+        return;
+      }
+      
+      resultDiv.className = '';
+      resultDiv.textContent = 'Testing connection...';
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/test-connection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            platform: platform,
+            model: model,
+            apiKey: apiKey
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          resultDiv.className = 'success';
+          resultDiv.textContent = `✅ Success!\n\nPlatform: ${platform}\nModel: ${model}\nResponse: ${data.response}\nTimestamp: ${data.timestamp}`;
+        } else {
+          resultDiv.className = 'error';
+          resultDiv.textContent = `❌ Error\n\n${data.error}`;
+        }
+      } catch (error) {
+        resultDiv.className = 'error';
+        resultDiv.textContent = `❌ Connection Error\n\nMake sure the backend is running:\npython kinic-agent-api.py`;
+      }
+    }
+    
+    // Check backend status
+    async function checkBackend() {
+      const statusSpan = document.getElementById('backendStatus');
+      try {
+        const response = await fetch('http://localhost:5000/api/health');
+        const data = await response.json();
+        if (data.status === 'healthy') {
+          statusSpan.style.color = '#50fa7b';
+          statusSpan.textContent = '✅ Running';
+        }
+      } catch (error) {
+        statusSpan.style.color = '#ff5555';
+        statusSpan.textContent = '❌ Not running (run: python kinic-agent-api.py)';
+      }
+    }
+    
+    checkBackend();
+    setInterval(checkBackend, 5000);
+  </script>
+</body>
+</html>
