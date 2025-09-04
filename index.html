@@ -421,15 +421,15 @@
     /* Activity Log */
     .activity-log {
       position: absolute;
-      bottom: 30px;
-      left: 30px;
+      top: 120px;
+      right: 30px;
       width: 350px;
       background: rgba(10, 14, 39, 0.8);
       border: 1px solid rgba(100, 255, 218, 0.3);
       border-radius: 12px;
       padding: 20px;
       backdrop-filter: blur(10px);
-      max-height: 200px;
+      max-height: 250px;
       overflow-y: auto;
     }
 
@@ -472,9 +472,9 @@
     /* Stats Panel */
     .stats-panel {
       position: absolute;
-      bottom: 30px;
+      top: 400px;
       right: 30px;
-      width: 280px;
+      width: 350px;
       background: rgba(10, 14, 39, 0.8);
       border: 1px solid rgba(189, 147, 249, 0.3);
       border-radius: 12px;
@@ -598,22 +598,28 @@
     <button class="btn" id="speedBtn">Speed: Normal</button>
   </div>
 
-  <!-- User Input Interface -->
+  <!-- User Input Interface (Left Side) -->
   <div class="command-interface">
-    <input type="text" id="commandInput" class="command-input" placeholder="Enter command: e.g., 'researcher analyze data' or 'all agents sync'" />
-    <button class="btn execute-btn" id="executeBtn">Execute</button>
+    <h3 style="color: #64ffda; font-size: 14px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px;">Command Interface</h3>
+    <input type="text" id="commandInput" class="command-input" placeholder="Enter command..." />
+    <button class="btn execute-btn" id="executeBtn">Execute Command</button>
     <div class="command-hints">
-      <span class="hint">Try: "researcher discover patterns" | "builder create solution" | "all sync"</span>
+      <div class="hint" style="margin-bottom: 8px;">Examples:</div>
+      <div style="font-size: 11px; color: #8892b0; line-height: 1.6;">
+        • researcher discover patterns<br>
+        • builder create solution<br>
+        • analyzer extract insights<br>
+        • all agents sync
+      </div>
     </div>
   </div>
 
   <style>
     .command-interface {
       position: absolute;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
+      bottom: 30px;
+      left: 30px;
+      width: 350px;
       z-index: 200;
       background: rgba(10, 14, 39, 0.8);
       border: 1px solid rgba(100, 255, 218, 0.3);
@@ -623,7 +629,7 @@
     }
 
     .command-input {
-      width: calc(100% - 100px);
+      width: 100%;
       padding: 12px 16px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(100, 255, 218, 0.3);
@@ -632,6 +638,7 @@
       font-size: 14px;
       font-family: 'JetBrains Mono', monospace;
       transition: all 0.3s ease;
+      margin-bottom: 15px;
     }
 
     .command-input:focus {
@@ -647,13 +654,12 @@
     }
 
     .execute-btn {
-      position: absolute;
-      right: 20px;
-      top: 20px;
+      width: 100%;
       padding: 12px 20px;
       background: linear-gradient(135deg, #64ffda, #00ff88);
       color: #0a0e27;
       font-weight: 700;
+      margin-bottom: 10px;
     }
 
     .execute-btn:hover {
@@ -796,9 +802,10 @@
     </svg>
   </div>
 
+  <!-- Data Feeds (Right Side) -->
   <!-- Activity Log -->
   <div class="activity-log">
-    <h3>Neural Activity</h3>
+    <h3>Neural Activity Feed</h3>
     <div id="logEntries"></div>
   </div>
 
