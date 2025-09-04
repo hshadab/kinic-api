@@ -61,6 +61,19 @@ Connect multiple AI agents (OpenAI, Anthropic, Perplexity) to a shared knowledge
 ### Real-Time Visualization
 This repository includes a stunning visualization of your Kinic brain and connected agents. Watch knowledge flow in real-time as your agents interact with the memory layer.
 
+## 🎥 See It In Action
+
+### Two-Agent HuggingFace Demo
+Watch how two AI agents collaborate using Kinic's memory layer to discover and share HuggingFace models:
+
+**[📺 Watch the Demo Video](https://www.youtube.com/watch?v=Ooipwo4TGXY)**
+
+In this simple yet powerful demonstration:
+- **Agent 1** discovers and saves HuggingFace model information to Kinic
+- **Agent 2** automatically finds and uses that knowledge through semantic search
+- No direct communication needed - pure memory-based collaboration
+- Real-world example of how Kinic enables AI teamwork
+
 ## 📦 What's in This Repository?
 
 ### 1. **Kinic API Client**
@@ -88,6 +101,26 @@ Ready-to-use backend for connecting AI platforms:
 - **[Brain Visualization](https://hshadab.github.io/kinic-api/)** - See Kinic in action
 - **[Google A2A Protocol Demo](https://hshadab.github.io/kinic-api/demo-google-a2a-v2.html)** - Advanced agent communication
 - **Agent Configuration Interface** - Set up and test your agents
+
+## 💡 Simple Example: Two Agents Sharing Knowledge
+
+Here's how easy it is for agents to collaborate through Kinic:
+
+```python
+# Agent 1: Researcher finds a great model
+researcher = KinicAgent(api_key="your-kinic-key", role="researcher")
+researcher.save("Found amazing sentiment model: cardiffnlp/twitter-roberta-base-sentiment")
+
+# Agent 2: Builder (different session, different AI) needs a sentiment model
+builder = KinicAgent(api_key="your-kinic-key", role="builder") 
+models = builder.search("sentiment analysis models")
+# Returns: "cardiffnlp/twitter-roberta-base-sentiment" - exactly what Agent 1 found!
+
+# Builder uses the discovered model
+builder.implement(f"Create API using {models[0]}")
+```
+
+That's it! No complex orchestration, no direct communication protocols. Just shared memory.
 
 ## 🚀 Quick Start
 
