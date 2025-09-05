@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.1.5';
+    window.APP_VERSION = '1.1.6';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -1750,6 +1750,9 @@
       const agentEl = document.getElementById(agentId);
       if (!agentEl) return;
       
+      const agentCard = agentEl.querySelector('.agent-card');
+      if (!agentCard) return;
+      
       // Update based on config
       if (config && config.platform) {
         updateAgentModel(agentId, config.platform, config.model);
@@ -1759,8 +1762,15 @@
           addAgentAction(agentId, `Connected to ${config.platform}`, '✅');
           agentCard.style.borderColor = '#50fa7b';
         } else {
-          metricItems[1].querySelector('.metric-value').textContent = '⚙️';
-          metricItems[1].querySelector('.metric-label').textContent = 'Configured';
+          // Update the latency metric to show configured status
+          const latencyDiv = document.getElementById(`latency-${agentId}`);
+          const latencyLabel = latencyDiv?.parentElement?.querySelector('.metric-label');
+          if (latencyDiv) {
+            latencyDiv.textContent = '⚙️';
+          }
+          if (latencyLabel) {
+            latencyLabel.textContent = 'Configured';
+          }
           agentCard.style.borderColor = '#ffb86c';
         }
       }
