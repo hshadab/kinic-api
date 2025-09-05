@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.2.3';
+    window.APP_VERSION = '1.2.4';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -2366,15 +2366,28 @@
       updateAgentVisualStatus(agentId, agentConfigs[agentId]);
     });
     
+    // Helper function to get agent element with fallback
+    function getAgentEl(id) {
+      return document.getElementById(id) || 
+             document.querySelector(`[data-agent="${id}"]`) ||
+             document.querySelector(`[id*="${id}"]`);
+    }
+    
     // Function to create tendril for a specific agent
     function createTendrilForAgent(agentId) {
       const agent = agents.find(a => a.id === agentId);
-      if (!agent) return;
+      if (!agent) {
+        console.error(`Agent not found in array: ${agentId}`);
+        return;
+      }
       
       const svg = document.getElementById('tendrils');
-      if (!svg) return;
+      if (!svg) {
+        console.error('Tendrils SVG not found');
+        return;
+      }
       
-      const agentEl = document.getElementById(agentId);
+      const agentEl = getAgentEl(agentId);
       const brainCore = document.querySelector('.brain-core');
       
       if (agentEl && brainCore) {
@@ -2437,13 +2450,17 @@
           console.log('Builder index in array:', index);
         }
         
-        const agentEl = document.getElementById(agent.id);
+        const agentEl = getAgentEl(agent.id);
         const brainCore = document.querySelector('.brain-core');
         
         if (!agentEl) {
           console.error(`❌ Agent element not found for ${agent.id}`);
           if (agent.id === 'builder') {
             console.error('CRITICAL: Builder element missing from DOM!');
+            // Try to find it with looser search
+            const allDivs = document.querySelectorAll('.agent');
+            console.log('All agent divs found:', allDivs.length);
+            allDivs.forEach(div => console.log('Agent div ID:', div.id));
           }
           return;
         }
@@ -2715,6 +2732,14 @@
     // Force tendril update after page fully loads
     window.addEventListener('load', () => {
       console.log('Page fully loaded - updating tendrils');
+      
+      // Debug checks
+      console.log('=== ELEMENT CHECKS ===');
+      console.log('Builder element exists?', !!document.getElementById('builder'));
+      console.log('Builder has .agent-card?', !!document.getElementById('builder')?.querySelector('.agent-card'));
+      console.log('SVG tendrils exists?', !!document.getElementById('tendrils'));
+      console.log('All agent elements:', document.querySelectorAll('.agent').length);
+      
       setTimeout(updateTendrils, 200);
       setTimeout(updateTendrils, 1000);
       
