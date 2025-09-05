@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.2.0';
+    window.APP_VERSION = '1.2.1';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -2043,6 +2043,73 @@
         // Try again after a short delay to ensure all elements are ready
         setTimeout(updateTendrils, 500);
       }, 100);
+      
+      // Aggressive fix for missing tendrils
+      let checkCount = 0;
+      const checkInterval = setInterval(() => {
+        checkCount++;
+        console.log(`Tendril verification attempt ${checkCount}`);
+        
+        // Check specifically for builder tendril
+        const builderEl = document.getElementById('builder');
+        const builderTendril = document.getElementById('tendril-builder');
+        
+        if (builderEl && !builderTendril) {
+          console.error('BUILDER TENDRIL MISSING - Creating manually');
+          
+          // Manually create the tendril
+          const svg = document.getElementById('tendrils');
+          const brainCore = document.querySelector('.brain-core');
+          
+          if (svg && brainCore) {
+            const builderCard = builderEl.querySelector('.agent-card');
+            if (builderCard) {
+              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+              
+              const svgRect = svg.getBoundingClientRect();
+              const builderRect = builderCard.getBoundingClientRect();
+              const brainRect = brainCore.getBoundingClientRect();
+              
+              const startX = builderRect.left + builderRect.width / 2 - svgRect.left;
+              const startY = builderRect.top + builderRect.height / 2 - svgRect.top;
+              const endX = brainRect.left + brainRect.width / 2 - svgRect.left;
+              const endY = brainRect.top + brainRect.height / 2 - svgRect.top;
+              
+              const dx = endX - startX;
+              const dy = endY - startY;
+              const controlX = startX + dx * 0.5;
+              const controlY = startY + dy * 0.2;
+              
+              path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
+              path.setAttribute('stroke', '#bd93f9'); // Builder color
+              path.setAttribute('stroke-width', '2');
+              path.setAttribute('fill', 'none');
+              path.setAttribute('id', 'tendril-builder');
+              path.style.opacity = '0.6';
+              path.style.filter = 'drop-shadow(0 0 5px #bd93f9)';
+              
+              svg.appendChild(path);
+              console.log('BUILDER TENDRIL CREATED MANUALLY');
+            }
+          }
+        }
+        
+        // Check all tendrils
+        const allTendrils = ['researcher', 'builder', 'analyzer', 'security', 'orchestrator']
+          .map(id => document.getElementById(`tendril-${id}`))
+          .filter(t => t !== null).length;
+        
+        console.log(`Tendrils found: ${allTendrils}/5`);
+        
+        if (allTendrils === 5 || checkCount > 20) {
+          clearInterval(checkInterval);
+          if (allTendrils === 5) {
+            console.log('✅ All 5 tendrils verified!');
+          } else {
+            console.error('❌ Failed to create all tendrils after 20 attempts');
+          }
+        }
+      }, 300);
     }
 
     // Create tendril connection (deprecated - using dynamic update instead)
