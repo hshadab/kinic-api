@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Platform Debug Tool</title>
+  <style>
+    body { 
+      background: #0a0e27; 
+      color: #64ffda; 
+      font-family: monospace; 
+      padding: 20px;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      border: 1px solid #64ffda;
+    }
+    button {
+      background: linear-gradient(135deg, #64ffda, #00ff88);
+      color: #0a0e27;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: bold;
+    }
+    select {
+      background: rgba(10, 14, 39, 0.95);
+      color: #64ffda;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #64ffda;
+      width: 100%;
+    }
+    pre {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .success { color: #50fa7b; }
+    .error { color: #ff5555; }
+    .warning { color: #ffb86c; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Platform Configuration Debugger</h1>
+  
+  <div class="section">
+    <h2>1. Platform Definition Test</h2>
+    <p>Testing inline agent definitions with all 5 platforms:</p>
+    <button onclick="testPlatformDefinition()">Run Test</button>
+    <div id="definitionResult"></div>
+  </div>
+  
+  <div class="section">
+    <h2>2. Dropdown Population Test</h2>
+    <p>Testing if dropdown correctly populates with all platforms:</p>
+    <select id="testDropdown">
+      <option>Click button to populate...</option>
+    </select>
+    <button onclick="populateDropdown()">Populate Dropdown</button>
+    <div id="dropdownResult"></div>
+  </div>
+  
+  <div class="section">
+    <h2>3. Object.entries Test</h2>
+    <p>Testing if Object.entries works correctly:</p>
+    <button onclick="testObjectEntries()">Test Object.entries</button>
+    <div id="entriesResult"></div>
+  </div>
+  
+  <div class="section">
+    <h2>4. Direct Platform Access Test</h2>
+    <p>Testing direct access to platform properties:</p>
+    <button onclick="testDirectAccess()">Test Direct Access</button>
+    <div id="directResult"></div>
+  </div>
+  
+  <div class="section">
+    <h2>5. Browser Console Commands</h2>
+    <p>Copy and paste these commands in your browser console (F12):</p>
+    <pre>
+// Check if all platforms are defined
+testAgent = { 
+  platforms: {
+    'openai': { name: 'OpenAI' },
+    'anthropic': { name: 'Anthropic' },
+    'perplexity': { name: 'Perplexity' },
+    'gemini': { name: 'Google Gemini' },
+    'grok': { name: 'xAI Grok' }
+  }
+};
+console.log('Platform keys:', Object.keys(testAgent.platforms));
+console.log('Platform count:', Object.keys(testAgent.platforms).length);
+    </pre>
+  </div>
+  
+  <script>
+    function testPlatformDefinition() {
+      const result = document.getElementById('definitionResult');
+      
+      try {
+        // Define agent with all platforms inline
+        const testAgent = {
+          id: 'test',
+          name: 'Test Agent',
+          platforms: {
+            'openai': { name: 'OpenAI', models: ['gpt-4'], requiresKey: true },
+            'anthropic': { name: 'Anthropic', models: ['claude-3'], requiresKey: true },
+            'perplexity': { name: 'Perplexity', models: ['pplx-70b'], requiresKey: true },
+            'gemini': { name: 'Google Gemini', models: ['gemini-1.5'], requiresKey: true },
+            'grok': { name: 'xAI Grok', models: ['grok-2'], requiresKey: true }
+          }
+        };
+        
+        const platformKeys = Object.keys(testAgent.platforms);
+        
+        result.innerHTML = `
+          <pre class="success">
+✅ Platform Definition Test Results:
+- Total platforms defined: ${platformKeys.length}
+- Platform keys: ${JSON.stringify(platformKeys, null, 2)}
+- All platforms:
+${platformKeys.map(key => `  - ${key}: ${testAgent.platforms[key].name}`).join('\n')}
+          </pre>
+        `;
+        
+        // Also log to console
+        console.log('Platform test:', testAgent);
+        console.log('Keys:', platformKeys);
+        
+      } catch (error) {
+        result.innerHTML = `<pre class="error">❌ Error: ${error.message}</pre>`;
+      }
+    }
+    
+    function populateDropdown() {
+      const dropdown = document.getElementById('testDropdown');
+      const result = document.getElementById('dropdownResult');
+      
+      try {
+        // Clear dropdown
+        dropdown.innerHTML = '<option value="">Select platform...</option>';
+        
+        // Define platforms
+        const platforms = {
+          'openai': { name: 'OpenAI' },
+          'anthropic': { name: 'Anthropic' },
+          'perplexity': { name: 'Perplexity' },
+          'gemini': { name: 'Google Gemini' },
+          'grok': { name: 'xAI Grok' }
+        };
+        
+        let addedCount = 0;
+        Object.entries(platforms).forEach(([key, platform]) => {
+          const option = document.createElement('option');
+          option.value = key;
+          option.textContent = platform.name;
+          dropdown.appendChild(option);
+          addedCount++;
+        });
+        
+        result.innerHTML = `
+          <pre class="success">
+✅ Dropdown Population Test:
+- Platforms added: ${addedCount}
+- Total options now: ${dropdown.options.length}
+- Options:
+${Array.from(dropdown.options).map(opt => `  - ${opt.value}: ${opt.textContent}`).join('\n')}
+          </pre>
+        `;
+        
+      } catch (error) {
+        result.innerHTML = `<pre class="error">❌ Error: ${error.message}</pre>`;
+      }
+    }
+    
+    function testObjectEntries() {
+      const result = document.getElementById('entriesResult');
+      
+      try {
+        const platforms = {
+          'openai': { name: 'OpenAI' },
+          'anthropic': { name: 'Anthropic' },
+          'perplexity': { name: 'Perplexity' },
+          'gemini': { name: 'Google Gemini' },
+          'grok': { name: 'xAI Grok' }
+        };
+        
+        const entries = Object.entries(platforms);
+        
+        result.innerHTML = `
+          <pre class="success">
+✅ Object.entries Test:
+- Entry count: ${entries.length}
+- Entries:
+${entries.map(([key, val]) => `  - [${key}, ${JSON.stringify(val)}]`).join('\n')}
+          </pre>
+        `;
+        
+        console.log('Object.entries test:', entries);
+        
+      } catch (error) {
+        result.innerHTML = `<pre class="error">❌ Error: ${error.message}</pre>`;
+      }
+    }
+    
+    function testDirectAccess() {
+      const result = document.getElementById('directResult');
+      
+      try {
+        const platforms = {};
+        
+        // Test adding properties one by one
+        platforms['openai'] = { name: 'OpenAI' };
+        platforms['anthropic'] = { name: 'Anthropic' };
+        platforms['perplexity'] = { name: 'Perplexity' };
+        platforms['gemini'] = { name: 'Google Gemini' };
+        platforms['grok'] = { name: 'xAI Grok' };
+        
+        const tests = [
+          `platforms.openai exists: ${!!platforms.openai}`,
+          `platforms.anthropic exists: ${!!platforms.anthropic}`,
+          `platforms.perplexity exists: ${!!platforms.perplexity}`,
+          `platforms.gemini exists: ${!!platforms.gemini}`,
+          `platforms.grok exists: ${!!platforms.grok}`,
+          `Total keys: ${Object.keys(platforms).length}`,
+          `Keys: ${Object.keys(platforms).join(', ')}`
+        ];
+        
+        result.innerHTML = `
+          <pre class="success">
+✅ Direct Access Test:
+${tests.map(test => `- ${test}`).join('\n')}
+          </pre>
+        `;
+        
+        console.log('Direct access test:', platforms);
+        
+      } catch (error) {
+        result.innerHTML = `<pre class="error">❌ Error: ${error.message}</pre>`;
+      }
+    }
+    
+    // Run all tests on page load
+    window.addEventListener('load', () => {
+      console.log('Debug page loaded. Click buttons to run tests.');
+      console.log('You can also check the main page by typing this in console:');
+      console.log('agents[0].platforms');
+    });
+  </script>
+</body>
+</html>

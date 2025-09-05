@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Platform Loading</title>
+  <style>
+    body { 
+      background: #0a0e27; 
+      color: #64ffda; 
+      font-family: monospace; 
+      padding: 20px;
+    }
+    select {
+      background: #0a0e27;
+      color: #64ffda;
+      padding: 10px;
+      margin: 10px;
+      border: 1px solid #64ffda;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Debug: Platform Loading Test</h1>
+  
+  <div>
+    <label>Select Agent:</label>
+    <select id="agentSelect" onchange="loadPlatforms()">
+      <option value="">Choose agent...</option>
+      <option value="researcher">Researcher</option>
+      <option value="builder">Builder</option>
+      <option value="analyzer">Analyzer</option>
+      <option value="security">Security</option>
+      <option value="orchestrator">Orchestrator</option>
+      <option value="connector">Connector</option>
+    </select>
+  </div>
+  
+  <div>
+    <label>Platforms:</label>
+    <select id="platformSelect">
+      <option>Select agent first...</option>
+    </select>
+  </div>
+  
+  <div id="output"></div>
+  
+  <script>
+    const agents = [
+      { 
+        id: 'researcher', 
+        name: 'Researcher', 
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'builder', 
+        name: 'Builder',
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'analyzer', 
+        name: 'Analyzer',
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      }
+    ];
+    
+    function loadPlatforms() {
+      const agentId = document.getElementById('agentSelect').value;
+      const platformSelect = document.getElementById('platformSelect');
+      const output = document.getElementById('output');
+      
+      if (!agentId) {
+        platformSelect.innerHTML = '<option>Select agent first...</option>';
+        output.innerHTML = '';
+        return;
+      }
+      
+      const agent = agents.find(a => a.id === agentId);
+      
+      if (!agent) {
+        output.innerHTML = '<p style="color: red;">Agent not found!</p>';
+        return;
+      }
+      
+      // Clear and populate platform dropdown
+      platformSelect.innerHTML = '<option value="">Select platform...</option>';
+      
+      const platforms = Object.keys(agent.platforms);
+      output.innerHTML = `
+        <h3>Found ${platforms.length} platforms for ${agent.name}:</h3>
+        <ul>
+      `;
+      
+      platforms.forEach(key => {
+        const platform = agent.platforms[key];
+        platformSelect.innerHTML += `<option value="${key}">${platform.name}</option>`;
+        output.innerHTML += `<li>${platform.name} (${key}) - ${platform.models.length} models</li>`;
+      });
+      
+      output.innerHTML += '</ul>';
+      
+      // Log to console for debugging
+      console.log(`Agent ${agentId} platforms:`, agent.platforms);
+      console.log('Platform keys:', Object.keys(agent.platforms));
+    }
+  </script>
+</body>
+</html>

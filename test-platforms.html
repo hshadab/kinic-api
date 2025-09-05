@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Platform Test</title>
+  <style>
+    body { 
+      background: #0a0e27; 
+      color: #64ffda; 
+      font-family: monospace; 
+      padding: 20px;
+    }
+    pre { 
+      background: rgba(255,255,255,0.1); 
+      padding: 20px; 
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Platform Configuration Test</h1>
+  <p>This page shows all configured platforms for each agent:</p>
+  
+  <div id="output"></div>
+  
+  <script>
+    const agents = [
+      { 
+        id: 'researcher', 
+        name: 'Researcher', 
+        emoji: '🔬', 
+        color: '#64ffda', 
+        angle: 0,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      }
+    ];
+    
+    let html = '';
+    agents.forEach(agent => {
+      html += `<h2>${agent.emoji} ${agent.name}</h2>`;
+      html += '<pre>';
+      html += 'Available Platforms:\n';
+      Object.entries(agent.platforms).forEach(([key, platform]) => {
+        html += `\n- ${platform.name} (${key})\n`;
+        html += `  Models: ${platform.models.join(', ')}\n`;
+      });
+      html += '</pre>';
+    });
+    
+    document.getElementById('output').innerHTML = html;
+    
+    // Also log to console
+    console.log('Platforms for researcher:', agents[0].platforms);
+    console.log('Platform keys:', Object.keys(agents[0].platforms));
+  </script>
+</body>
+</html>

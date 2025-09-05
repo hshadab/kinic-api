@@ -28,8 +28,12 @@ def test_connection():
             return test_openai_connection(api_key, model)
         elif platform == 'anthropic':
             return test_anthropic_connection(api_key, model)
-        elif platform == 'perplexity':
-            return test_perplexity_connection(api_key, model)
+        elif platform == 'deepseek':
+            return test_deepseek_connection(api_key, model)
+        elif platform == 'gemini':
+            return test_gemini_connection(api_key, model)
+        elif platform == 'grok':
+            return test_grok_connection(api_key, model)
         else:
             return jsonify({
                 'success': False,
@@ -120,13 +124,13 @@ def test_anthropic_connection(api_key, model):
                 'error': error_str
             }), 500
 
-def test_perplexity_connection(api_key, model):
-    """Test Perplexity API connection (uses OpenAI client)"""
+def test_deepseek_connection(api_key, model):
+    """Test DeepSeek API connection (uses OpenAI client)"""
     try:
-        # Perplexity uses OpenAI-compatible API
+        # DeepSeek uses OpenAI-compatible API
         client = openai.OpenAI(
             api_key=api_key,
-            base_url="https://api.perplexity.ai"
+            base_url="https://api.deepseek.com"
         )
         
         response = client.chat.completions.create(
@@ -139,7 +143,7 @@ def test_perplexity_connection(api_key, model):
         
         return jsonify({
             'success': True,
-            'message': 'Perplexity connection successful',
+            'message': 'DeepSeek connection successful',
             'response': response.choices[0].message.content,
             'model': model,
             'timestamp': datetime.now().isoformat()
@@ -151,6 +155,84 @@ def test_perplexity_connection(api_key, model):
             return jsonify({
                 'success': False,
                 'error': 'Invalid API key'
+            }), 401
+        else:
+            return jsonify({
+                'success': False,
+                'error': error_str
+            }), 500
+
+def test_gemini_connection(api_key, model):
+    """Test Google Gemini API connection"""
+    try:
+        import google.generativeai as genai
+        
+        # Configure the API key
+        genai.configure(api_key=api_key)
+        
+        # Create the model
+        gemini_model = genai.GenerativeModel(model)
+        
+        # Make a simple test call
+        response = gemini_model.generate_content("Say 'Connection successful' in exactly 3 words")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Google Gemini connection successful',
+            'response': response.text,
+            'model': model,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        error_str = str(e)
+        if 'api key' in error_str.lower() or 'invalid' in error_str.lower():
+            return jsonify({
+                'success': False,
+                'error': 'Invalid API key'
+            }), 401
+        elif 'model' in error_str.lower():
+            return jsonify({
+                'success': False,
+                'error': f'Model {model} not found or not accessible'
+            }), 404
+        else:
+            return jsonify({
+                'success': False,
+                'error': error_str
+            }), 500
+
+def test_grok_connection(api_key, model):
+    """Test xAI Grok API connection"""
+    try:
+        # Grok uses OpenAI-compatible API
+        client = openai.OpenAI(
+            api_key=api_key,
+            base_url="https://api.x.ai/v1"
+        )
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "user", "content": "Say 'Connection successful' in exactly 3 words"}
+            ],
+            max_tokens=10
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'xAI Grok connection successful',
+            'response': response.choices[0].message.content,
+            'model': model,
+            'timestamp': datetime.now().isoformat()
+        })
+        
+    except Exception as e:
+        error_str = str(e)
+        if 'authentication' in error_str.lower() or 'api key' in error_str.lower():
+            return jsonify({
+                'success': False,
+                'error': 'Invalid API key - Note: Grok API requires special access'
             }), 401
         else:
             return jsonify({

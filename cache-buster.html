@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cache Buster & Platform Debugger</title>
+  <style>
+    body { 
+      background: #0a0e27; 
+      color: #64ffda; 
+      font-family: monospace; 
+      padding: 20px;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      border: 1px solid #64ffda;
+    }
+    button {
+      background: linear-gradient(135deg, #64ffda, #00ff88);
+      color: #0a0e27;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+      font-weight: bold;
+    }
+    button:hover { opacity: 0.9; }
+    pre {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+    }
+    .success { color: #50fa7b; }
+    .error { color: #ff5555; }
+    .warning { color: #ffb86c; }
+    .info { color: #8be9fd; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Cache Buster & Platform Debugger</h1>
+  
+  <div class="section">
+    <h2>Instructions to Force Clear Cache</h2>
+    <ol>
+      <li class="warning">Open Developer Tools (F12)</li>
+      <li class="warning">Right-click the Refresh button in your browser</li>
+      <li class="warning">Select "Empty Cache and Hard Reload"</li>
+      <li class="info">OR: Hold Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac)</li>
+      <li class="info">OR: In DevTools, go to Network tab, check "Disable cache"</li>
+    </ol>
+  </div>
+  
+  <div class="section">
+    <h2>1. Load index.html with Cache Buster</h2>
+    <p>Click to open index.html with a timestamp to bypass cache:</p>
+    <button onclick="openWithCacheBuster()">Open index.html (No Cache)</button>
+    <div id="cacheResult"></div>
+  </div>
+  
+  <div class="section">
+    <h2>2. Direct Script Test</h2>
+    <p>This will load and test the agent definitions directly:</p>
+    <button onclick="loadAndTestAgents()">Load & Test Agents</button>
+    <div id="scriptResult"></div>
+  </div>
+  
+  <div class="section">
+    <h2>3. Console Commands</h2>
+    <p>Run these in the browser console on the main page:</p>
+    <pre class="info">
+// 1. Check if agents array exists
+console.log('Agents defined?', typeof agents !== 'undefined');
+
+// 2. Check first agent's platforms
+console.log('Researcher platforms:', agents[0].platforms);
+
+// 3. Count platforms
+console.log('Platform count:', Object.keys(agents[0].platforms).length);
+
+// 4. Check for specific platforms
+console.log('Has Gemini?', 'gemini' in agents[0].platforms);
+console.log('Has Grok?', 'grok' in agents[0].platforms);
+
+// 5. List all platform keys
+console.log('All keys:', Object.keys(agents[0].platforms));
+
+// 6. Force reload agent config
+loadAgentConfig();
+    </pre>
+  </div>
+  
+  <div class="section">
+    <h2>4. Check LocalStorage</h2>
+    <button onclick="checkLocalStorage()">Check LocalStorage</button>
+    <button onclick="clearLocalStorage()">Clear All LocalStorage</button>
+    <div id="storageResult"></div>
+  </div>
+  
+  <script>
+    function openWithCacheBuster() {
+      const timestamp = new Date().getTime();
+      const url = `index.html?v=${timestamp}`;
+      const result = document.getElementById('cacheResult');
+      
+      result.innerHTML = `
+        <pre class="success">
+Opening: ${url}
+This forces the browser to load a fresh copy.
+Check the console for debug messages.
+        </pre>
+      `;
+      
+      window.open(url, '_blank');
+    }
+    
+    async function loadAndTestAgents() {
+      const result = document.getElementById('scriptResult');
+      
+      try {
+        // Fetch the index.html file
+        const response = await fetch('index.html?t=' + Date.now());
+        const text = await response.text();
+        
+        // Extract the agents definition
+        const agentsMatch = text.match(/const agents = \[([\s\S]*?)\];/);
+        
+        if (!agentsMatch) {
+          result.innerHTML = '<pre class="error">Could not find agents definition in index.html</pre>';
+          return;
+        }
+        
+        // Count occurrences of platform names
+        const platformCounts = {
+          'OpenAI': (text.match(/name: 'OpenAI'/g) || []).length,
+          'Anthropic': (text.match(/name: 'Anthropic'/g) || []).length,
+          'Perplexity': (text.match(/name: 'Perplexity'/g) || []).length,
+          'Google Gemini': (text.match(/name: 'Google Gemini'/g) || []).length,
+          'xAI Grok': (text.match(/name: 'xAI Grok'/g) || []).length
+        };
+        
+        // Check for platform keys
+        const keyCounts = {
+          'openai': (text.match(/'openai':/g) || []).length,
+          'anthropic': (text.match(/'anthropic':/g) || []).length,
+          'perplexity': (text.match(/'perplexity':/g) || []).length,
+          'gemini': (text.match(/'gemini':/g) || []).length,
+          'grok': (text.match(/'grok':/g) || []).length
+        };
+        
+        let html = '<pre class="success">File Analysis Results:\n\n';
+        html += 'Platform name occurrences in file:\n';
+        for (const [platform, count] of Object.entries(platformCounts)) {
+          const status = count > 0 ? '✅' : '❌';
+          html += `  ${status} ${platform}: ${count} times\n`;
+        }
+        
+        html += '\nPlatform key occurrences in file:\n';
+        for (const [key, count] of Object.entries(keyCounts)) {
+          const status = count > 0 ? '✅' : '❌';
+          html += `  ${status} '${key}': ${count} times\n`;
+        }
+        
+        html += '\n';
+        if (platformCounts['Google Gemini'] > 0 && platformCounts['xAI Grok'] > 0) {
+          html += '<span class="success">✅ File contains Gemini and Grok platforms!</span>\n';
+          html += '<span class="warning">If you still don\'t see them, it\'s a caching issue.</span>\n';
+          html += '<span class="info">Try: Ctrl+Shift+R or Cmd+Shift+R to hard refresh</span>';
+        } else {
+          html += '<span class="error">❌ File is missing Gemini or Grok!</span>';
+        }
+        
+        html += '</pre>';
+        result.innerHTML = html;
+        
+      } catch (error) {
+        result.innerHTML = `<pre class="error">Error: ${error.message}</pre>`;
+      }
+    }
+    
+    function checkLocalStorage() {
+      const result = document.getElementById('storageResult');
+      const configs = localStorage.getItem('agentConfigs');
+      
+      let html = '<pre>';
+      html += 'LocalStorage Contents:\n\n';
+      
+      if (configs) {
+        try {
+          const parsed = JSON.parse(configs);
+          html += 'Agent Configs:\n';
+          html += JSON.stringify(parsed, null, 2);
+        } catch (e) {
+          html += 'Error parsing configs: ' + e.message;
+        }
+      } else {
+        html += 'No agent configs stored';
+      }
+      
+      html += '\n\nAll localStorage keys:\n';
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        html += `  - ${key}\n`;
+      }
+      
+      html += '</pre>';
+      result.innerHTML = html;
+    }
+    
+    function clearLocalStorage() {
+      localStorage.clear();
+      const result = document.getElementById('storageResult');
+      result.innerHTML = '<pre class="success">✅ LocalStorage cleared!</pre>';
+    }
+    
+    // Auto-run file test on load
+    window.addEventListener('load', () => {
+      loadAndTestAgents();
+    });
+  </script>
+</body>
+</html>

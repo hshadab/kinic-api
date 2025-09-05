@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Agent Platform Test</title>
+  <style>
+    body { 
+      background: #0a0e27; 
+      color: #64ffda; 
+      font-family: monospace; 
+      padding: 20px;
+    }
+    .agent-test {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      border: 1px solid #64ffda;
+    }
+    select {
+      background: rgba(10, 14, 39, 0.95);
+      color: #64ffda;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #64ffda;
+      width: 100%;
+    }
+    .platforms {
+      margin: 10px 0;
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+    }
+    .success { color: #50fa7b; }
+    .error { color: #ff5555; }
+    .warning { color: #ffb86c; }
+    h3 { color: #bd93f9; }
+  </style>
+</head>
+<body>
+  <h1>🧪 Agent Platform Tester</h1>
+  <p>This page loads the exact same agent definitions from index.html</p>
+  
+  <div class="agent-test">
+    <h3>Select an Agent to Test:</h3>
+    <select id="agentSelect" onchange="testAgent()">
+      <option value="">Choose agent...</option>
+      <option value="researcher">🔬 Researcher</option>
+      <option value="builder">🔨 Builder</option>
+      <option value="analyzer">📊 Analyzer</option>
+      <option value="security">🔒 Security</option>
+      <option value="orchestrator">🎭 Orchestrator</option>
+      <option value="connector">🔗 Connector</option>
+    </select>
+    
+    <div id="platformDropdown" style="display: none;">
+      <h3>Platforms Available:</h3>
+      <select id="platformSelect">
+        <option>Select agent first...</option>
+      </select>
+    </div>
+    
+    <div id="results"></div>
+  </div>
+  
+  <script>
+    // EXACT copy from index.html
+    const agents = [
+      { 
+        id: 'researcher', 
+        name: 'Researcher', 
+        emoji: '🔬', 
+        color: '#64ffda', 
+        angle: 0,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'builder', 
+        name: 'Builder', 
+        emoji: '🔨', 
+        color: '#bd93f9', 
+        angle: 60,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true },
+          'local': { name: 'Local (Ollama)', models: ['codellama', 'llama2', 'mistral'], requiresKey: false }
+        }
+      },
+      { 
+        id: 'analyzer', 
+        name: 'Analyzer', 
+        emoji: '📊', 
+        color: '#ff79c6', 
+        angle: 120,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'security', 
+        name: 'Security', 
+        emoji: '🔒', 
+        color: '#50fa7b', 
+        angle: 180,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'orchestrator', 
+        name: 'Orchestrator', 
+        emoji: '🎭', 
+        color: '#ffb86c', 
+        angle: 240,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
+        }
+      },
+      { 
+        id: 'connector', 
+        name: 'Connector', 
+        emoji: '🔗', 
+        color: '#8be9fd', 
+        angle: 300,
+        platforms: {
+          'openai': { name: 'OpenAI', models: ['gpt-3.5-turbo'], requiresKey: true },
+          'anthropic': { name: 'Anthropic', models: ['claude-3-haiku-20240307'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true },
+          'huggingface': { name: 'HuggingFace', models: ['meta-llama/Llama-2-7b', 'google/flan-t5-base'], requiresKey: true }
+        }
+      }
+    ];
+    
+    function testAgent() {
+      const agentId = document.getElementById('agentSelect').value;
+      const resultsDiv = document.getElementById('results');
+      const dropdownDiv = document.getElementById('platformDropdown');
+      
+      if (!agentId) {
+        dropdownDiv.style.display = 'none';
+        resultsDiv.innerHTML = '';
+        return;
+      }
+      
+      const agent = agents.find(a => a.id === agentId);
+      
+      if (!agent) {
+        resultsDiv.innerHTML = '<div class="error">Agent not found!</div>';
+        return;
+      }
+      
+      // Show dropdown section
+      dropdownDiv.style.display = 'block';
+      
+      // Populate platform dropdown
+      const platformSelect = document.getElementById('platformSelect');
+      platformSelect.innerHTML = '<option value="">Select platform...</option>';
+      
+      const platformKeys = Object.keys(agent.platforms);
+      
+      // Add each platform to dropdown
+      platformKeys.forEach(key => {
+        const platform = agent.platforms[key];
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = platform.name;
+        platformSelect.appendChild(option);
+      });
+      
+      // Display results
+      let html = '<div class="platforms">';
+      html += `<h3>${agent.emoji} ${agent.name} Results:</h3>`;
+      html += `<p class="success">✅ Total platforms: ${platformKeys.length}</p>`;
+      
+      // Check for specific platforms
+      const hasGemini = platformKeys.includes('gemini');
+      const hasGrok = platformKeys.includes('grok');
+      const hasPerplexity = platformKeys.includes('perplexity');
+      
+      html += '<p>Platform Status:</p>';
+      html += `<div style="margin-left: 20px;">`;
+      html += `<div class="${hasGemini ? 'success' : 'error'}">${hasGemini ? '✅' : '❌'} Google Gemini</div>`;
+      html += `<div class="${hasGrok ? 'success' : 'error'}">${hasGrok ? '✅' : '❌'} xAI Grok</div>`;
+      html += `<div class="${hasPerplexity ? 'success' : 'error'}">${hasPerplexity ? '✅' : '❌'} Perplexity</div>`;
+      html += `<div class="success">✅ OpenAI</div>`;
+      html += `<div class="success">✅ Anthropic</div>`;
+      html += `</div>`;
+      
+      html += '<p style="margin-top: 15px;">All Platform Keys:</p>';
+      html += `<div style="margin-left: 20px; color: #8be9fd;">`;
+      platformKeys.forEach(key => {
+        html += `• ${key}: ${agent.platforms[key].name}<br>`;
+      });
+      html += `</div>`;
+      
+      html += '<p style="margin-top: 15px;">Dropdown Options Count: ' + platformSelect.options.length + ' (including placeholder)</p>';
+      
+      html += '</div>';
+      resultsDiv.innerHTML = html;
+      
+      // Console logging
+      console.log('=== AGENT TEST ===');
+      console.log('Agent:', agent.name);
+      console.log('Platform keys:', platformKeys);
+      console.log('Platforms object:', agent.platforms);
+      console.log('Has Gemini?', hasGemini);
+      console.log('Has Grok?', hasGrok);
+      console.log('Dropdown options:', Array.from(platformSelect.options).map(o => o.text));
+    }
+    
+    // Quick check on load
+    window.addEventListener('load', () => {
+      console.log('Page loaded. Agents defined:', agents.length);
+      console.log('Quick check - Researcher platforms:', Object.keys(agents[0].platforms));
+    });
+  </script>
+</body>
+</html>
