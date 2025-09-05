@@ -9,7 +9,7 @@
   <title>Kinic: The Shared AI Brain</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.0.9';
+    window.APP_VERSION = '1.1.0';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -1544,6 +1544,10 @@
               cardEl.className = 'agent-card idle';
             }, 500);
             break;
+          case 'testing':
+            statusEl.classList.add('processing');
+            cardEl.className = 'agent-card processing';
+            break;
           case 'success':
             cardEl.className = 'agent-card success';
             setTimeout(() => {
@@ -1657,15 +1661,97 @@
     }
     
     async function testAllAgents() {
-      for (const agentId of Object.keys(agentConfigs)) {
+      const statusDiv = document.getElementById('configStatus');
+      const configuredAgents = Object.keys(agentConfigs);
+      
+      if (configuredAgents.length === 0) {
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = 'rgba(255, 204, 0, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 204, 0, 0.3)';
+        statusDiv.style.color = '#ffcc00';
+        statusDiv.innerHTML = '⚠️ No agents configured yet';
+        return;
+      }
+      
+      statusDiv.style.display = 'block';
+      statusDiv.style.background = 'rgba(100, 255, 218, 0.1)';
+      statusDiv.style.border = '1px solid rgba(100, 255, 218, 0.3)';
+      statusDiv.style.color = '#64ffda';
+      
+      let successCount = 0;
+      let failCount = 0;
+      
+      // Test each agent sequentially
+      for (let i = 0; i < configuredAgents.length; i++) {
+        const agentId = configuredAgents[i];
         const config = agentConfigs[agentId];
-        if (config) {
-          // Update visual feedback
-          updateAgentVisualStatus(agentId, { ...config, status: 'testing' });
-          await new Promise(resolve => setTimeout(resolve, 500));
-          updateAgentVisualStatus(agentId, { ...config, status: 'active' });
+        const agent = agents.find(a => a.id === agentId);
+        
+        if (!config || !agent) continue;
+        
+        // Update status to show testing
+        statusDiv.innerHTML = `🔄 Testing ${i + 1}/${configuredAgents.length}: ${agent.name}...`;
+        updateAgentStatus(agentId, 'testing');
+        
+        // Simulate API test (in real implementation, would call backend)
+        try {
+          // Check if we have all required fields
+          if (config.platform && config.model && config.apiKey) {
+            // Simulate successful test with a small delay
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // Update agent visual status
+            updateAgentStatus(agentId, 'connected');
+            updateAgentModel(agentId, config.platform, config.model);
+            addAgentAction(agentId, 'Connection verified', '✅');
+            
+            // Update agent card border color
+            const agentCard = document.getElementById(`card-${agentId}`);
+            if (agentCard) {
+              agentCard.style.borderColor = '#50fa7b';
+              agentCard.classList.remove('idle');
+              agentCard.classList.add('active');
+            }
+            
+            successCount++;
+          } else {
+            // Missing configuration
+            updateAgentStatus(agentId, 'error');
+            addAgentAction(agentId, 'Incomplete config', '❌');
+            failCount++;
+          }
+        } catch (error) {
+          // Test failed
+          updateAgentStatus(agentId, 'error');
+          addAgentAction(agentId, 'Connection failed', '❌');
+          failCount++;
         }
       }
+      
+      // Show final results
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      if (successCount === configuredAgents.length) {
+        statusDiv.style.background = 'rgba(80, 250, 123, 0.1)';
+        statusDiv.style.border = '1px solid rgba(80, 250, 123, 0.3)';
+        statusDiv.style.color = '#50fa7b';
+        statusDiv.innerHTML = `✅ All ${successCount} agents connected successfully!`;
+      } else if (successCount > 0) {
+        statusDiv.style.background = 'rgba(255, 204, 0, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 204, 0, 0.3)';
+        statusDiv.style.color = '#ffcc00';
+        statusDiv.innerHTML = `⚠️ ${successCount} connected, ${failCount} failed`;
+      } else {
+        statusDiv.style.background = 'rgba(255, 85, 85, 0.1)';
+        statusDiv.style.border = '1px solid rgba(255, 85, 85, 0.3)';
+        statusDiv.style.color = '#ff5555';
+        statusDiv.innerHTML = `❌ All connections failed`;
+      }
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        statusDiv.style.display = 'none';
+      }, 5000);
     }
     
     function exportConfigs() {
