@@ -15,10 +15,12 @@
     // Auto-reload with cache bypass if URL doesn't have version parameter
     // This preserves localStorage data (agent configs)
     const urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.has('v')) {
-      const timestamp = new Date().getTime();
+    const currentV = urlParams.get('v');
+    // Force update if using old version
+    if (currentV === '1757047823092' || !currentV) {
+      const newTimestamp = Date.now();
       // Use replace to avoid adding to history
-      window.location.replace(`${window.location.pathname}?v=${timestamp}`);
+      window.location.replace(`${window.location.pathname}?v=${newTimestamp}`);
     }
   </script>
   <style>
