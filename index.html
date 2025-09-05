@@ -9,13 +9,15 @@
   <title>Kinic: The Shared AI Brain</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.0.6';
+    window.APP_VERSION = '1.0.7';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
+    // This preserves localStorage data (agent configs)
     const urlParams = new URLSearchParams(window.location.search);
     if (!urlParams.has('v')) {
       const timestamp = new Date().getTime();
+      // Use replace to avoid adding to history
       window.location.replace(`${window.location.pathname}?v=${timestamp}`);
     }
   </script>
@@ -893,7 +895,8 @@
       <!-- Quick Actions -->
       <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(100, 255, 218, 0.1);">
         <button class="btn" onclick="testAllAgents()" style="width: 100%; margin-bottom: 10px; padding: 10px; background: rgba(100, 255, 218, 0.1); border: 1px solid rgba(100, 255, 218, 0.3); color: #64ffda; border-radius: 8px; font-size: 12px; cursor: pointer;">Test All Connections</button>
-        <button class="btn" onclick="exportConfigs()" style="width: 100%; padding: 10px; background: transparent; border: 1px solid rgba(100, 255, 218, 0.2); color: #8892b0; border-radius: 8px; font-size: 12px; cursor: pointer;">Export Configurations</button>
+        <button class="btn" onclick="exportConfigs()" style="width: 100%; margin-bottom: 10px; padding: 10px; background: transparent; border: 1px solid rgba(100, 255, 218, 0.2); color: #8892b0; border-radius: 8px; font-size: 12px; cursor: pointer;">Export Configurations</button>
+        <button class="btn" onclick="resetAgentConfigs()" style="width: 100%; padding: 10px; background: rgba(255, 85, 85, 0.1); border: 1px solid rgba(255, 85, 85, 0.3); color: #ff5555; border-radius: 8px; font-size: 12px; cursor: pointer;">🗑️ Reset All Configurations</button>
       </div>
     </div>
     
@@ -1438,7 +1441,7 @@
         statusDiv.style.background = 'rgba(255, 204, 0, 0.1)';
         statusDiv.style.border = '1px solid rgba(255, 204, 0, 0.3)';
         statusDiv.style.color = '#ffcc00';
-        statusDiv.innerHTML = `⚠️ Backend not running<br><small style="opacity: 0.8">Run: python kinic-agent-api.py</small>`;
+        statusDiv.innerHTML = `⚠️ Backend optional<br><small style="opacity: 0.8">Config saved locally. Backend needed for API testing only.</small>`;
       }
     }
     
@@ -1639,6 +1642,49 @@
       link.href = url;
       link.download = 'kinic-agent-configs.json';
       link.click();
+    }
+    
+    function resetAgentConfigs() {
+      if (confirm('Are you sure you want to reset all agent configurations? This will clear all saved API keys and settings.')) {
+        // Clear localStorage
+        localStorage.removeItem('agentConfigs');
+        
+        // Clear in-memory configs
+        agentConfigs = {};
+        
+        // Reset all agent visual states
+        agents.forEach(agent => {
+          updateAgentStatus(agent.id, 'offline');
+          updateAgentModel(agent.id, '', '');
+          
+          // Clear agent card displays
+          const modelDiv = document.getElementById(`model-${agent.id}`);
+          if (modelDiv) modelDiv.style.display = 'none';
+          
+          const taskDiv = document.getElementById(`task-${agent.id}`);
+          if (taskDiv) taskDiv.style.display = 'none';
+          
+          const actionsDiv = document.getElementById(`actions-${agent.id}`);
+          if (actionsDiv) actionsDiv.innerHTML = '';
+        });
+        
+        // Clear form fields
+        document.getElementById('agentSelector').value = '';
+        document.getElementById('agentConfig').style.display = 'none';
+        document.getElementById('apiKeyInput').value = '';
+        
+        // Show success message
+        const statusDiv = document.getElementById('configStatus');
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = 'rgba(80, 250, 123, 0.1)';
+        statusDiv.style.border = '1px solid rgba(80, 250, 123, 0.3)';
+        statusDiv.style.color = '#50fa7b';
+        statusDiv.innerHTML = '✅ All configurations reset successfully';
+        
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, 3000);
+      }
     }
     
     // Task functions
