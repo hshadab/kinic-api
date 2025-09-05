@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.1.1';
+    window.APP_VERSION = '1.1.2';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -340,6 +340,28 @@
       font-size: 24px;
       background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent);
       border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+    
+    .agent-avatar span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .agent-avatar .platform-logo {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .agent-avatar .platform-logo svg {
+      width: 100%;
+      height: 100%;
     }
 
     .agent-info {
@@ -1624,19 +1646,54 @@
     
     function updateAgentModel(agentId, platform, model) {
       const modelDiv = document.getElementById(`model-${agentId}`);
-      const platformBadge = document.getElementById(`platform-${agentId}`);
-      const modelName = document.getElementById(`model-name-${agentId}`);
+      const avatarIcon = document.getElementById(`avatar-icon-${agentId}`);
       
-      if (modelDiv && platform && model) {
-        modelDiv.style.display = 'flex';
+      if (platform && model) {
+        // Update the model text under agent name
+        if (modelDiv) {
+          const shortModel = model.length > 20 ? model.substring(0, 17) + '...' : model;
+          modelDiv.textContent = shortModel;
+        }
         
-        // Update platform badge
-        platformBadge.className = `platform-badge platform-${platform.toLowerCase()}`;
-        platformBadge.textContent = platform;
-        
-        // Update model name (truncate if too long)
-        const shortModel = model.length > 20 ? model.substring(0, 17) + '...' : model;
-        modelName.textContent = shortModel;
+        // Update avatar icon based on platform
+        if (avatarIcon) {
+          const platformLower = platform.toLowerCase();
+          let iconHTML = '';
+          
+          switch(platformLower) {
+            case 'openai':
+              iconHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="#10a37f"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.975 5.975 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/></svg>';
+              break;
+            case 'anthropic':
+              iconHTML = '<span style="font-size: 24px;">🤖</span>';
+              break;
+            case 'deepseek':
+              iconHTML = '<span style="font-size: 24px;">🌊</span>';
+              break;
+            case 'gemini':
+            case 'google':
+              iconHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="#4285f4"><path d="M12 0L9.19 8.63L0 9.24l7.46 5.73L4.82 24L12 18.77L19.18 24l-2.64-9.03L24 9.24l-9.19-.61L12 0z"/></svg>';
+              break;
+            case 'grok':
+            case 'xai':
+              iconHTML = '<span style="font-size: 24px; font-weight: bold; color: #fff;">✗</span>';
+              break;
+            default:
+              const agent = agents.find(a => a.id === agentId);
+              iconHTML = `<span style="font-size: 24px;">${agent ? agent.emoji : '?'}</span>`;
+          }
+          
+          avatarIcon.innerHTML = iconHTML;
+        }
+      } else {
+        // Reset to default if no platform
+        if (modelDiv) {
+          modelDiv.textContent = 'Not Connected';
+        }
+        if (avatarIcon) {
+          const agent = agents.find(a => a.id === agentId);
+          avatarIcon.innerHTML = `<span style="font-size: 24px;">${agent ? agent.emoji : '?'}</span>`;
+        }
       }
     }
     
@@ -1839,12 +1896,9 @@
         // Reset all agent visual states
         agents.forEach(agent => {
           updateAgentStatus(agent.id, 'offline');
-          updateAgentModel(agent.id, '', '');
+          updateAgentModel(agent.id, '', ''); // This will reset avatar to emoji
           
           // Clear agent card displays
-          const modelDiv = document.getElementById(`model-${agent.id}`);
-          if (modelDiv) modelDiv.style.display = 'none';
-          
           const taskDiv = document.getElementById(`task-${agent.id}`);
           if (taskDiv) taskDiv.style.display = 'none';
           
@@ -1937,19 +1991,13 @@
             <div class="status-indicator offline" id="status-${agent.id}"></div>
             
             <div class="agent-header">
-              <div class="agent-avatar" style="background: linear-gradient(135deg, ${agent.color}30, ${agent.color}10); border-color: ${agent.color};">
-                ${agent.emoji}
+              <div class="agent-avatar" id="avatar-${agent.id}" style="background: linear-gradient(135deg, ${agent.color}30, ${agent.color}10); border-color: ${agent.color};">
+                <span id="avatar-icon-${agent.id}">${agent.emoji}</span>
               </div>
               <div class="agent-info">
                 <div class="agent-name" style="color: ${agent.color}">${agent.name}</div>
-                <div class="agent-role">Neural Agent</div>
+                <div class="agent-role" id="model-${agent.id}">Not Connected</div>
               </div>
-            </div>
-            
-            <!-- Model/Platform Info -->
-            <div class="model-info" id="model-${agent.id}" style="display: none;">
-              <span class="platform-badge" id="platform-${agent.id}">Not Connected</span>
-              <span id="model-name-${agent.id}">-</span>
             </div>
             
             <!-- Active Task Display -->
