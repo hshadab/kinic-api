@@ -3,7 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>Kinic: The Shared AI Brain</title>
+  <script>
+    // Cache buster version - increment this when making changes
+    window.APP_VERSION = '1.0.6';
+    console.log('Kinic App Version:', window.APP_VERSION);
+    
+    // Auto-reload with cache bypass if URL doesn't have version parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('v')) {
+      const timestamp = new Date().getTime();
+      window.location.replace(`${window.location.pathname}?v=${timestamp}`);
+    }
+  </script>
   <style>
     * {
       margin: 0;
@@ -372,6 +387,222 @@
     @keyframes agentFloat {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-10px); }
+    }
+
+    /* Animated States for Agent Cards */
+    .agent-card.thinking {
+      animation: thinkingPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes thinkingPulse {
+      0%, 100% { 
+        box-shadow: 
+          0 10px 40px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+      50% { 
+        box-shadow: 
+          0 10px 40px rgba(0, 0, 0, 0.4),
+          0 0 30px currentColor,
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+    }
+
+    .agent-card.processing {
+      animation: processingSpinner 3s linear infinite;
+    }
+
+    @keyframes processingSpinner {
+      0% { border-color: currentColor transparent transparent transparent; }
+      25% { border-color: transparent currentColor transparent transparent; }
+      50% { border-color: transparent transparent currentColor transparent; }
+      75% { border-color: transparent transparent transparent currentColor; }
+      100% { border-color: currentColor transparent transparent transparent; }
+    }
+
+    .agent-card.success {
+      animation: successFlash 0.5s ease-out;
+    }
+
+    @keyframes successFlash {
+      0% { background-color: rgba(80, 250, 123, 0.3); }
+      100% { background-color: transparent; }
+    }
+
+    .agent-card.error {
+      animation: errorShake 0.5s ease-out;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .agent-card.idle {
+      animation: idleBreathe 4s ease-in-out infinite;
+    }
+
+    @keyframes idleBreathe {
+      0%, 100% { opacity: 0.8; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.02); }
+    }
+
+    /* Status Indicator Styles */
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    .status-indicator.connected {
+      background: #50fa7b;
+      box-shadow: 0 0 10px #50fa7b;
+    }
+
+    .status-indicator.offline {
+      background: #ff5555;
+      box-shadow: 0 0 10px #ff5555;
+    }
+
+    .status-indicator.busy {
+      background: #ffb86c;
+      box-shadow: 0 0 10px #ffb86c;
+    }
+
+    .status-indicator.processing {
+      background: #8be9fd;
+      box-shadow: 0 0 10px #8be9fd;
+      animation: statusBlink 0.5s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes statusBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Model/Platform Display */
+    .model-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      margin: 8px 0;
+      font-size: 10px;
+      color: #8892b0;
+    }
+
+    .platform-badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .platform-openai { background: rgba(16, 163, 127, 0.2); color: #10a37f; }
+    .platform-anthropic { background: rgba(216, 135, 85, 0.2); color: #d88755; }
+    .platform-perplexity { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; }
+    .platform-gemini { background: rgba(66, 133, 244, 0.2); color: #4285f4; }
+    .platform-google { background: rgba(66, 133, 244, 0.2); color: #4285f4; }
+    .platform-grok { background: rgba(255, 255, 255, 0.2); color: #ffffff; }
+    .platform-xai { background: rgba(255, 255, 255, 0.2); color: #ffffff; }
+
+    /* Active Task Display */
+    .active-task {
+      padding: 8px;
+      background: rgba(100, 255, 218, 0.05);
+      border: 1px solid rgba(100, 255, 218, 0.2);
+      border-radius: 8px;
+      margin: 8px 0;
+      min-height: 40px;
+    }
+
+    .task-label {
+      font-size: 9px;
+      color: #64ffda;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .task-content {
+      font-size: 11px;
+      color: #ccd6f6;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-progress {
+      height: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .task-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #64ffda, #00ff88);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    /* Recent Actions Feed */
+    .recent-actions {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .actions-label {
+      font-size: 9px;
+      color: #8892b0;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .action-item {
+      font-size: 10px;
+      color: #8892b0;
+      padding: 3px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      animation: fadeInAction 0.3s ease forwards;
+    }
+
+    .action-item:nth-child(2) { opacity: 0.9; }
+    .action-item:nth-child(3) { opacity: 0.7; }
+    .action-item:nth-child(4) { opacity: 0.5; }
+
+    @keyframes fadeInAction {
+      from { 
+        opacity: 0; 
+        transform: translateY(-10px);
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0);
+      }
+    }
+
+    .action-time {
+      font-size: 9px;
+      color: #64ffda;
+      margin-left: auto;
     }
 
     /* Tendrils connecting agents to brain */
@@ -954,7 +1185,9 @@
         platforms: {
           'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
           'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-haiku-20240307'], requiresKey: true },
-          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true }
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
         }
       },
       { 
@@ -966,6 +1199,9 @@
         platforms: {
           'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
           'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true },
           'local': { name: 'Local (Ollama)', models: ['codellama', 'llama2', 'mistral'], requiresKey: false }
         }
       },
@@ -976,9 +1212,11 @@
         color: '#ff79c6', 
         angle: 120,
         platforms: {
-          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-3.5-turbo'], requiresKey: true },
+          'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
           'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
-          'cohere': { name: 'Cohere', models: ['command', 'command-light'], requiresKey: true }
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-1.0-pro'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
         }
       },
       { 
@@ -989,7 +1227,10 @@
         angle: 180,
         platforms: {
           'openai': { name: 'OpenAI', models: ['gpt-4', 'gpt-3.5-turbo'], requiresKey: true },
-          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229'], requiresKey: true }
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
         }
       },
       { 
@@ -1000,7 +1241,10 @@
         angle: 240,
         platforms: {
           'openai': { name: 'OpenAI', models: ['gpt-4-turbo-preview', 'gpt-4'], requiresKey: true },
-          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true }
+          'anthropic': { name: 'Anthropic', models: ['claude-3-opus-20240229', 'claude-3-sonnet-20240229'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true }
         }
       },
       { 
@@ -1012,6 +1256,9 @@
         platforms: {
           'openai': { name: 'OpenAI', models: ['gpt-3.5-turbo'], requiresKey: true },
           'anthropic': { name: 'Anthropic', models: ['claude-3-haiku-20240307'], requiresKey: true },
+          'perplexity': { name: 'Perplexity', models: ['pplx-70b-online', 'pplx-7b-online'], requiresKey: true },
+          'gemini': { name: 'Google Gemini', models: ['gemini-1.5-pro', 'gemini-1.5-flash'], requiresKey: true },
+          'grok': { name: 'xAI Grok', models: ['grok-2', 'grok-2-mini'], requiresKey: true },
           'huggingface': { name: 'HuggingFace', models: ['meta-llama/Llama-2-7b', 'google/flan-t5-base'], requiresKey: true }
         }
       }
@@ -1072,13 +1319,31 @@
       const agent = agents.find(a => a.id === agentId);
       const config = agentConfigs[agentId] || {};
       
+      // Debug logging
+      console.log('=== LOADING AGENT CONFIG ===');
+      console.log('Agent ID:', agentId);
+      console.log('Agent object:', agent);
+      console.log('Platform keys available:', Object.keys(agent.platforms));
+      console.log('Platforms object:', agent.platforms);
+      
       // Update platform options
       const platformSelect = document.getElementById('platformSelect');
       platformSelect.innerHTML = '<option value="" style="background: #0a0e27; color: #64ffda;">Select platform...</option>';
-      Object.keys(agent.platforms).forEach(key => {
-        const selected = config.platform === key ? 'selected' : '';
-        platformSelect.innerHTML += `<option value="${key}" ${selected} style="background: #0a0e27; color: #64ffda;">${agent.platforms[key].name}</option>`;
-      });
+      
+      // Log each platform as we add it
+      try {
+        Object.keys(agent.platforms).forEach(key => {
+          console.log(`Adding platform: ${key} -> ${agent.platforms[key].name}`);
+          const selected = config.platform === key ? 'selected' : '';
+          platformSelect.innerHTML += `<option value="${key}" ${selected} style="background: #0a0e27; color: #64ffda;">${agent.platforms[key].name}</option>`;
+        });
+      } catch (error) {
+        console.error('Error adding platforms:', error);
+        console.error('Agent platforms object:', agent.platforms);
+      }
+      
+      console.log('Total options in dropdown:', platformSelect.options.length);
+      console.log('Options:', Array.from(platformSelect.options).map(o => `${o.value}: ${o.text}`));
       
       if (config.platform) {
         updateModelOptions();
@@ -1208,22 +1473,143 @@
       updateAgentVisualStatus(agentId, agentConfigs[agentId]);
     }
     
+    // Enhanced Agent Card Management Functions
+    function updateAgentStatus(agentId, status) {
+      const statusEl = document.getElementById(`status-${agentId}`);
+      const cardEl = document.getElementById(`card-${agentId}`);
+      
+      if (statusEl) {
+        // Remove all status classes
+        statusEl.className = 'status-indicator';
+        
+        // Add new status class
+        switch(status) {
+          case 'connected':
+            statusEl.classList.add('connected');
+            cardEl.className = 'agent-card idle';
+            break;
+          case 'processing':
+            statusEl.classList.add('processing');
+            cardEl.className = 'agent-card processing';
+            break;
+          case 'busy':
+            statusEl.classList.add('busy');
+            cardEl.className = 'agent-card thinking';
+            break;
+          case 'offline':
+            statusEl.classList.add('offline');
+            cardEl.className = 'agent-card idle';
+            break;
+          case 'error':
+            statusEl.classList.add('offline');
+            cardEl.className = 'agent-card error';
+            setTimeout(() => {
+              cardEl.className = 'agent-card idle';
+            }, 500);
+            break;
+          case 'success':
+            cardEl.className = 'agent-card success';
+            setTimeout(() => {
+              cardEl.className = 'agent-card idle';
+            }, 500);
+            break;
+        }
+      }
+    }
+    
+    function updateAgentModel(agentId, platform, model) {
+      const modelDiv = document.getElementById(`model-${agentId}`);
+      const platformBadge = document.getElementById(`platform-${agentId}`);
+      const modelName = document.getElementById(`model-name-${agentId}`);
+      
+      if (modelDiv && platform && model) {
+        modelDiv.style.display = 'flex';
+        
+        // Update platform badge
+        platformBadge.className = `platform-badge platform-${platform.toLowerCase()}`;
+        platformBadge.textContent = platform;
+        
+        // Update model name (truncate if too long)
+        const shortModel = model.length > 20 ? model.substring(0, 17) + '...' : model;
+        modelName.textContent = shortModel;
+      }
+    }
+    
+    function updateAgentTask(agentId, task, progress = 0) {
+      const taskDiv = document.getElementById(`task-${agentId}`);
+      const taskContent = document.getElementById(`task-content-${agentId}`);
+      const progressBar = document.getElementById(`progress-${agentId}`);
+      
+      if (taskDiv) {
+        if (task) {
+          taskDiv.style.display = 'block';
+          taskContent.textContent = task;
+          progressBar.style.width = `${progress}%`;
+          
+          // Update status to processing if task is active
+          if (progress > 0 && progress < 100) {
+            updateAgentStatus(agentId, 'processing');
+          } else if (progress === 100) {
+            updateAgentStatus(agentId, 'success');
+            setTimeout(() => {
+              taskDiv.style.display = 'none';
+              updateAgentStatus(agentId, 'connected');
+            }, 2000);
+          }
+        } else {
+          taskDiv.style.display = 'none';
+        }
+      }
+    }
+    
+    function addAgentAction(agentId, action, emoji = '📝') {
+      const actionList = document.getElementById(`action-list-${agentId}`);
+      
+      if (actionList) {
+        // Create new action item
+        const actionItem = document.createElement('div');
+        actionItem.className = 'action-item';
+        
+        const time = new Date().toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        
+        actionItem.innerHTML = `
+          <span>${emoji} ${action}</span>
+          <span class="action-time">${time}</span>
+        `;
+        
+        // Add to top of list
+        actionList.insertBefore(actionItem, actionList.firstChild);
+        
+        // Keep only last 3 actions
+        while (actionList.children.length > 3) {
+          actionList.removeChild(actionList.lastChild);
+        }
+      }
+    }
+    
+    function updateAgentMetrics(agentId, tokens, latency) {
+      const tokensEl = document.getElementById(`tokens-${agentId}`);
+      const latencyEl = document.getElementById(`latency-${agentId}`);
+      
+      if (tokensEl) tokensEl.textContent = tokens;
+      if (latencyEl) latencyEl.textContent = latency;
+    }
+    
     function updateAgentVisualStatus(agentId, config) {
       const agentEl = document.getElementById(agentId);
       if (!agentEl) return;
       
-      const agentCard = agentEl.querySelector('.agent-card');
-      const metricItems = agentCard.querySelectorAll('.metric-item');
-      
+      // Update based on config
       if (config && config.platform) {
-        // Update first metric to show platform
-        metricItems[0].querySelector('.metric-value').textContent = config.platform;
-        metricItems[0].querySelector('.metric-label').textContent = 'Platform';
+        updateAgentModel(agentId, config.platform, config.model);
         
-        // Update second metric to show status
         if (config.status === 'active') {
-          metricItems[1].querySelector('.metric-value').textContent = '✅';
-          metricItems[1].querySelector('.metric-label').textContent = 'Active';
+          updateAgentStatus(agentId, 'connected');
+          addAgentAction(agentId, `Connected to ${config.platform}`, '✅');
           agentCard.style.borderColor = '#50fa7b';
         } else {
           metricItems[1].querySelector('.metric-value').textContent = '⚙️';
@@ -1316,7 +1702,10 @@
         agentDiv.style.animationDelay = `${index * 0.5}s`;
 
         agentDiv.innerHTML = `
-          <div class="agent-card" style="border-color: ${agent.color}; background: linear-gradient(135deg, ${agent.color}15, ${agent.color}08);">
+          <div class="agent-card idle" id="card-${agent.id}" style="border-color: ${agent.color}; background: linear-gradient(135deg, ${agent.color}15, ${agent.color}08); position: relative;">
+            <!-- Status Indicator -->
+            <div class="status-indicator offline" id="status-${agent.id}"></div>
+            
             <div class="agent-header">
               <div class="agent-avatar" style="background: linear-gradient(135deg, ${agent.color}30, ${agent.color}10); border-color: ${agent.color};">
                 ${agent.emoji}
@@ -1326,14 +1715,40 @@
                 <div class="agent-role">Neural Agent</div>
               </div>
             </div>
+            
+            <!-- Model/Platform Info -->
+            <div class="model-info" id="model-${agent.id}" style="display: none;">
+              <span class="platform-badge" id="platform-${agent.id}">Not Connected</span>
+              <span id="model-name-${agent.id}">-</span>
+            </div>
+            
+            <!-- Active Task Display -->
+            <div class="active-task" id="task-${agent.id}" style="display: none;">
+              <div class="task-label">Active Task</div>
+              <div class="task-content" id="task-content-${agent.id}">Idle</div>
+              <div class="task-progress">
+                <div class="task-progress-bar" id="progress-${agent.id}" style="width: 0%"></div>
+              </div>
+            </div>
+            
             <div class="agent-metrics">
               <div class="metric-item">
-                <div class="metric-value" style="color: ${agent.color}">0</div>
-                <div class="metric-label">Synapses</div>
+                <div class="metric-value" style="color: ${agent.color}" id="tokens-${agent.id}">0</div>
+                <div class="metric-label">Tokens</div>
               </div>
               <div class="metric-item">
-                <div class="metric-value" style="color: ${agent.color}">0ms</div>
+                <div class="metric-value" style="color: ${agent.color}" id="latency-${agent.id}">0ms</div>
                 <div class="metric-label">Latency</div>
+              </div>
+            </div>
+            
+            <!-- Recent Actions Feed -->
+            <div class="recent-actions" id="actions-${agent.id}">
+              <div class="actions-label">Recent Actions</div>
+              <div id="action-list-${agent.id}">
+                <div class="action-item">
+                  <span>⏳ Waiting for connection...</span>
+                </div>
               </div>
             </div>
           </div>
@@ -1525,6 +1940,68 @@
     updateStats();
     setTimeout(autoAnimate, 1000);
     
+    // Debug: Platform verification on page load
+    console.log('=== PAGE INITIALIZATION DEBUG ===');
+    console.log('App Version:', window.APP_VERSION);
+    console.log('Total agents loaded:', agents.length);
+    agents.forEach(agent => {
+      const platforms = Object.keys(agent.platforms);
+      console.log(`${agent.name} (${agent.id}): ${platforms.length} platforms`);
+      console.log(`  - Has Gemini: ${platforms.includes('gemini')}`);
+      console.log(`  - Has Grok: ${platforms.includes('grok')}`);
+      console.log(`  - Platform list: ${platforms.join(', ')}`);
+    });
+    
+    // Check if we need to force reload for cache issues
+    const expectedPlatforms = ['openai', 'anthropic', 'perplexity', 'gemini', 'grok'];
+    const actualPlatforms = Object.keys(agents[0].platforms);
+    const missingPlatforms = expectedPlatforms.filter(p => !actualPlatforms.includes(p));
+    
+    if (missingPlatforms.length > 0) {
+      console.error('⚠️ CACHE ISSUE DETECTED!');
+      console.error('Missing platforms:', missingPlatforms);
+      console.error('Your browser is loading an old cached version.');
+      console.error('Press Ctrl+Shift+R (Windows/Linux) or Cmd+Shift+R (Mac) to force reload.');
+      
+      // Show visual warning
+      const warning = document.createElement('div');
+      warning.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #ff5555, #ff8888);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 8px;
+        z-index: 10000;
+        font-family: monospace;
+        box-shadow: 0 4px 20px rgba(255,85,85,0.3);
+        animation: pulse 2s infinite;
+      `;
+      warning.innerHTML = `
+        <strong>⚠️ Cache Issue Detected!</strong><br>
+        Missing platforms: ${missingPlatforms.join(', ')}<br>
+        Press <strong>Ctrl+Shift+R</strong> to force reload
+      `;
+      document.body.appendChild(warning);
+      
+      // Add pulse animation
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+      `;
+      document.head.appendChild(style);
+    } else {
+      console.log('✅ All platforms loaded correctly!');
+    }
+    
+    console.log('=== END DEBUG ===');
+    console.log('To test: Select any agent from the dropdown and check console for platform loading.');
+    
     // Load saved configurations on startup
     Object.keys(agentConfigs).forEach(agentId => {
       updateAgentVisualStatus(agentId, agentConfigs[agentId]);
@@ -1701,6 +2178,95 @@
         log.removeChild(log.lastChild);
       }
     }
+    
+    // Demo function to show agent card features
+    function demoAgentCards() {
+      // Simulate connecting the researcher agent
+      setTimeout(() => {
+        updateAgentModel('researcher', 'OpenAI', 'gpt-4-turbo-preview');
+        updateAgentStatus('researcher', 'connected');
+        addAgentAction('researcher', 'API Connected', '🔌');
+        updateAgentMetrics('researcher', '1.2k', '342ms');
+      }, 1000);
+      
+      // Simulate a task
+      setTimeout(() => {
+        updateAgentTask('researcher', 'Analyzing codebase...', 20);
+        addAgentAction('researcher', 'Starting analysis', '🔍');
+      }, 2000);
+      
+      // Progress update
+      setTimeout(() => {
+        updateAgentTask('researcher', 'Analyzing codebase...', 60);
+        updateAgentMetrics('researcher', '4.7k', '1.2s');
+      }, 3000);
+      
+      // Complete task
+      setTimeout(() => {
+        updateAgentTask('researcher', 'Analyzing codebase...', 100);
+        addAgentAction('researcher', 'Analysis complete', '✅');
+        updateAgentMetrics('researcher', '8.3k', '2.1s');
+      }, 4000);
+      
+      // Connect builder agent
+      setTimeout(() => {
+        updateAgentModel('builder', 'Anthropic', 'claude-3-opus-20240229');
+        updateAgentStatus('builder', 'connected');
+        addAgentAction('builder', 'API Connected', '🔌');
+        updateAgentMetrics('builder', '0.8k', '567ms');
+      }, 5000);
+      
+      // Builder starts task
+      setTimeout(() => {
+        updateAgentTask('builder', 'Generating code...', 30);
+        addAgentAction('builder', 'Code generation', '⚡');
+        updateAgentStatus('builder', 'processing');
+      }, 6000);
+      
+      // Simulate error on analyzer
+      setTimeout(() => {
+        updateAgentStatus('analyzer', 'error');
+        addAgentAction('analyzer', 'Connection failed', '❌');
+      }, 7000);
+      
+      // Connect security agent
+      setTimeout(() => {
+        updateAgentModel('security', 'Perplexity', 'llama-3.1-sonar-large');
+        updateAgentStatus('security', 'connected');
+        addAgentAction('security', 'Online search enabled', '🌐');
+        updateAgentMetrics('security', '2.1k', '889ms');
+      }, 8000);
+    }
+    
+    // Initialize: Load saved configurations
+    agents.forEach(agent => {
+      const config = agentConfigs[agent.id];
+      if (config && config.platform) {
+        updateAgentModel(agent.id, config.platform, config.model);
+        updateAgentStatus(agent.id, 'connected');
+        addAgentAction(agent.id, 'Restored from config', '💾');
+        updateAgentMetrics(agent.id, '0', '0ms');
+      }
+    });
+    
+    // Start random background animations
+    setInterval(() => {
+      const randomAgent = agents[Math.floor(Math.random() * agents.length)];
+      if (Math.random() > 0.7) {
+        animateParticle(randomAgent.id, true);
+        setTimeout(() => animateParticle(randomAgent.id, false), 1500);
+      }
+    }, 3000);
+    
+    // Uncomment to run demo on page load
+    // demoAgentCards();
+    
+    // Run demo when 'd' key is pressed
+    document.addEventListener('keypress', (e) => {
+      if (e.key === 'd') {
+        demoAgentCards();
+      }
+    });
   </script>
 </body>
 </html>
