@@ -130,6 +130,7 @@
       width: 380px;
       height: 380px;
       transform: translate(-50%, -50%);
+      z-index: 10;
       
       /* Container for SVG brain */
       display: flex;
@@ -299,6 +300,7 @@
       pointer-events: auto;
       cursor: pointer;
       transition: all 0.3s ease;
+      z-index: 20;
     }
 
     .agent:hover {
@@ -1221,8 +1223,8 @@
       <!-- Agents will be dynamically added -->
     </div>
 
-    <!-- SVG for Vessel-like Connections -->
-    <svg id="vessels-svg" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none; z-index: 5;">
+    <!-- SVG for Vessel-like Connections (behind everything) -->
+    <svg id="vessels-svg" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none; z-index: 1;">
       <defs>
         <!-- Vessel glow filter -->
         <filter id="vesselGlow">
