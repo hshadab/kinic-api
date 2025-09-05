@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.2.2';
+    window.APP_VERSION = '1.2.3';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -1261,6 +1261,9 @@
   </div>
 
   <script>
+    console.log('=== KINIC STARTING - Version:', window.APP_VERSION, '===');
+    console.log('Debugging Builder tendril issue...');
+    
     // Agent definitions with emojis, colors, and platforms
     const agents = [
       { 
@@ -1335,6 +1338,10 @@
         }
       }
     ];
+    
+    console.log('✅ Agents array defined with', agents.length, 'agents');
+    console.log('Agent IDs:', agents.map(a => a.id));
+    console.log('Builder agent:', agents.find(a => a.id === 'builder'));
     
     // Store agent configurations
     let agentConfigs = JSON.parse(localStorage.getItem('agentConfigs') || '{}');
