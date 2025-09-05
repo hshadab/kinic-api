@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.2.4';
+    window.APP_VERSION = '1.3.0';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -1221,21 +1221,19 @@
       <!-- Agents will be dynamically added -->
     </div>
 
-    <!-- SVG for Tendrils -->
-    <svg style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none; z-index: 5;">
+    <!-- SVG for Vessel-like Connections -->
+    <svg id="vessels-svg" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; pointer-events: none; z-index: 5;">
       <defs>
-        <linearGradient id="tendrilGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#64ffda;stop-opacity:0" />
-          <stop offset="50%" style="stop-color:#64ffda;stop-opacity:0.6" />
-          <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0.8" />
-        </linearGradient>
-        <linearGradient id="tendrilGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#bd93f9;stop-opacity:0" />
-          <stop offset="50%" style="stop-color:#bd93f9;stop-opacity:0.6" />
-          <stop offset="100%" style="stop-color:#ff79c6;stop-opacity:0.8" />
-        </linearGradient>
+        <!-- Vessel glow filter -->
+        <filter id="vesselGlow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
-      <g id="tendrils"></g>
+      <g id="vessels"></g>
     </svg>
   </div>
 
@@ -2045,79 +2043,32 @@
         container.appendChild(agentDiv);
       });
       
-      // Create tendrils after all agents are placed
+      // Create vessels after all agents are placed
       setTimeout(() => {
-        updateTendrils();
+        createVessels();
         // Try again after a short delay to ensure all elements are ready
-        setTimeout(updateTendrils, 500);
+        setTimeout(createVessels, 500);
       }, 100);
       
-      // Aggressive fix for missing tendrils
-      let checkCount = 0;
-      const checkInterval = setInterval(() => {
-        checkCount++;
-        console.log(`Tendril verification attempt ${checkCount}`);
+      // Verify vessels are created
+      let vesselCheckCount = 0;
+      const vesselCheckInterval = setInterval(() => {
+        vesselCheckCount++;
+        const vessels = document.querySelectorAll('[id^="vessel-"]').length;
+        console.log(`Vessel check ${vesselCheckCount}: ${vessels}/5 vessels found`);
         
-        // Check specifically for builder tendril
-        const builderEl = document.getElementById('builder');
-        const builderTendril = document.getElementById('tendril-builder');
-        
-        if (builderEl && !builderTendril) {
-          console.error('BUILDER TENDRIL MISSING - Creating manually');
-          
-          // Manually create the tendril
-          const svg = document.getElementById('tendrils');
-          const brainCore = document.querySelector('.brain-core');
-          
-          if (svg && brainCore) {
-            const builderCard = builderEl.querySelector('.agent-card');
-            if (builderCard) {
-              const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-              
-              const svgRect = svg.getBoundingClientRect();
-              const builderRect = builderCard.getBoundingClientRect();
-              const brainRect = brainCore.getBoundingClientRect();
-              
-              const startX = builderRect.left + builderRect.width / 2 - svgRect.left;
-              const startY = builderRect.top + builderRect.height / 2 - svgRect.top;
-              const endX = brainRect.left + brainRect.width / 2 - svgRect.left;
-              const endY = brainRect.top + brainRect.height / 2 - svgRect.top;
-              
-              const dx = endX - startX;
-              const dy = endY - startY;
-              const controlX = startX + dx * 0.5;
-              const controlY = startY + dy * 0.2;
-              
-              path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
-              path.setAttribute('stroke', '#bd93f9'); // Builder color
-              path.setAttribute('stroke-width', '2');
-              path.setAttribute('fill', 'none');
-              path.setAttribute('id', 'tendril-builder');
-              path.style.opacity = '0.6';
-              path.style.filter = 'drop-shadow(0 0 5px #bd93f9)';
-              
-              svg.appendChild(path);
-              console.log('BUILDER TENDRIL CREATED MANUALLY');
-            }
-          }
+        if (vessels < 5) {
+          console.log('Recreating vessels...');
+          createVessels();
         }
         
-        // Check all tendrils
-        const allTendrils = ['researcher', 'builder', 'analyzer', 'security', 'orchestrator']
-          .map(id => document.getElementById(`tendril-${id}`))
-          .filter(t => t !== null).length;
-        
-        console.log(`Tendrils found: ${allTendrils}/5`);
-        
-        if (allTendrils === 5 || checkCount > 20) {
-          clearInterval(checkInterval);
-          if (allTendrils === 5) {
-            console.log('✅ All 5 tendrils verified!');
-          } else {
-            console.error('❌ Failed to create all tendrils after 20 attempts');
+        if (vessels === 5 || vesselCheckCount > 10) {
+          clearInterval(vesselCheckInterval);
+          if (vessels === 5) {
+            console.log('✅ All 5 vessels verified!');
           }
         }
-      }, 300);
+      }, 500);
     }
 
     // Create tendril connection (deprecated - using dynamic update instead)
@@ -2366,184 +2317,133 @@
       updateAgentVisualStatus(agentId, agentConfigs[agentId]);
     });
     
-    // Helper function to get agent element with fallback
-    function getAgentEl(id) {
-      return document.getElementById(id) || 
-             document.querySelector(`[data-agent="${id}"]`) ||
-             document.querySelector(`[id*="${id}"]`);
-    }
-    
-    // Function to create tendril for a specific agent
-    function createTendrilForAgent(agentId) {
-      const agent = agents.find(a => a.id === agentId);
-      if (!agent) {
-        console.error(`Agent not found in array: ${agentId}`);
-        return;
-      }
+    // NEW VESSEL SYSTEM - Complete rebuild for reliability
+    function createVessels() {
+      console.log('🔄 Creating vessel connections...');
       
-      const svg = document.getElementById('tendrils');
-      if (!svg) {
-        console.error('Tendrils SVG not found');
-        return;
-      }
-      
-      const agentEl = getAgentEl(agentId);
+      const vesselsContainer = document.getElementById('vessels');
       const brainCore = document.querySelector('.brain-core');
       
-      if (agentEl && brainCore) {
-        const agentCard = agentEl.querySelector('.agent-card');
-        if (!agentCard) return;
-        
-        const agentRect = agentCard.getBoundingClientRect();
-        const brainRect = brainCore.getBoundingClientRect();
-        const svgRect = svg.getBoundingClientRect();
-        
-        const startX = agentRect.left + agentRect.width / 2 - svgRect.left;
-        const startY = agentRect.top + agentRect.height / 2 - svgRect.top;
-        const endX = brainRect.left + brainRect.width / 2 - svgRect.left;
-        const endY = brainRect.top + brainRect.height / 2 - svgRect.top;
-        
-        // Remove existing tendril if any
-        const existingTendril = document.getElementById(`tendril-${agentId}`);
-        if (existingTendril) {
-          existingTendril.remove();
-        }
-        
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        const dx = endX - startX;
-        const dy = endY - startY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        const curveAmount = distance * 0.2;
-        const angle = Math.atan2(dy, dx) + Math.PI / 2;
-        const controlX = (startX + endX) / 2 + Math.cos(angle) * curveAmount;
-        const controlY = (startY + endY) / 2 + Math.sin(angle) * curveAmount;
-        
-        path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
-        path.setAttribute('class', 'tendril-path');
-        path.setAttribute('stroke', agent.color);
-        path.setAttribute('id', `tendril-${agentId}`);
-        path.style.opacity = '0.6';
-        path.style.filter = `drop-shadow(0 0 5px ${agent.color})`;
-        
-        svg.appendChild(path);
-        console.log(`Manually created tendril for ${agentId}`);
+      if (!vesselsContainer) {
+        console.error('❌ Vessels container not found');
+        return;
       }
-    }
-    
-    // Function to update all tendrils dynamically
-    function updateTendrils() {
-      const svg = document.getElementById('tendrils');
-      if (!svg) return;
       
-      svg.innerHTML = ''; // Clear existing
+      if (!brainCore) {
+        console.error('❌ Brain core not found');
+        return;
+      }
       
-      // Explicitly list all 5 agents to ensure they all get tendrils
-      const activeAgents = agents.slice(0, 5); // Only first 5 agents
+      // Clear any existing vessels
+      vesselsContainer.innerHTML = '';
       
-      console.log('Updating tendrils for agents:', activeAgents.map(a => `${a.id} (${a.name})`));
+      // Get brain position
+      const brainRect = brainCore.getBoundingClientRect();
+      const brainX = brainRect.left + brainRect.width / 2;
+      const brainY = brainRect.top + brainRect.height / 2;
       
-      activeAgents.forEach((agent, index) => {
-        // Special logging for builder agent
-        if (agent.id === 'builder') {
-          console.log('=== PROCESSING BUILDER AGENT ===');
-          console.log('Builder data:', agent);
-          console.log('Builder index in array:', index);
-        }
+      // Define the 5 agents explicitly with their colors
+      const vesselAgents = [
+        { id: 'researcher', color: '#64ffda', name: 'Researcher' },
+        { id: 'builder', color: '#bd93f9', name: 'Builder' },
+        { id: 'analyzer', color: '#ff79c6', name: 'Analyzer' },
+        { id: 'security', color: '#50fa7b', name: 'Security' },
+        { id: 'orchestrator', color: '#ffb86c', name: 'Orchestrator' }
+      ];
+      
+      // Create vessel for each agent
+      vesselAgents.forEach((agent, index) => {
+        console.log(`Creating vessel for ${agent.name}...`);
         
-        const agentEl = getAgentEl(agent.id);
-        const brainCore = document.querySelector('.brain-core');
+        // Try multiple ways to find the agent element
+        let agentEl = document.getElementById(agent.id);
+        if (!agentEl) {
+          // Try finding by class and index
+          const allAgents = document.querySelectorAll('.agent');
+          if (allAgents[index]) {
+            agentEl = allAgents[index];
+            console.log(`Found ${agent.name} by index ${index}`);
+          }
+        }
         
         if (!agentEl) {
-          console.error(`❌ Agent element not found for ${agent.id}`);
-          if (agent.id === 'builder') {
-            console.error('CRITICAL: Builder element missing from DOM!');
-            // Try to find it with looser search
-            const allDivs = document.querySelectorAll('.agent');
-            console.log('All agent divs found:', allDivs.length);
-            allDivs.forEach(div => console.log('Agent div ID:', div.id));
-          }
+          console.error(`❌ Could not find element for ${agent.name}`);
           return;
         }
         
-        if (!brainCore) {
-          console.error('❌ Brain core element not found');
-          return;
-        }
-        
-        // Get agent card center
+        // Get agent card within the element
         const agentCard = agentEl.querySelector('.agent-card');
         if (!agentCard) {
-          console.warn(`⚠️ No agent card found for ${agent.id}`);
-          if (agent.id === 'builder') {
-            console.error('CRITICAL: Builder card missing!');
-          }
+          console.error(`❌ No card found for ${agent.name}`);
           return;
         }
         
+        // Get positions
         const agentRect = agentCard.getBoundingClientRect();
-        const agentCenterX = agentRect.left + agentRect.width / 2;
-        const agentCenterY = agentRect.top + agentRect.height / 2;
+        const agentX = agentRect.left + agentRect.width / 2;
+        const agentY = agentRect.top + agentRect.height / 2;
         
-        // Get brain center
-        const brainRect = brainCore.getBoundingClientRect();
-        const brainCenterX = brainRect.left + brainRect.width / 2;
-        const brainCenterY = brainRect.top + brainRect.height / 2;
+        // Create the vessel path
+        const vessel = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         
-        // Get SVG position for coordinate conversion
-        const svgRect = svg.getBoundingClientRect();
-        
-        // Convert to SVG coordinates
-        const startX = agentCenterX - svgRect.left;
-        const startY = agentCenterY - svgRect.top;
-        const endX = brainCenterX - svgRect.left;
-        const endY = brainCenterY - svgRect.top;
-        
-        // Create path element
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        
-        // Calculate control points for smooth curve
-        const dx = endX - startX;
-        const dy = endY - startY;
+        // Calculate curve control points for organic look
+        const dx = brainX - agentX;
+        const dy = brainY - agentY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        // Create natural curve based on distance
-        const curveAmount = distance * 0.2;
-        const angle = Math.atan2(dy, dx) + Math.PI / 2;
-        const controlX = (startX + endX) / 2 + Math.cos(angle) * curveAmount;
-        const controlY = (startY + endY) / 2 + Math.sin(angle) * curveAmount;
+        // Create organic curve
+        const curve1X = agentX + dx * 0.25 + (Math.random() - 0.5) * 30;
+        const curve1Y = agentY + dy * 0.25 + (Math.random() - 0.5) * 30;
+        const curve2X = agentX + dx * 0.75 + (Math.random() - 0.5) * 30;
+        const curve2Y = agentY + dy * 0.75 + (Math.random() - 0.5) * 30;
         
-        // Set path attributes
-        path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
-        path.setAttribute('class', 'tendril-path');
-        path.setAttribute('stroke', agent.color);
-        path.setAttribute('id', `tendril-${agent.id}`);
-        path.style.opacity = '0.6';
-        path.style.filter = `drop-shadow(0 0 5px ${agent.color})`;
+        // Build path
+        const pathData = `M ${agentX} ${agentY} C ${curve1X} ${curve1Y}, ${curve2X} ${curve2Y}, ${brainX} ${brainY}`;
         
-        svg.appendChild(path);
-        console.log(`✅ Tendril created for ${agent.id} with color ${agent.color}`);
+        vessel.setAttribute('d', pathData);
+        vessel.setAttribute('stroke', agent.color);
+        vessel.setAttribute('stroke-width', '4');
+        vessel.setAttribute('stroke-linecap', 'round');
+        vessel.setAttribute('fill', 'none');
+        vessel.setAttribute('opacity', '0.7');
+        vessel.setAttribute('filter', 'url(#vesselGlow)');
+        vessel.setAttribute('id', `vessel-${agent.id}`);
         
-        // Verify the tendril was actually added
-        if (agent.id === 'builder') {
-          const verifyTendril = document.getElementById('tendril-builder');
-          if (verifyTendril) {
-            console.log('✅✅ BUILDER TENDRIL VERIFIED IN DOM');
-          } else {
-            console.error('❌❌ BUILDER TENDRIL NOT IN DOM AFTER CREATION');
-          }
-        }
+        // Add pulsing animation
+        vessel.style.animation = `vesselPulse ${3 + index * 0.5}s ease-in-out infinite`;
+        
+        vesselsContainer.appendChild(vessel);
+        console.log(`✅ Vessel created for ${agent.name}`);
       });
+      
+      console.log('✅ All vessels created');
     }
     
-    // Update tendrils on window resize or scroll
-    window.addEventListener('resize', updateTendrils);
-    window.addEventListener('scroll', updateTendrils);
+    // Add CSS animation for vessels
+    const vesselStyle = document.createElement('style');
+    vesselStyle.textContent = `
+      @keyframes vesselPulse {
+        0%, 100% { 
+          opacity: 0.5;
+          stroke-width: 3;
+        }
+        50% { 
+          opacity: 0.9;
+          stroke-width: 5;
+        }
+      }
+    `;
+    document.head.appendChild(vesselStyle);
     
-    // Initial tendril update
-    setTimeout(updateTendrils, 100);
+    // Update vessels on window resize or scroll
+    window.addEventListener('resize', createVessels);
+    window.addEventListener('scroll', createVessels);
     
-    // Update tendrils periodically to handle any DOM changes
-    setInterval(updateTendrils, 2000);
+    // Initial vessel creation
+    setTimeout(createVessels, 100);
+    
+    // Update vessels periodically to handle any DOM changes
+    setInterval(createVessels, 2000);
 
     // Periodic stats update
     setInterval(updateStats, 5000);
@@ -2737,11 +2637,11 @@
       console.log('=== ELEMENT CHECKS ===');
       console.log('Builder element exists?', !!document.getElementById('builder'));
       console.log('Builder has .agent-card?', !!document.getElementById('builder')?.querySelector('.agent-card'));
-      console.log('SVG tendrils exists?', !!document.getElementById('tendrils'));
+      console.log('SVG vessels exists?', !!document.getElementById('vessels'));
       console.log('All agent elements:', document.querySelectorAll('.agent').length);
       
-      setTimeout(updateTendrils, 200);
-      setTimeout(updateTendrils, 1000);
+      setTimeout(createVessels, 200);
+      setTimeout(createVessels, 1000);
       
       // Extra check specifically for builder agent
       setTimeout(() => {
