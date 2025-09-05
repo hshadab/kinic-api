@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.1.8';
+    window.APP_VERSION = '1.1.9';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -2323,52 +2323,49 @@
           console.warn(`No agent card found for ${agent.id}`);
           return;
         }
-          
-          const agentRect = agentCard.getBoundingClientRect();
-          const agentCenterX = agentRect.left + agentRect.width / 2;
-          const agentCenterY = agentRect.top + agentRect.height / 2;
-          
-          // Get brain center
-          const brainRect = brainCore.getBoundingClientRect();
-          const brainCenterX = brainRect.left + brainRect.width / 2;
-          const brainCenterY = brainRect.top + brainRect.height / 2;
-          
-          // Get SVG position for coordinate conversion
-          const svgRect = svg.getBoundingClientRect();
-          
-          // Convert to SVG coordinates
-          const startX = agentCenterX - svgRect.left;
-          const startY = agentCenterY - svgRect.top;
-          const endX = brainCenterX - svgRect.left;
-          const endY = brainCenterY - svgRect.top;
-          
-          // Create path element
-          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-          
-          // Calculate control points for smooth curve
-          const dx = endX - startX;
-          const dy = endY - startY;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          // Create natural curve based on distance
-          const curveAmount = distance * 0.2;
-          const angle = Math.atan2(dy, dx) + Math.PI / 2;
-          const controlX = (startX + endX) / 2 + Math.cos(angle) * curveAmount;
-          const controlY = (startY + endY) / 2 + Math.sin(angle) * curveAmount;
-          
-          // Set path attributes
-          path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
-          path.setAttribute('class', 'tendril-path');
-          path.setAttribute('stroke', agent.color);
-          path.setAttribute('id', `tendril-${agent.id}`);
-          path.style.opacity = '0.6';
-          path.style.filter = `drop-shadow(0 0 5px ${agent.color})`;
-          
-          svg.appendChild(path);
-          console.log(`Tendril created for ${agent.id} with color ${agent.color}`);
-        } else {
-          console.warn(`Could not create tendril for ${agent.id} - missing elements`);
-        }
+        
+        const agentRect = agentCard.getBoundingClientRect();
+        const agentCenterX = agentRect.left + agentRect.width / 2;
+        const agentCenterY = agentRect.top + agentRect.height / 2;
+        
+        // Get brain center
+        const brainRect = brainCore.getBoundingClientRect();
+        const brainCenterX = brainRect.left + brainRect.width / 2;
+        const brainCenterY = brainRect.top + brainRect.height / 2;
+        
+        // Get SVG position for coordinate conversion
+        const svgRect = svg.getBoundingClientRect();
+        
+        // Convert to SVG coordinates
+        const startX = agentCenterX - svgRect.left;
+        const startY = agentCenterY - svgRect.top;
+        const endX = brainCenterX - svgRect.left;
+        const endY = brainCenterY - svgRect.top;
+        
+        // Create path element
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        
+        // Calculate control points for smooth curve
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        // Create natural curve based on distance
+        const curveAmount = distance * 0.2;
+        const angle = Math.atan2(dy, dx) + Math.PI / 2;
+        const controlX = (startX + endX) / 2 + Math.cos(angle) * curveAmount;
+        const controlY = (startY + endY) / 2 + Math.sin(angle) * curveAmount;
+        
+        // Set path attributes
+        path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
+        path.setAttribute('class', 'tendril-path');
+        path.setAttribute('stroke', agent.color);
+        path.setAttribute('id', `tendril-${agent.id}`);
+        path.style.opacity = '0.6';
+        path.style.filter = `drop-shadow(0 0 5px ${agent.color})`;
+        
+        svg.appendChild(path);
+        console.log(`Tendril created for ${agent.id} with color ${agent.color}`);
       });
     }
     
