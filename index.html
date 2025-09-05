@@ -9,7 +9,7 @@
   <title>Kinic: Shared AI Memory</title>
   <script>
     // Cache buster version - increment this when making changes
-    window.APP_VERSION = '1.1.9';
+    window.APP_VERSION = '1.2.0';
     console.log('Kinic App Version:', window.APP_VERSION);
     
     // Auto-reload with cache bypass if URL doesn't have version parameter
@@ -2291,6 +2291,57 @@
       updateAgentVisualStatus(agentId, agentConfigs[agentId]);
     });
     
+    // Function to create tendril for a specific agent
+    function createTendrilForAgent(agentId) {
+      const agent = agents.find(a => a.id === agentId);
+      if (!agent) return;
+      
+      const svg = document.getElementById('tendrils');
+      if (!svg) return;
+      
+      const agentEl = document.getElementById(agentId);
+      const brainCore = document.querySelector('.brain-core');
+      
+      if (agentEl && brainCore) {
+        const agentCard = agentEl.querySelector('.agent-card');
+        if (!agentCard) return;
+        
+        const agentRect = agentCard.getBoundingClientRect();
+        const brainRect = brainCore.getBoundingClientRect();
+        const svgRect = svg.getBoundingClientRect();
+        
+        const startX = agentRect.left + agentRect.width / 2 - svgRect.left;
+        const startY = agentRect.top + agentRect.height / 2 - svgRect.top;
+        const endX = brainRect.left + brainRect.width / 2 - svgRect.left;
+        const endY = brainRect.top + brainRect.height / 2 - svgRect.top;
+        
+        // Remove existing tendril if any
+        const existingTendril = document.getElementById(`tendril-${agentId}`);
+        if (existingTendril) {
+          existingTendril.remove();
+        }
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        const dx = endX - startX;
+        const dy = endY - startY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const curveAmount = distance * 0.2;
+        const angle = Math.atan2(dy, dx) + Math.PI / 2;
+        const controlX = (startX + endX) / 2 + Math.cos(angle) * curveAmount;
+        const controlY = (startY + endY) / 2 + Math.sin(angle) * curveAmount;
+        
+        path.setAttribute('d', `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`);
+        path.setAttribute('class', 'tendril-path');
+        path.setAttribute('stroke', agent.color);
+        path.setAttribute('id', `tendril-${agentId}`);
+        path.style.opacity = '0.6';
+        path.style.filter = `drop-shadow(0 0 5px ${agent.color})`;
+        
+        svg.appendChild(path);
+        console.log(`Manually created tendril for ${agentId}`);
+      }
+    }
+    
     // Function to update all tendrils dynamically
     function updateTendrils() {
       const svg = document.getElementById('tendrils');
@@ -2304,6 +2355,11 @@
       console.log('Updating tendrils for agents:', activeAgents.map(a => `${a.id} (${a.name})`));
       
       activeAgents.forEach(agent => {
+        // Special logging for builder agent
+        if (agent.id === 'builder') {
+          console.log('Processing Builder agent specifically...');
+        }
+        
         const agentEl = document.getElementById(agent.id);
         const brainCore = document.querySelector('.brain-core');
         
@@ -2568,6 +2624,24 @@
       console.log('Page fully loaded - updating tendrils');
       setTimeout(updateTendrils, 200);
       setTimeout(updateTendrils, 1000);
+      
+      // Extra check specifically for builder agent
+      setTimeout(() => {
+        const builderTendril = document.getElementById('tendril-builder');
+        if (!builderTendril) {
+          console.warn('Builder tendril still missing, forcing recreation...');
+          createTendrilForAgent('builder');
+        }
+        
+        // Check all agents have tendrils
+        ['researcher', 'builder', 'analyzer', 'security', 'orchestrator'].forEach(agentId => {
+          const tendril = document.getElementById(`tendril-${agentId}`);
+          if (!tendril) {
+            console.warn(`${agentId} tendril missing, creating...`);
+            createTendrilForAgent(agentId);
+          }
+        });
+      }, 2000);
     });
     
     // Uncomment to run demo on page load
