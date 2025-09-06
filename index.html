@@ -1986,7 +1986,7 @@
       activeAgents.forEach((agent, index) => {
         const angleRad = (agent.angle * Math.PI) / 180;
         const x = centerX + Math.cos(angleRad) * radius - 100;
-        const y = centerY + Math.sin(angleRad) * radius - 40;
+        const y = centerY + Math.sin(angleRad) * radius + 20;
 
         const agentDiv = document.createElement('div');
         agentDiv.className = 'agent';
