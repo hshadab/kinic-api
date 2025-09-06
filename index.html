@@ -309,7 +309,7 @@
     }
 
     .agent-card {
-      background: rgba(10, 14, 39, 0.95);
+      background: rgba(10, 14, 39, 1.0);
       border: 1px solid;
       border-radius: 16px;
       padding: 16px;
@@ -1172,10 +1172,10 @@
             <circle cx="190" cy="145" r="120" fill="url(#sphereGradient)" opacity="1"/>
             
             <!-- Inner glow layer -->
-            <circle cx="190" cy="145" r="110" fill="url(#innerGlow)" opacity="0.95"/>
+            <circle cx="190" cy="145" r="110" fill="url(#innerGlow)" opacity="1.0"/>
             
             <!-- Polygonal facets for texture -->
-            <g opacity="0.8">
+            <g opacity="0.9">
               <!-- Top facets -->
               <polygon points="190,45 210,55 225,70 220,85 200,90 180,85 175,70 190,55" fill="#fff8e1"/>
               <polygon points="155,65 175,70 180,85 165,95 150,90 145,75" fill="#ffe082"/>
@@ -1193,7 +1193,7 @@
             </g>
             
             <!-- Subtle texture polygons -->
-            <g opacity="0.6">
+            <g opacity="0.7">
               <polygon points="160,80 175,85 170,95 158,90" fill="#ffd54f"/>
               <polygon points="210,85 225,90 220,100 208,95" fill="#ffcc80"/>
               <polygon points="140,125 155,130 150,140 138,135" fill="#ffb74d"/>
@@ -2407,7 +2407,7 @@
         vessel.setAttribute('stroke-width', '4');
         vessel.setAttribute('stroke-linecap', 'round');
         vessel.setAttribute('fill', 'none');
-        vessel.setAttribute('opacity', '0.25');
+        vessel.setAttribute('opacity', '0.15');
         vessel.setAttribute('filter', 'url(#vesselGlow)');
         vessel.setAttribute('id', `vessel-${agent.id}`);
         
@@ -2426,11 +2426,11 @@
     vesselStyle.textContent = `
       @keyframes vesselPulse {
         0%, 100% { 
-          opacity: 0.15;
+          opacity: 0.1;
           stroke-width: 3;
         }
         50% { 
-          opacity: 0.3;
+          opacity: 0.2;
           stroke-width: 5;
         }
       }
