@@ -53,3 +53,6 @@ Thumbs.db
 *.sh
 *.bat
 *.ps1
+
+# Archive folder - old/backup files
+archive/
