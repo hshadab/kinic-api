@@ -448,11 +448,24 @@
       100% { border-color: currentColor transparent transparent transparent; }
     }
 
-    .agent-card.success {
-      animation: ultraDramaticConnect 2.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    .agent-card.connecting {
+      animation: connectionAttempt 1s ease-out forwards;
       position: relative;
       overflow: visible;
       z-index: 100 !important;
+    }
+    
+    .agent-card.success {
+      animation: connectionSuccess 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+      position: relative;
+      overflow: visible;
+      z-index: 100 !important;
+    }
+    
+    .agent-card.failed {
+      animation: connectionFailed 0.8s ease-out forwards;
+      position: relative;
+      overflow: visible;
     }
 
     .agent-card.success::before {
@@ -488,6 +501,92 @@
       z-index: -2;
     }
 
+    @keyframes connectionAttempt {
+      0% { 
+        transform: scale(1) rotate(0deg) translateY(0);
+        background-color: transparent;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        filter: brightness(1) contrast(1) saturate(1);
+      }
+      50% {
+        transform: scale(1.1) rotate(2deg) translateY(-10px);
+        background-color: rgba(100, 255, 218, 0.2);
+        box-shadow: 0 0 40px rgba(100, 255, 218, 0.5),
+                    0 0 60px rgba(100, 255, 218, 0.3);
+        filter: brightness(1.2) contrast(1.1) saturate(1.2);
+      }
+      100% {
+        transform: scale(1.05) rotate(1deg) translateY(-5px);
+        background-color: rgba(100, 255, 218, 0.15);
+        box-shadow: 0 0 30px rgba(100, 255, 218, 0.4);
+        filter: brightness(1.1) contrast(1.05) saturate(1.1);
+      }
+    }
+    
+    @keyframes connectionSuccess {
+      0% {
+        transform: scale(1.05) rotate(1deg) translateY(-5px);
+        background-color: rgba(100, 255, 218, 0.15);
+        filter: brightness(1.1) contrast(1.05) saturate(1.1);
+      }
+      20% {
+        transform: scale(1.3) rotate(10deg) translateY(-50px);
+        background-color: rgba(80, 250, 123, 0.7);
+        box-shadow: 0 0 80px rgba(80, 250, 123, 1),
+                    0 0 120px rgba(100, 255, 218, 0.8),
+                    0 0 160px rgba(80, 250, 123, 0.6),
+                    inset 0 0 60px rgba(255, 255, 255, 0.5);
+        filter: brightness(1.8) contrast(1.5) saturate(2) hue-rotate(10deg);
+      }
+      40% {
+        transform: scale(1.15) rotate(-5deg) translateY(-20px);
+        background-color: rgba(80, 250, 123, 0.4);
+        filter: brightness(1.4) contrast(1.2) saturate(1.5);
+      }
+      60% {
+        transform: scale(1.08) rotate(3deg) translateY(-10px);
+        background-color: rgba(80, 250, 123, 0.2);
+        filter: brightness(1.2) contrast(1.1) saturate(1.2);
+      }
+      100% {
+        transform: scale(1) rotate(0deg) translateY(0);
+        background-color: transparent;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                    0 0 30px rgba(80, 250, 123, 0.3);
+        filter: brightness(1) contrast(1) saturate(1);
+      }
+    }
+    
+    @keyframes connectionFailed {
+      0% {
+        transform: scale(1.05) rotate(1deg) translateY(-5px);
+        background-color: rgba(100, 255, 218, 0.15);
+        filter: brightness(1.1) contrast(1.05) saturate(1.1);
+      }
+      30% {
+        transform: scale(1.08) rotate(-3deg) translateY(-8px);
+        background-color: rgba(255, 85, 85, 0.3);
+        box-shadow: 0 0 40px rgba(255, 85, 85, 0.6);
+        filter: brightness(1.2) contrast(1.1) saturate(0.8) hue-rotate(-10deg);
+      }
+      60% {
+        transform: scale(0.98) rotate(2deg) translateY(0) translateX(-5px);
+        background-color: rgba(255, 85, 85, 0.2);
+      }
+      70% {
+        transform: scale(1.02) rotate(-1deg) translateY(0) translateX(5px);
+      }
+      80% {
+        transform: scale(0.99) rotate(0) translateY(0) translateX(-3px);
+      }
+      100% {
+        transform: scale(1) rotate(0deg) translateY(0);
+        background-color: transparent;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        filter: brightness(1) contrast(1) saturate(1);
+      }
+    }
+    
     @keyframes ultraDramaticConnect {
       0% { 
         transform: scale(1) rotate(0deg) translateY(0);
@@ -1791,15 +1890,34 @@
             cardEl.className = 'agent-card idle';
             break;
           case 'error':
+          case 'failed':
+            statusEl.classList.remove('connected', 'processing');
             statusEl.classList.add('offline');
-            cardEl.className = 'agent-card error';
+            cardEl.className = 'agent-card failed';
+            
+            // Show failure effects
+            const failShake = document.createElement('div');
+            failShake.style.position = 'fixed';
+            failShake.style.top = '0';
+            failShake.style.left = '0';
+            failShake.style.width = '100vw';
+            failShake.style.height = '100vh';
+            failShake.style.background = 'radial-gradient(circle at center, rgba(255, 85, 85, 0.2), transparent)';
+            failShake.style.pointerEvents = 'none';
+            failShake.style.zIndex = '10000';
+            failShake.style.animation = 'viewportFlash 0.4s ease-out';
+            document.body.appendChild(failShake);
+            setTimeout(() => failShake.remove(), 400);
+            
             setTimeout(() => {
               cardEl.className = 'agent-card idle';
-            }, 500);
+            }, 800);
             break;
           case 'testing':
+          case 'connecting':
+            statusEl.classList.remove('connected', 'offline');
             statusEl.classList.add('processing');
-            cardEl.className = 'agent-card processing';
+            cardEl.className = 'agent-card connecting';
             break;
           case 'success':
             cardEl.className = 'agent-card success';
@@ -2021,34 +2139,54 @@
         
         // Update status to show testing
         statusDiv.innerHTML = `🔄 Testing ${i + 1}/${configuredAgents.length}: ${agent.name}...`;
-        updateAgentStatus(agentId, 'testing');
+        
+        // Start connecting animation
+        updateAgentStatus(agentId, 'connecting');
         
         // Simulate API test (in real implementation, would call backend)
         try {
           // Check if we have all required fields
           if (config.platform && config.model && config.apiKey) {
-            // Simulate successful test with a small delay
-            await new Promise(resolve => setTimeout(resolve, 800));
+            // Wait for connecting animation to play
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Update agent visual status
-            updateAgentStatus(agentId, 'connected');
-            updateAgentModel(agentId, config.platform, config.model);
-            addAgentAction(agentId, 'Connection verified', '✅');
+            // Simulate connection result (90% success rate for demo)
+            const connectionSuccessful = Math.random() > 0.1;
             
-            // Update agent card border color
-            const agentCard = document.getElementById(`card-${agentId}`);
-            if (agentCard) {
-              agentCard.style.borderColor = '#50fa7b';
-              agentCard.classList.remove('idle');
-              agentCard.classList.add('active');
+            if (connectionSuccessful) {
+              // Trigger success animation
+              updateAgentStatus(agentId, 'success');
+              updateAgentModel(agentId, config.platform, config.model);
+              addAgentAction(agentId, 'Connection verified', '✅');
+              
+              // Update agent card border color after animation
+              setTimeout(() => {
+                const agentCard = document.getElementById(`card-${agentId}`);
+                if (agentCard) {
+                  agentCard.style.borderColor = '#50fa7b';
+                  agentCard.classList.remove('idle');
+                  agentCard.classList.add('active');
+                }
+                updateAgentStatus(agentId, 'connected');
+              }, 1500);
+              
+              successCount++;
+              // Wait for success animation to complete
+              await new Promise(resolve => setTimeout(resolve, 2500));
+            } else {
+              // Trigger failure animation
+              updateAgentStatus(agentId, 'failed');
+              addAgentAction(agentId, 'Connection failed', '❌');
+              failCount++;
+              // Wait for failure animation to complete
+              await new Promise(resolve => setTimeout(resolve, 800));
             }
-            
-            successCount++;
           } else {
-            // Missing configuration
-            updateAgentStatus(agentId, 'error');
+            // Missing configuration - immediate failure
+            updateAgentStatus(agentId, 'failed');
             addAgentAction(agentId, 'Incomplete config', '❌');
             failCount++;
+            await new Promise(resolve => setTimeout(resolve, 800));
           }
         } catch (error) {
           // Test failed
