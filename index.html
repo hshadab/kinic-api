@@ -1978,7 +1978,7 @@
       const container = document.getElementById('agentsContainer');
       const centerX = 400;
       const centerY = 400;
-      const radius = 300;
+      const radius = 380;
 
       // Only create first 5 agents to match our requirement
       const activeAgents = agents.slice(0, 5);
@@ -2382,8 +2382,16 @@
         
         // Get positions
         const agentRect = agentCard.getBoundingClientRect();
-        const agentX = agentRect.left + agentRect.width / 2;
-        const agentY = agentRect.top + agentRect.height / 2;
+        const agentCenterX = agentRect.left + agentRect.width / 2;
+        const agentCenterY = agentRect.top + agentRect.height / 2;
+        
+        // Calculate angle from agent to brain
+        const angleToBrain = Math.atan2(brainY - agentCenterY, brainX - agentCenterX);
+        
+        // Calculate edge point on the card (closer to brain)
+        const cardEdgeOffset = 100; // Distance from center to edge
+        const agentX = agentCenterX + Math.cos(angleToBrain) * cardEdgeOffset;
+        const agentY = agentCenterY + Math.sin(angleToBrain) * cardEdgeOffset;
         
         // Create the vessel path
         const vessel = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -2399,8 +2407,14 @@
         const curve2X = agentX + dx * 0.75 + (Math.random() - 0.5) * 30;
         const curve2Y = agentY + dy * 0.75 + (Math.random() - 0.5) * 30;
         
-        // Build path
-        const pathData = `M ${agentX} ${agentY} C ${curve1X} ${curve1Y}, ${curve2X} ${curve2Y}, ${brainX} ${brainY}`;
+        // Calculate brain edge point (where vessel connects to brain)
+        const brainRadius = 190; // Brain visual radius
+        const angleFromBrain = Math.atan2(agentY - brainY, agentX - brainX);
+        const brainEdgeX = brainX + Math.cos(angleFromBrain) * brainRadius;
+        const brainEdgeY = brainY + Math.sin(angleFromBrain) * brainRadius;
+        
+        // Build path from card edge to brain edge
+        const pathData = `M ${agentX} ${agentY} C ${curve1X} ${curve1Y}, ${curve2X} ${curve2Y}, ${brainEdgeX} ${brainEdgeY}`;
         
         vessel.setAttribute('d', pathData);
         vessel.setAttribute('stroke', agent.color);
