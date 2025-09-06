@@ -59,11 +59,14 @@
     }
 
     .header {
-      position: absolute;
-      top: 30px;
+      display: none; /* Hide old header */
+    }
+    
+    .sidebar-header {
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(100, 255, 218, 0.15);
       text-align: center;
-      z-index: 100;
-      animation: fadeIn 2s ease-out;
     }
 
     @keyframes fadeIn {
@@ -72,21 +75,37 @@
     }
 
     .logo {
-      width: 140px;
-      height: 60px;
-      margin-bottom: 10px;
-      filter: drop-shadow(0 0 30px rgba(100, 255, 218, 0.6));
+      display: none; /* Hide old logo */
+    }
+    
+    .sidebar-logo {
+      width: 180px;
+      height: auto;
+      margin: 0 auto 12px;
+      display: block;
+      filter: drop-shadow(0 0 25px rgba(100, 255, 218, 0.5));
+      transition: filter 0.3s ease;
+    }
+    
+    .sidebar-logo:hover {
+      filter: drop-shadow(0 0 35px rgba(100, 255, 218, 0.8));
+    }
+    
+    .sidebar-subtitle {
+      color: #8892b0;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-align: center;
+      margin: 0;
+      font-weight: 500;
+      opacity: 0.7;
+      width: 180px;
+      margin: 0 auto;
     }
 
     h1 {
-      font-size: 2.5rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #64ffda, #00ff88, #bd93f9);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
-      letter-spacing: -1px;
+      display: none; /* Hide old h1 */
     }
 
     .subtitle {
@@ -1238,6 +1257,11 @@
 
   <!-- User Input Interface (Left Side) -->
   <div class="command-interface">
+    <!-- Kinic Logo and Subtitle -->
+    <div class="sidebar-header">
+      <img src="https://cdn.prod.website-files.com/6712749157ea3bf4a781f309/671bbee00d9198b08a63cb40_kinic-logo.svg" alt="Kinic" class="sidebar-logo">
+      <p class="sidebar-subtitle">Shared AI Memory</p>
+    </div>
     <!-- Tab Navigation -->
     <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid rgba(100, 255, 218, 0.2); padding-bottom: 10px;">
       <button class="tab-btn active" onclick="switchTab('configure')" id="configureTab" style="background: rgba(100, 255, 218, 0.2); color: #64ffda; border: 1px solid rgba(100, 255, 218, 0.3); padding: 8px 16px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.3s;">Configure</button>
