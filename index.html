@@ -449,12 +449,74 @@
     }
 
     .agent-card.success {
-      animation: successFlash 0.5s ease-out;
+      animation: dramaticConnect 1.5s ease-out;
+      position: relative;
+      overflow: visible;
     }
 
-    @keyframes successFlash {
-      0% { background-color: rgba(80, 250, 123, 0.3); }
-      100% { background-color: transparent; }
+    .agent-card.success::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      bottom: -20px;
+      background: radial-gradient(circle at center, 
+        rgba(80, 250, 123, 0.8) 0%,
+        rgba(80, 250, 123, 0.4) 30%,
+        transparent 70%);
+      animation: pulseRing 1.5s ease-out;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    @keyframes dramaticConnect {
+      0% { 
+        transform: scale(1) rotate(0deg);
+        background-color: transparent;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      }
+      15% {
+        transform: scale(1.15) rotate(2deg);
+        background-color: rgba(80, 250, 123, 0.5);
+        box-shadow: 0 0 60px rgba(80, 250, 123, 0.8),
+                    0 0 100px rgba(80, 250, 123, 0.4),
+                    inset 0 0 30px rgba(80, 250, 123, 0.3);
+      }
+      30% {
+        transform: scale(1.05) rotate(-1deg);
+        background-color: rgba(80, 250, 123, 0.3);
+      }
+      50% {
+        transform: scale(1.1) rotate(1deg);
+        background-color: rgba(80, 250, 123, 0.2);
+        box-shadow: 0 0 40px rgba(80, 250, 123, 0.6),
+                    0 0 80px rgba(80, 250, 123, 0.3);
+      }
+      70% {
+        transform: scale(1.02) rotate(0deg);
+      }
+      100% { 
+        transform: scale(1) rotate(0deg);
+        background-color: transparent;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                    0 0 20px rgba(80, 250, 123, 0.2);
+      }
+    }
+
+    @keyframes pulseRing {
+      0% {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      20% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
     }
 
     .agent-card.error {
@@ -506,6 +568,19 @@
       background: #8be9fd;
       box-shadow: 0 0 10px #8be9fd;
       animation: statusBlink 0.5s ease-in-out infinite;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translate(0, 0); }
+      10% { transform: translate(-2px, -1px); }
+      20% { transform: translate(2px, 1px); }
+      30% { transform: translate(-1px, 2px); }
+      40% { transform: translate(1px, -2px); }
+      50% { transform: translate(-2px, 1px); }
+      60% { transform: translate(2px, -1px); }
+      70% { transform: translate(-1px, -2px); }
+      80% { transform: translate(1px, 2px); }
+      90% { transform: translate(2px, -1px); }
     }
 
     @keyframes statusPulse {
@@ -1628,9 +1703,19 @@
             break;
           case 'success':
             cardEl.className = 'agent-card success';
+            
+            // Create dramatic connection effect
+            createConnectionBurst(agentId);
+            
+            // Add screen shake
+            document.body.style.animation = 'screenShake 0.3s ease-out';
+            setTimeout(() => {
+              document.body.style.animation = '';
+            }, 300);
+            
             setTimeout(() => {
               cardEl.className = 'agent-card idle';
-            }, 500);
+            }, 1500);
             break;
         }
       }
@@ -2162,6 +2247,83 @@
       setTimeout(() => burst.remove(), 1000);
     }
 
+    // Create dramatic connection burst effect
+    function createConnectionBurst(agentId) {
+      const agent = document.getElementById(agentId);
+      if (!agent) return;
+      
+      const agentRect = agent.getBoundingClientRect();
+      const brain = document.querySelector('.brain-core');
+      const brainRect = brain.getBoundingClientRect();
+      
+      // Create multiple particle effects
+      for (let i = 0; i < 12; i++) {
+        const particle = document.createElement('div');
+        particle.style.position = 'fixed';
+        particle.style.width = '8px';
+        particle.style.height = '8px';
+        particle.style.borderRadius = '50%';
+        particle.style.background = '#50fa7b';
+        particle.style.boxShadow = '0 0 10px #50fa7b, 0 0 20px #50fa7b';
+        particle.style.left = agentRect.left + agentRect.width / 2 + 'px';
+        particle.style.top = agentRect.top + agentRect.height / 2 + 'px';
+        particle.style.pointerEvents = 'none';
+        particle.style.zIndex = '9999';
+        
+        document.body.appendChild(particle);
+        
+        // Animate particles toward brain with spread
+        const angle = (i / 12) * Math.PI * 2;
+        const spread = 30;
+        const midX = agentRect.left + agentRect.width / 2 + Math.cos(angle) * spread;
+        const midY = agentRect.top + agentRect.height / 2 + Math.sin(angle) * spread;
+        
+        particle.animate([
+          { 
+            transform: 'translate(0, 0) scale(0)',
+            opacity: 0
+          },
+          { 
+            transform: `translate(${Math.cos(angle) * spread}px, ${Math.sin(angle) * spread}px) scale(1.5)`,
+            opacity: 1,
+            offset: 0.2
+          },
+          { 
+            transform: `translate(${brainRect.left + brainRect.width/2 - agentRect.left - agentRect.width/2}px, 
+                       ${brainRect.top + brainRect.height/2 - agentRect.top - agentRect.height/2}px) scale(0.5)`,
+            opacity: 0.5,
+            offset: 0.8
+          },
+          { 
+            transform: `translate(${brainRect.left + brainRect.width/2 - agentRect.left - agentRect.width/2}px, 
+                       ${brainRect.top + brainRect.height/2 - agentRect.top - agentRect.height/2}px) scale(0)`,
+            opacity: 0
+          }
+        ], {
+          duration: 1200,
+          easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+        });
+        
+        setTimeout(() => particle.remove(), 1200);
+      }
+      
+      // Flash the vessel connection
+      const vessel = document.getElementById(`vessel-${agentId}`);
+      if (vessel) {
+        vessel.style.strokeWidth = '8';
+        vessel.style.opacity = '1';
+        vessel.style.filter = 'drop-shadow(0 0 20px currentColor)';
+        vessel.style.animation = 'vesselFlash 1s ease-out';
+        
+        setTimeout(() => {
+          vessel.style.strokeWidth = '4';
+          vessel.style.opacity = '0.15';
+          vessel.style.filter = 'url(#vesselGlow)';
+          vessel.style.animation = '';
+        }, 1000);
+      }
+    }
+
     // Add log entry
     function addLogEntry() {
       const log = document.getElementById('logEntries');
@@ -2446,6 +2608,26 @@
         50% { 
           opacity: 0.2;
           stroke-width: 5;
+        }
+      }
+      
+      @keyframes vesselFlash {
+        0% {
+          stroke-width: 4;
+          opacity: 0.15;
+        }
+        20% {
+          stroke-width: 10;
+          opacity: 1;
+          filter: drop-shadow(0 0 30px currentColor) drop-shadow(0 0 60px currentColor);
+        }
+        40% {
+          stroke-width: 6;
+          opacity: 0.8;
+        }
+        100% {
+          stroke-width: 4;
+          opacity: 0.15;
         }
       }
     `;
