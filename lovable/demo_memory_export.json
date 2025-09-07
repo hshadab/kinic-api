@@ -1,0 +1,103 @@
+{
+  "agent_id": "lovable-assistant",
+  "export_date": "2025-09-07T19:24:34.474179",
+  "memories": [
+    {
+      "id": "41e3a6ca7306",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:13.967431",
+      "type": "architecture",
+      "content": "Chose React with TypeScript for type safety",
+      "context": "User building e-commerce MVP",
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 1
+      }
+    },
+    {
+      "id": "6baaf2a851fc",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:14.468119",
+      "type": "styling",
+      "content": "Using Tailwind CSS for utility-first styling",
+      "context": "Rapid prototyping requirement",
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 1
+      }
+    },
+    {
+      "id": "e9794bfbc18b",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:14.968806",
+      "type": "authentication",
+      "content": "Implemented Supabase Auth with email/password",
+      "context": "User requested authentication",
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 1
+      }
+    },
+    {
+      "id": "7f4557f56e7e",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:15.469180",
+      "type": "database",
+      "content": "Supabase PostgreSQL for data persistence",
+      "context": "Already using Supabase for auth",
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 1
+      }
+    },
+    {
+      "id": "54f85669d324",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:15.969422",
+      "type": "pattern",
+      "content": "User prefers async/await over .then() chains",
+      "confidence": 0.8,
+      "examples": [
+        "fetchProducts",
+        "authenticateUser",
+        "loadCart"
+      ],
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 1
+      }
+    },
+    {
+      "id": "75e0e523110c",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:26.472722",
+      "type": "feature",
+      "content": "Shopping cart using React Context API",
+      "context": "Maintaining state management consistency",
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 2
+      }
+    },
+    {
+      "id": "19d3a5199023",
+      "agent_id": "lovable-assistant",
+      "session_id": "089fc764",
+      "timestamp": "2025-09-07T19:24:26.472785",
+      "type": "pattern",
+      "content": "User consistently chooses React built-in solutions over external libraries",
+      "confidence": 0.9,
+      "metadata": {
+        "project": "ecommerce-mvp",
+        "day": 2
+      }
+    }
+  ],
+  "total_count": 7
+}
