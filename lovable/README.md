@@ -46,7 +46,7 @@ This runs an interactive demonstration showing:
 
 ### Web Visualization
 
-Open `demo.html` in your browser to see:
+Open `index.html` in your browser (or visit the [GitHub Pages demo](https://hshadab.github.io/kinic-api/lovable/)) to see:
 - Side-by-side comparison (with/without Kinic)
 - Live memory visualization
 - Integration code examples
