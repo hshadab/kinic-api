@@ -43,7 +43,7 @@
     .callout { position: fixed; left:50%; transform: translateX(-50%); top: 72px; background: rgba(10,14,39,0.95); border:1px solid rgba(100,255,218,0.35); color:#e0fff2; padding: 14px 18px; border-radius: 14px; z-index: 1200; box-shadow: 0 10px 30px rgba(0,0,0,0.45); backdrop-filter: blur(6px); font-size: 18px; }
     .callout strong { color:#64ffda; }
     #annots { position: fixed; inset: 0; pointer-events: none; z-index: 1150; }
-    .annot { position: fixed; background: rgba(10,14,39,0.96); color:#eafff7; border:1px solid rgba(100,255,218,0.5); border-radius: 14px; padding: 20px 24px; font-size: 42px; line-height:1.25; max-width: 90vw; box-shadow: 0 18px 44px rgba(0,0,0,0.6); }
+    .annot { position: fixed; background: rgba(10,14,39,0.96); color:#eafff7; border:1px solid rgba(100,255,218,0.5); border-radius: 14px; padding: 20px 24px; font-size: 42px; line-height:1.25; max-width: 90vw; box-shadow: 0 18px 44px rgba(0,0,0,0.6); z-index: 1300; }
     .annot:after { content: ""; position: absolute; width: 0; height: 0; border: 22px solid transparent; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.35)); }
     .annot.arrow-down:after { top: -44px; left: 48px; border-bottom-color: rgba(10,14,39,0.96); }
     .annot.arrow-up:after { bottom: -44px; left: 48px; border-top-color: rgba(10,14,39,0.96); }
@@ -326,48 +326,75 @@
     const ctaOverlay = document.getElementById('ctaOverlay');
 
     function showCallout(text, duration=3000) {
-      callout.innerHTML = text;
-      callout.style.display = 'block';
-      callout.classList.remove('fade-out');
-      callout.classList.add('fade-in');
-      setTimeout(() => { callout.classList.remove('fade-in'); callout.classList.add('fade-out'); setTimeout(()=>{ callout.style.display='none'; callout.classList.remove('fade-out'); }, 800); }, duration);
+      // Deprecated in favor of showMessage; keep for compatibility
+      return showMessage(text, duration);
+    }
+
+    // Ensure a single, non-overlapping annotation flow
+    function removeAllAnnotations() {
+      document.querySelectorAll('.annot').forEach(n => n.remove());
+      document.querySelectorAll('.arrow-marker').forEach(n => n.remove());
+      const spot = document.getElementById('spotlight');
+      if (spot) spot.style.display = 'none';
+      document.querySelectorAll('.focus-ring').forEach(el => el.classList.remove('focus-ring'));
+      document.querySelectorAll('.nudge').forEach(el => el.classList.remove('nudge'));
+    }
+
+    function showMessage(text, duration=3600) {
+      removeAllAnnotations();
+      return new Promise(resolve => {
+        const a = document.createElement('div');
+        a.className = 'annot fade-in arrow-down';
+        a.innerHTML = text;
+        document.getElementById('annots').appendChild(a);
+        a.style.top = `86px`;
+        a.style.left = `50%`;
+        a.style.transform = 'translateX(-50%)';
+        setTimeout(() => {
+          a.classList.add('fade-out');
+          setTimeout(() => { a.remove(); resolve(); }, 900);
+        }, duration);
+      });
     }
 
     function showPointer(targetEl, text, opts={}) {
       const duration = opts.duration || 4200;
-      const a = document.createElement('div');
-      a.className = 'annot fade-in arrow-down';
-      a.innerHTML = text;
-      document.getElementById('annots').appendChild(a);
-      const rect = targetEl.getBoundingClientRect();
-      // Put annotation at top center
-      a.style.top = `86px`;
-      a.style.left = `50%`;
-      a.style.transform = 'translateX(-50%)';
-      // Spotlight focus
-      const spot = document.getElementById('spotlight');
-      const cx = rect.left + rect.width/2;
-      const cy = rect.top + Math.min(rect.height/2 + 8, rect.height - 8);
-      const radius = Math.max(120, Math.max(rect.width, rect.height)/2 + 70);
-      spot.style.setProperty('--x', `${cx}px`);
-      spot.style.setProperty('--y', `${cy}px`);
-      spot.style.setProperty('--r', `${radius}px`);
-      spot.style.display = 'block';
-      // Add a pulsing arrow marker pointing at the target
-      const arrow = document.createElement('div');
-      arrow.className = 'arrow-marker';
-      arrow.style.top = `${Math.max(70, rect.top - 10)}px`;
-      arrow.style.left = `${Math.min(window.innerWidth - 24, rect.left + rect.width/2 - 10)}px`;
-      document.body.appendChild(arrow);
-      // Add focus ring + subtle nudge
-      targetEl.classList.add('focus-ring', 'nudge');
-      setTimeout(()=>{ 
-        a.classList.add('fade-out'); 
-        setTimeout(()=>{ a.remove(); }, 900); 
-        arrow.remove(); 
-        targetEl.classList.remove('focus-ring', 'nudge'); 
-        spot.style.display = 'none';
-      }, duration);
+      removeAllAnnotations();
+      return new Promise(resolve => {
+        const a = document.createElement('div');
+        a.className = 'annot fade-in arrow-down';
+        a.innerHTML = text;
+        document.getElementById('annots').appendChild(a);
+        const rect = targetEl.getBoundingClientRect();
+        // Top-centered annotation bubble
+        a.style.top = `86px`;
+        a.style.left = `50%`;
+        a.style.transform = 'translateX(-50%)';
+        // Spotlight focus
+        const spot = document.getElementById('spotlight');
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + Math.min(rect.height/2 + 8, rect.height - 8);
+        const radius = Math.max(120, Math.max(rect.width, rect.height)/2 + 70);
+        spot.style.setProperty('--x', `${cx}px`);
+        spot.style.setProperty('--y', `${cy}px`);
+        spot.style.setProperty('--r', `${radius}px`);
+        spot.style.display = 'block';
+        // Add a pulsing arrow marker pointing at the target
+        const arrow = document.createElement('div');
+        arrow.className = 'arrow-marker';
+        arrow.style.top = `${Math.max(70, rect.top - 10)}px`;
+        arrow.style.left = `${Math.min(window.innerWidth - 24, rect.left + rect.width/2 - 10)}px`;
+        document.body.appendChild(arrow);
+        // Add focus ring + subtle nudge
+        targetEl.classList.add('focus-ring', 'nudge');
+        setTimeout(()=>{ 
+          a.classList.add('fade-out'); 
+          setTimeout(()=>{ a.remove(); resolve(); }, 900); 
+          arrow.remove(); 
+          targetEl.classList.remove('focus-ring', 'nudge'); 
+          spot.style.display = 'none';
+        }, duration);
+      });
     }
 
     async function autoPlay() {
@@ -377,40 +404,36 @@
       searchMemory();
       renderPRPreview();
 
-      await sleep(1400);
-      showCallout('<strong>Day 1:</strong> <strong>Lovable</strong> builds. <strong>Kinic</strong> persists decisions + patterns.', 3600);
+      await sleep(1200);
+      await showMessage('<strong>Day 1:</strong> <strong>Lovable</strong> builds. <strong>Kinic</strong> records decisions + patterns.', 3600);
 
       // Focus project A
       const projSelect = document.getElementById('projectSelect');
       projSelect.value = 'ecommerce-mvp'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: Tech choices (React+TS, Tailwind, Supabase).<br><strong>Kinic</strong>: Stored as enduring memory.', { duration: 4200 });
-      await sleep(4200);
+      await showPointer(document.getElementById('cardTop'), '<strong>Tech choices saved</strong> — no re‑explaining tomorrow.', { duration: 4200 });
       document.getElementById('topMemories').classList.remove('glow');
 
       // Search for auth
-      showCallout('<strong>Kinic</strong>: semantic memory finds <strong>auth patterns</strong> fast.', 3600);
+      await showMessage('<strong>Kinic</strong>: semantic memory finds <strong>auth patterns</strong> fast.', 3200);
       const q = document.getElementById('searchQuery');
       q.value = 'auth'; searchMemory();
       document.getElementById('searchResults').classList.add('glow');
-      showPointer(document.getElementById('cardSearch'), '<strong>Kinic</strong>: Org-wide snippets + standards reusable across repos.', { duration: 4400 });
-      await sleep(4400);
+      await showPointer(document.getElementById('cardSearch'), 'Org‑wide <strong>auth snippet + standards</strong>, found instantly across repos.', { duration: 4400 });
       document.getElementById('searchResults').classList.remove('glow');
 
       // Switch to project B
-      showCallout('Cross‑project reuse: <strong>org standards</strong> auto‑apply.', 3200);
+      await showMessage('Day 2: New project — <strong>org standards</strong> auto‑apply.', 3200);
       projSelect.value = 'blog-platform'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: New project.<br><strong>Kinic</strong>: Applies team preferences automatically.', { duration: 4200 });
-      await sleep(4200);
+      await showPointer(document.getElementById('cardTop'), '<strong>Team preferences applied</strong> to new repo — consistent by default.', { duration: 4200 });
       document.getElementById('topMemories').classList.remove('glow');
 
       // PR preview highlight
-      showCallout('PR‑time guidance from <strong>past fixes</strong>.', 3200);
+      await showMessage('PR time: <strong>past fixes</strong> guide reviewers.', 3200);
       document.getElementById('prPreview').scrollIntoView({ behavior:'smooth', block:'center' });
       document.getElementById('prPreview').classList.add('glow');
-      showPointer(document.getElementById('cardPR'), '<strong>Kinic</strong>: Reminds reviewers of prior incidents + standards.', { duration: 4200 });
-      await sleep(4200);
+      await showPointer(document.getElementById('cardPR'), '<strong>Fewer regressions</strong> — reminders from incidents + standards.', { duration: 4200 });
       document.getElementById('prPreview').classList.remove('glow');
 
       // Exit CTA
