@@ -405,7 +405,7 @@
       renderPRPreview();
 
       await sleep(1200);
-      await showMessage('<strong>Day 1:</strong> Build with Lovable. Kinic remembers your choices.', 3600);
+      await showMessage('<strong>Day 1:</strong> Build with Lovable. <br>Supabase keeps your data; <strong>Kinic remembers your setup</strong>.', 3600);
 
       // Focus project A
       const projSelect = document.getElementById('projectSelect');
@@ -415,15 +415,16 @@
       document.getElementById('topMemories').classList.remove('glow');
 
       // Search for auth
-      await showMessage('Need something? <strong>Kinic finds it fast</strong> (like login).', 3200);
+      await showMessage('Ask in your own words — <strong>Kinic\'s smart (semantic) search</strong> finds what you mean (like login).', 3400);
       const q = document.getElementById('searchQuery');
       q.value = 'auth'; searchMemory();
       document.getElementById('searchResults').classList.add('glow');
       await showPointer(document.getElementById('cardSearch'), '<strong>Saved login code</strong> and simple tips — ready to paste.', { duration: 4400 });
+      await showMessage('Works with your tools: <strong>Supabase for accounts</strong>; <strong>Kinic for memory + discovery</strong>.', 3600);
       document.getElementById('searchResults').classList.remove('glow');
 
       // Switch to project B
-      await showMessage('Day 2: New project — <strong>your preferences carry over</strong> automatically.', 3200);
+      await showMessage('Day 2: New project — <strong>your preferences carry over</strong> automatically.', 3400);
       projSelect.value = 'blog-platform'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
       await showPointer(document.getElementById('cardTop'), '<strong>Your usual setup</strong> is already applied — no extra steps.', { duration: 4200 });
