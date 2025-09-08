@@ -50,6 +50,9 @@
     /* Side start button (kept out of main view, slides in on hover) */
     .start-btn { position: fixed; right: -140px; top: 50%; transform: translateY(-50%); padding: 10px 16px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border: none; border-radius: 8px 0 0 8px; font-weight: 800; letter-spacing: .5px; z-index:1050; opacity:.15; transition: right .25s ease, opacity .25s ease, transform .25s ease; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
     .start-btn:hover { right: 0; opacity: 1; transform: translateY(-50%) scale(1.02); cursor: pointer; }
+    /* Small floating button for touch devices / discoverability */
+    .start-fab { position: fixed; right: 16px; bottom: 16px; padding: 12px 14px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border:none; border-radius: 999px; font-weight: 900; z-index:1050; opacity:.35; box-shadow: 0 10px 28px rgba(0,0,0,.35); }
+    .start-fab:hover { opacity: .9; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -139,6 +142,8 @@
 
   <!-- Off-screen Start button for recording control -->
   <button id="startBtn" class="start-btn" aria-label="Start Demo">▶ Start Demo</button>
+  <!-- Floating minimal Start button (mobile / easy access) -->
+  <button id="startFab" class="start-fab" aria-label="Start Demo">▶</button>
 
   <script>
     // Fully mocked dataset
@@ -367,6 +372,13 @@
       const startBtn = document.getElementById('startBtn');
       startBtn.addEventListener('click', () => {
         startBtn.style.display = 'none';
+        replay();
+      });
+      const startFab = document.getElementById('startFab');
+      startFab.addEventListener('click', () => {
+        startFab.style.display = 'none';
+        const startBtnEl = document.getElementById('startBtn');
+        if (startBtnEl) startBtnEl.style.display = 'none';
         replay();
       });
     })();
