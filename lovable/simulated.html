@@ -7,25 +7,25 @@
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { background: linear-gradient(135deg, #0a0e27 0%, #1a1e3a 100%); color:#e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height:100vh; }
-    .header { padding:40px; text-align:center; background: rgba(255,255,255,0.02); border-bottom:1px solid rgba(100,255,218,0.1); position:relative; overflow:hidden; }
-    h1 { font-size:42px; font-weight:700; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .subtitle { color:#8892b0; margin-top:8px; }
-    .container { max-width:1200px; margin:0 auto; padding:32px; }
-    .demo-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(100,255,218,0.2); border-radius: 16px; padding: 24px; margin: 20px 0; }
+    .header { padding:28px; text-align:center; background: rgba(255,255,255,0.02); border-bottom:1px solid rgba(100,255,218,0.1); position:relative; overflow:hidden; }
+    h1 { font-size:36px; font-weight:700; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .subtitle { color:#8892b0; margin-top:6px; font-size:16px; }
+    .container { max-width:1200px; margin:0 auto; padding:16px; }
+    .demo-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(100,255,218,0.2); border-radius: 14px; padding: 16px; margin: 14px 0; }
     .card-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
     .card-icon { font-size:28px; }
     .card-title { font-size:20px; font-weight:600; color:#64ffda; }
-    .demo-section { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-    .chat-container { background: rgba(0,0,0,0.3); border-radius:12px; padding:16px; max-height:420px; overflow-y:auto; }
+    .demo-section { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; align-items:start; }
+    .chat-container { background: rgba(0,0,0,0.3); border-radius:12px; padding:12px; max-height:240px; overflow-y:auto; }
     .chat-message { margin:12px 0; padding:12px 14px; border-radius:8px; }
     .ai-message { background: rgba(189,147,249,0.1); border-left:3px solid #bd93f9; }
     .message-label { font-size:11px; color:#8892b0; text-transform:uppercase; margin-bottom:4px; }
-    .memory-viz { background: rgba(0,0,0,0.3); border-radius:12px; padding:16px; min-height:120px; }
-    .memory-item { display:flex; align-items:flex-start; gap:10px; padding:10px; margin:6px 0; background: rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(100,255,218,0.1); }
+    .memory-viz { background: rgba(0,0,0,0.3); border-radius:12px; padding:10px; min-height:120px; max-height:240px; overflow:auto; }
+    .memory-item { display:flex; align-items:flex-start; gap:8px; padding:8px; margin:6px 0; background: rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(100,255,218,0.1); font-size:13px; }
     .memory-icon { width:8px; height:8px; border-radius:50%; background:#64ffda; box-shadow:0 0 10px #64ffda; margin-top:6px; }
     .controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
     .input, select { padding:10px; background: rgba(255,255,255,0.05); border:1px solid rgba(100,255,218,0.2); border-radius:8px; color:#fff; }
-    .btn { padding:10px 16px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
+    .btn { padding:8px 14px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
     pre { white-space: pre-wrap; }
     .note { color:#8892b0; font-size:13px; margin-top:6px; }
 
@@ -40,8 +40,14 @@
     @keyframes slideUp { to{transform: translateY(0); opacity:1} }
     @keyframes pulse { 0%,100%{transform: scale(1)} 50%{transform: scale(1.02)} }
     @keyframes glowPulse { 0%{box-shadow: 0 0 0 0 rgba(100,255,218,0.4)} 70%{box-shadow: 0 0 20px 8px rgba(100,255,218,0.0)} 100%{box-shadow: 0 0 0 0 rgba(100,255,218,0)} }
-    .callout { position: fixed; left:50%; transform: translateX(-50%); bottom: 24px; background: rgba(10,14,39,0.9); border:1px solid rgba(100,255,218,0.3); color:#e0fff2; padding: 12px 16px; border-radius: 12px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(6px); }
+    .callout { position: fixed; left:50%; transform: translateX(-50%); top: 72px; background: rgba(10,14,39,0.95); border:1px solid rgba(100,255,218,0.35); color:#e0fff2; padding: 14px 18px; border-radius: 14px; z-index: 1200; box-shadow: 0 10px 30px rgba(0,0,0,0.45); backdrop-filter: blur(6px); font-size: 18px; }
     .callout strong { color:#64ffda; }
+    #annots { position: fixed; inset: 0; pointer-events: none; z-index: 1150; }
+    .annot { position: fixed; background: rgba(10,14,39,0.95); color:#eafff7; border:1px solid rgba(100,255,218,0.35); border-radius: 10px; padding: 10px 12px; font-size: 14px; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
+    .annot:after { content: ""; position: absolute; width: 0; height: 0; border: 8px solid transparent; }
+    .annot.arrow-down:after { top: -16px; left: 20px; border-bottom-color: rgba(10,14,39,0.95); }
+    .annot.arrow-up:after { bottom: -16px; left: 20px; border-top-color: rgba(10,14,39,0.95); }
+    .annot strong { color:#64ffda; }
     .cta-overlay { position: fixed; inset:0; background: radial-gradient(1200px 600px at 50% 30%, rgba(100,255,218,0.12), transparent), rgba(10,14,39,0.92); display:none; align-items:center; justify-content:center; z-index: 1100; }
     .cta-card { text-align:center; max-width: 760px; padding: 32px; border: 1px solid rgba(100,255,218,0.2); border-radius: 16px; background: rgba(255,255,255,0.02); }
     .cta-title { font-size: 40px; font-weight: 800; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom: 12px; }
@@ -61,7 +67,7 @@
     <div class="subtitle fade-in" style="animation-delay:.15s">Build once. Remember forever.</div>
   </div>
   <div class="container">
-    <div class="demo-card">
+    <div class="demo-card" style="display:none;">
       <div class="card-header">
         <div class="card-icon">🎯</div>
         <div class="card-title">What this shows</div>
@@ -101,14 +107,14 @@
       </div>
 
       <div class="demo-section">
-        <div class="demo-card" style="margin:0;">
+        <div class="demo-card" id="cardTop" style="margin:0;">
           <div class="card-header" style="margin-bottom:8px;">
             <div class="card-icon">⭐</div>
             <div class="card-title">Top Memories</div>
           </div>
           <div id="topMemories" class="memory-viz"></div>
         </div>
-        <div class="demo-card" style="margin:0;">
+        <div class="demo-card" id="cardSearch" style="margin:0;">
           <div class="card-header" style="margin-bottom:8px;">
             <div class="card-icon">🔍</div>
             <div class="card-title">Search Results</div>
@@ -117,7 +123,7 @@
         </div>
       </div>
 
-      <div class="demo-card" style="margin-top:20px;">
+      <div class="demo-card" id="cardPR" style="margin-top:0;">
         <div class="card-header" style="margin-bottom:8px;">
           <div class="card-icon">📝</div>
           <div class="card-title">PR Review Preview</div>
@@ -129,6 +135,7 @@
 
   <!-- Annotation callout -->
   <div id="callout" class="callout" style="display:none;"></div>
+  <div id="annots"></div>
 
   <!-- End Overlay CTA -->
   <div id="ctaOverlay" class="cta-overlay">
@@ -294,6 +301,20 @@
       setTimeout(() => { callout.classList.remove('fade-in'); callout.classList.add('fade-out'); setTimeout(()=>{ callout.style.display='none'; callout.classList.remove('fade-out'); }, 500); }, duration);
     }
 
+    function showPointer(targetEl, text, opts={}) {
+      const a = document.createElement('div');
+      a.className = 'annot fade-in ' + (opts.arrow || 'arrow-up');
+      a.innerHTML = text;
+      document.getElementById('annots').appendChild(a);
+      const rect = targetEl.getBoundingClientRect();
+      let top = rect.bottom + 12; let left = rect.left + 12;
+      if (opts.position === 'top') { top = rect.top - 64; left = rect.left + 12; a.classList.remove('arrow-up'); a.classList.add('arrow-down'); }
+      if (opts.center) { left = rect.left + rect.width/2 - 140; }
+      a.style.top = `${Math.max(80, top)}px`;
+      a.style.left = `${Math.max(12, Math.min(left, window.innerWidth - 332))}px`;
+      setTimeout(()=>{ a.classList.add('fade-out'); setTimeout(()=>{ a.remove(); }, 600); }, opts.duration || 2600);
+    }
+
     async function autoPlay() {
       // Initial render
       populateFilters();
@@ -301,40 +322,44 @@
       searchMemory();
       renderPRPreview();
 
-      await sleep(800);
-      showCallout('<strong>Day 1</strong>: Decisions become durable memory.');
+      await sleep(1000);
+      showCallout('<strong>Day 1:</strong> <strong>Lovable</strong> builds. <strong>Kinic</strong> persists decisions + patterns.');
 
       // Focus project A
       const projSelect = document.getElementById('projectSelect');
       projSelect.value = 'ecommerce-mvp'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      await sleep(2000);
+      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: Tech choices (React+TS, Tailwind, Supabase).<br><strong>Kinic</strong>: Stored as enduring memory.');
+      await sleep(3000);
       document.getElementById('topMemories').classList.remove('glow');
 
       // Search for auth
-      showCallout('Semantic memory finds <strong>auth patterns</strong> fast.');
+      showCallout('<strong>Kinic</strong>: semantic memory finds <strong>auth patterns</strong> fast.');
       const q = document.getElementById('searchQuery');
       q.value = 'auth'; searchMemory();
       document.getElementById('searchResults').classList.add('glow');
-      await sleep(2200);
+      showPointer(document.getElementById('cardSearch'), '<strong>Kinic</strong>: Org-wide snippets + standards reusable across repos.');
+      await sleep(3200);
       document.getElementById('searchResults').classList.remove('glow');
 
       // Switch to project B
       showCallout('Cross‑project reuse: <strong>org standards</strong> auto‑apply.');
       projSelect.value = 'blog-platform'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      await sleep(2000);
+      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: New project.<br><strong>Kinic</strong>: Applies team preferences automatically.');
+      await sleep(3000);
       document.getElementById('topMemories').classList.remove('glow');
 
       // PR preview highlight
       showCallout('PR‑time guidance from <strong>past fixes</strong>.');
       document.getElementById('prPreview').scrollIntoView({ behavior:'smooth', block:'center' });
       document.getElementById('prPreview').classList.add('glow');
-      await sleep(2400);
+      showPointer(document.getElementById('cardPR'), '<strong>Kinic</strong>: Reminds reviewers of prior incidents + standards.');
+      await sleep(3200);
       document.getElementById('prPreview').classList.remove('glow');
 
       // Exit CTA
-      await sleep(400);
+      await sleep(600);
       ctaOverlay.style.display = 'flex';
     }
 
