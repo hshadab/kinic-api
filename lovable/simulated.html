@@ -343,8 +343,11 @@
       autoPlay();
     }
 
-    // Kickoff
-    autoPlay();
+    // Kickoff (no autorun). Render static view only; use Start/Replay to animate.
+    populateFilters();
+    renderTopMemories();
+    searchMemory();
+    renderPRPreview();
 
     // Side start button handler
     document.getElementById('startBtn').addEventListener('click', () => {
