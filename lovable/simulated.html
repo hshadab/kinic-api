@@ -340,6 +340,8 @@
       document.getElementById('repoSelect').value='';
       document.getElementById('typeSelect').value='';
       renderTopMemories(); searchMemory(); renderPRPreview();
+      const startBtn = document.getElementById('startBtn');
+      if (startBtn) startBtn.style.display = 'none';
       autoPlay();
     }
 
@@ -350,9 +352,13 @@
     renderPRPreview();
 
     // Side start button handler
-    document.getElementById('startBtn').addEventListener('click', () => {
-      replay();
-    });
+    (function(){
+      const startBtn = document.getElementById('startBtn');
+      startBtn.addEventListener('click', () => {
+        startBtn.style.display = 'none';
+        replay();
+      });
+    })();
   </script>
 </body>
 </html>
