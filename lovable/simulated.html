@@ -10,6 +10,8 @@
     .header { padding:28px; text-align:center; background: rgba(255,255,255,0.02); border-bottom:1px solid rgba(100,255,218,0.1); position:relative; overflow:hidden; }
     h1 { font-size:36px; font-weight:700; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .subtitle { color:#8892b0; margin-top:6px; font-size:16px; }
+    .start-cta { margin-top:12px; display:flex; gap:10px; justify-content:center; }
+    .primary-btn { font-size:16px; padding:10px 18px; }
     .container { max-width:1200px; margin:0 auto; padding:16px; }
     .demo-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(100,255,218,0.2); border-radius: 14px; padding: 16px; margin: 14px 0; }
     .card-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
@@ -30,8 +32,8 @@
     .note { color:#8892b0; font-size:13px; margin-top:6px; }
 
     /* Animations */
-    .fade-in { animation: fadeIn 0.6s ease forwards; opacity:0; }
-    .fade-out { animation: fadeOut 0.6s ease forwards; }
+    .fade-in { animation: fadeIn 0.9s ease forwards; opacity:0; }
+    .fade-out { animation: fadeOut 0.9s ease forwards; }
     .slide-up { animation: slideUp 0.6s ease forwards; transform: translateY(12px); opacity: 0; }
     .pulse { animation: pulse 1.2s ease-in-out infinite; }
     .glow { box-shadow: 0 0 0 rgba(100,255,218,0.7); animation: glowPulse 1.6s infinite; }
@@ -43,12 +45,32 @@
     .callout { position: fixed; left:50%; transform: translateX(-50%); top: 72px; background: rgba(10,14,39,0.95); border:1px solid rgba(100,255,218,0.35); color:#e0fff2; padding: 14px 18px; border-radius: 14px; z-index: 1200; box-shadow: 0 10px 30px rgba(0,0,0,0.45); backdrop-filter: blur(6px); font-size: 18px; }
     .callout strong { color:#64ffda; }
     #annots { position: fixed; inset: 0; pointer-events: none; z-index: 1150; }
-    .annot { position: fixed; background: rgba(10,14,39,0.95); color:#eafff7; border:1px solid rgba(100,255,218,0.35); border-radius: 10px; padding: 10px 12px; font-size: 14px; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.45); }
-    .annot:after { content: ""; position: absolute; width: 0; height: 0; border: 8px solid transparent; }
-    .annot.arrow-down:after { top: -16px; left: 20px; border-bottom-color: rgba(10,14,39,0.95); }
-    .annot.arrow-up:after { bottom: -16px; left: 20px; border-top-color: rgba(10,14,39,0.95); }
+    .annot { position: fixed; background: rgba(10,14,39,0.96); color:#eafff7; border:1px solid rgba(100,255,218,0.5); border-radius: 12px; padding: 14px 16px; font-size: 18px; line-height:1.35; max-width: 420px; box-shadow: 0 16px 40px rgba(0,0,0,0.55); }
+    .annot:after { content: ""; position: absolute; width: 0; height: 0; border: 12px solid transparent; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.35)); }
+    .annot.arrow-down:after { top: -24px; left: 24px; border-bottom-color: rgba(10,14,39,0.96); }
+    .annot.arrow-up:after { bottom: -24px; left: 24px; border-top-color: rgba(10,14,39,0.96); }
     .annot strong { color:#64ffda; }
+    /* Attention ring on targets */
+    .focus-ring { animation: ringPulse 2.2s ease-out infinite; }
+    @keyframes ringPulse { 0%{ box-shadow: 0 0 0 0 rgba(100,255,218,0.6), 0 0 0 0 rgba(100,255,218,0.25);} 70%{ box-shadow: 0 0 0 12px rgba(100,255,218,0), 0 0 0 24px rgba(100,255,218,0);} 100%{ box-shadow: 0 0 0 0 rgba(100,255,218,0), 0 0 0 0 rgba(100,255,218,0);} }
+    /* Subtle nudge to show movement */
+    .nudge { animation: nudge 1.5s ease-in-out infinite; }
+    @keyframes nudge { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-2px) } }
+    /* Pulsing arrow marker */
+    .arrow-marker { position: fixed; width: 20px; height: 20px; border-right: 4px solid #64ffda; border-bottom: 4px solid #64ffda; transform: rotate(45deg); filter: drop-shadow(0 0 8px rgba(100,255,218,0.85)); z-index: 1200; animation: arrowPulse 1.2s ease-in-out infinite; }
+    @keyframes arrowPulse { 0%,100%{ transform: rotate(45deg) scale(1); opacity: .8 } 50%{ transform: rotate(45deg) scale(1.15); opacity: 1 } }
     .cta-overlay { position: fixed; inset:0; background: radial-gradient(1200px 600px at 50% 30%, rgba(100,255,218,0.12), transparent), rgba(10,14,39,0.92); display:none; align-items:center; justify-content:center; z-index: 1100; }
+    /* Spotlight overlay to focus viewer attention */
+    #spotlight { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 1120; 
+      --x: 50%; --y: 50%; --r: 140px;
+      background:
+        radial-gradient(circle at var(--x) var(--y), 
+          rgba(0,0,0,0) 0,
+          rgba(0,0,0,0) calc(var(--r)),
+          rgba(0,0,0,0.65) calc(var(--r) + 1px)
+        );
+      transition: background .25s ease;
+    }
     .cta-card { text-align:center; max-width: 760px; padding: 32px; border: 1px solid rgba(100,255,218,0.2); border-radius: 16px; background: rgba(255,255,255,0.02); }
     .cta-title { font-size: 40px; font-weight: 800; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom: 12px; }
     .cta-sub { color:#bdeedf; margin-bottom: 20px; font-size: 18px; }
@@ -59,12 +81,27 @@
     /* Small floating button for touch devices / discoverability */
     .start-fab { position: fixed; right: 16px; bottom: 16px; padding: 12px 14px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border:none; border-radius: 999px; font-weight: 900; z-index:1050; opacity:.35; box-shadow: 0 10px 28px rgba(0,0,0,.35); }
     .start-fab:hover { opacity: .9; cursor: pointer; }
+
+    /* Responsive layout */
+    @media (max-width: 1024px) {
+      .container { padding: 14px; }
+      .demo-section { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .demo-section { grid-template-columns: 1fr; }
+      .start-btn { display: none; }
+      .start-fab { opacity: .9; }
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h1 class="slide-up">Lovable + Kinic: Memory Demo</h1>
     <div class="subtitle fade-in" style="animation-delay:.15s">Build once. Remember forever.</div>
+    <div class="start-cta fade-in" style="animation-delay:.25s">
+      <button class="btn primary-btn" onclick="replay(); return false;">Start Guided Demo</button>
+      <a class="btn" href="?autoplay=1">Autoplay</a>
+    </div>
   </div>
   <div class="container">
     <div class="demo-card" style="display:none;">
@@ -135,6 +172,8 @@
 
   <!-- Annotation callout -->
   <div id="callout" class="callout" style="display:none;"></div>
+  <!-- Spotlight overlay -->
+  <div id="spotlight"></div>
   <div id="annots"></div>
 
   <!-- End Overlay CTA -->
@@ -293,12 +332,50 @@
     const callout = document.getElementById('callout');
     const ctaOverlay = document.getElementById('ctaOverlay');
 
-    function showCallout(text, duration=1800) {
+    function showCallout(text, duration=3000) {
       callout.innerHTML = text;
       callout.style.display = 'block';
       callout.classList.remove('fade-out');
       callout.classList.add('fade-in');
-      setTimeout(() => { callout.classList.remove('fade-in'); callout.classList.add('fade-out'); setTimeout(()=>{ callout.style.display='none'; callout.classList.remove('fade-out'); }, 500); }, duration);
+      setTimeout(() => { callout.classList.remove('fade-in'); callout.classList.add('fade-out'); setTimeout(()=>{ callout.style.display='none'; callout.classList.remove('fade-out'); }, 800); }, duration);
+    }
+
+    function showPointer(targetEl, text, opts={}) {
+      const duration = opts.duration || 4200;
+      const a = document.createElement('div');
+      a.className = 'annot fade-in ' + (opts.arrow || 'arrow-up');
+      a.innerHTML = text;
+      document.getElementById('annots').appendChild(a);
+      const rect = targetEl.getBoundingClientRect();
+      let top = rect.bottom + 14; let left = rect.left + 14;
+      if (opts.position === 'top') { top = rect.top - 86; left = rect.left + 14; a.classList.remove('arrow-up'); a.classList.add('arrow-down'); }
+      if (opts.center) { left = rect.left + rect.width/2 - 180; }
+      a.style.top = `${Math.max(80, top)}px`;
+      a.style.left = `${Math.max(12, Math.min(left, window.innerWidth - 452))}px`;
+      // Spotlight focus
+      const spot = document.getElementById('spotlight');
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + Math.min(rect.height/2 + 8, rect.height - 8);
+      const radius = Math.max(120, Math.max(rect.width, rect.height)/2 + 70);
+      spot.style.setProperty('--x', `${cx}px`);
+      spot.style.setProperty('--y', `${cy}px`);
+      spot.style.setProperty('--r', `${radius}px`);
+      spot.style.display = 'block';
+      // Add a pulsing arrow marker pointing at the target
+      const arrow = document.createElement('div');
+      arrow.className = 'arrow-marker';
+      arrow.style.top = `${Math.max(70, rect.top - 10)}px`;
+      arrow.style.left = `${Math.min(window.innerWidth - 24, rect.left + rect.width/2 - 10)}px`;
+      document.body.appendChild(arrow);
+      // Add focus ring + subtle nudge
+      targetEl.classList.add('focus-ring', 'nudge');
+      setTimeout(()=>{ 
+        a.classList.add('fade-out'); 
+        setTimeout(()=>{ a.remove(); }, 900); 
+        arrow.remove(); 
+        targetEl.classList.remove('focus-ring', 'nudge'); 
+        spot.style.display = 'none';
+      }, duration);
     }
 
     function showPointer(targetEl, text, opts={}) {
@@ -322,44 +399,44 @@
       searchMemory();
       renderPRPreview();
 
-      await sleep(1000);
-      showCallout('<strong>Day 1:</strong> <strong>Lovable</strong> builds. <strong>Kinic</strong> persists decisions + patterns.');
+      await sleep(1400);
+      showCallout('<strong>Day 1:</strong> <strong>Lovable</strong> builds. <strong>Kinic</strong> persists decisions + patterns.', 3600);
 
       // Focus project A
       const projSelect = document.getElementById('projectSelect');
       projSelect.value = 'ecommerce-mvp'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: Tech choices (React+TS, Tailwind, Supabase).<br><strong>Kinic</strong>: Stored as enduring memory.');
-      await sleep(3000);
+      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: Tech choices (React+TS, Tailwind, Supabase).<br><strong>Kinic</strong>: Stored as enduring memory.', { duration: 4200 });
+      await sleep(4200);
       document.getElementById('topMemories').classList.remove('glow');
 
       // Search for auth
-      showCallout('<strong>Kinic</strong>: semantic memory finds <strong>auth patterns</strong> fast.');
+      showCallout('<strong>Kinic</strong>: semantic memory finds <strong>auth patterns</strong> fast.', 3600);
       const q = document.getElementById('searchQuery');
       q.value = 'auth'; searchMemory();
       document.getElementById('searchResults').classList.add('glow');
-      showPointer(document.getElementById('cardSearch'), '<strong>Kinic</strong>: Org-wide snippets + standards reusable across repos.');
-      await sleep(3200);
+      showPointer(document.getElementById('cardSearch'), '<strong>Kinic</strong>: Org-wide snippets + standards reusable across repos.', { duration: 4400 });
+      await sleep(4400);
       document.getElementById('searchResults').classList.remove('glow');
 
       // Switch to project B
-      showCallout('Cross‑project reuse: <strong>org standards</strong> auto‑apply.');
+      showCallout('Cross‑project reuse: <strong>org standards</strong> auto‑apply.', 3200);
       projSelect.value = 'blog-platform'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: New project.<br><strong>Kinic</strong>: Applies team preferences automatically.');
-      await sleep(3000);
+      showPointer(document.getElementById('cardTop'), '<strong>Lovable</strong>: New project.<br><strong>Kinic</strong>: Applies team preferences automatically.', { duration: 4200 });
+      await sleep(4200);
       document.getElementById('topMemories').classList.remove('glow');
 
       // PR preview highlight
-      showCallout('PR‑time guidance from <strong>past fixes</strong>.');
+      showCallout('PR‑time guidance from <strong>past fixes</strong>.', 3200);
       document.getElementById('prPreview').scrollIntoView({ behavior:'smooth', block:'center' });
       document.getElementById('prPreview').classList.add('glow');
-      showPointer(document.getElementById('cardPR'), '<strong>Kinic</strong>: Reminds reviewers of prior incidents + standards.');
-      await sleep(3200);
+      showPointer(document.getElementById('cardPR'), '<strong>Kinic</strong>: Reminds reviewers of prior incidents + standards.', { duration: 4200 });
+      await sleep(4200);
       document.getElementById('prPreview').classList.remove('glow');
 
       // Exit CTA
-      await sleep(600);
+      await sleep(1000);
       ctaOverlay.style.display = 'flex';
     }
 
