@@ -157,7 +157,7 @@
       <div class="demo-card" id="cardPR" style="margin-top:0;">
         <div class="card-header" style="margin-bottom:8px;">
           <div class="card-icon">📝</div>
-          <div class="card-title">PR Review Preview</div>
+          <div class="card-title">Review Suggestions</div>
         </div>
         <div id="prPreview" class="chat-container"></div>
       </div>
@@ -312,12 +312,12 @@
       notes.slice(0,5).forEach(n => {
         const div = document.createElement('div'); div.className='chat-message ai-message';
         const meta = n.metadata || {};
-        div.innerHTML = `<div class="message-label">PR Comment · ${meta.project||''} · ${meta.repo||''}</div>`+
+        div.innerHTML = `<div class="message-label">Review Note · ${meta.project||''} · ${meta.repo||''}</div>`+
           `<div><strong>${n.content||''}</strong></div>`+
           `<div style="color:#8892b0; font-size:12px; margin-top:6px;">${new Date(n.timestamp).toLocaleString()}</div>`;
         out.appendChild(div);
       });
-      if (out.innerHTML.trim()==='') out.innerHTML = '<div class="chat-message ai-message"><div class="message-label">PR Comment</div><div>No PR notes yet for this selection.</div></div>';
+      if (out.innerHTML.trim()==='') out.innerHTML = '<div class="chat-message ai-message"><div class="message-label">Review Note</div><div>No suggestions yet for this selection.</div></div>';
     }
 
     // Guided autoplay with annotations
@@ -405,35 +405,35 @@
       renderPRPreview();
 
       await sleep(1200);
-      await showMessage('<strong>Day 1:</strong> <strong>Lovable</strong> builds. <strong>Kinic</strong> records decisions + patterns.', 3600);
+      await showMessage('<strong>Day 1:</strong> Build with Lovable. Kinic remembers your choices.', 3600);
 
       // Focus project A
       const projSelect = document.getElementById('projectSelect');
       projSelect.value = 'ecommerce-mvp'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      await showPointer(document.getElementById('cardTop'), '<strong>Tech choices saved</strong> — no re‑explaining tomorrow.', { duration: 4200 });
+      await showPointer(document.getElementById('cardTop'), '<strong>Your setup is saved</strong> — no re‑explaining tomorrow.', { duration: 4200 });
       document.getElementById('topMemories').classList.remove('glow');
 
       // Search for auth
-      await showMessage('<strong>Kinic</strong>: semantic memory finds <strong>auth patterns</strong> fast.', 3200);
+      await showMessage('Need something? <strong>Kinic finds it fast</strong> (like login).', 3200);
       const q = document.getElementById('searchQuery');
       q.value = 'auth'; searchMemory();
       document.getElementById('searchResults').classList.add('glow');
-      await showPointer(document.getElementById('cardSearch'), 'Org‑wide <strong>auth snippet + standards</strong>, found instantly across repos.', { duration: 4400 });
+      await showPointer(document.getElementById('cardSearch'), '<strong>Saved login code</strong> and simple tips — ready to paste.', { duration: 4400 });
       document.getElementById('searchResults').classList.remove('glow');
 
       // Switch to project B
-      await showMessage('Day 2: New project — <strong>org standards</strong> auto‑apply.', 3200);
+      await showMessage('Day 2: New project — <strong>your preferences carry over</strong> automatically.', 3200);
       projSelect.value = 'blog-platform'; projSelect.dispatchEvent(new Event('change'));
       document.getElementById('topMemories').classList.add('glow');
-      await showPointer(document.getElementById('cardTop'), '<strong>Team preferences applied</strong> to new repo — consistent by default.', { duration: 4200 });
+      await showPointer(document.getElementById('cardTop'), '<strong>Your usual setup</strong> is already applied — no extra steps.', { duration: 4200 });
       document.getElementById('topMemories').classList.remove('glow');
 
       // PR preview highlight
-      await showMessage('PR time: <strong>past fixes</strong> guide reviewers.', 3200);
+      await showMessage('Before you share, <strong>Kinic suggests what worked last time</strong>.', 3200);
       document.getElementById('prPreview').scrollIntoView({ behavior:'smooth', block:'center' });
       document.getElementById('prPreview').classList.add('glow');
-      await showPointer(document.getElementById('cardPR'), '<strong>Fewer regressions</strong> — reminders from incidents + standards.', { duration: 4200 });
+      await showPointer(document.getElementById('cardPR'), '<strong>Ship with confidence</strong> — helpful reminders prevent repeat mistakes.', { duration: 4200 });
       document.getElementById('prPreview').classList.remove('glow');
 
       // Exit CTA
