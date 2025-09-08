@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lovable + Kinic: Simulated Memory Demo</title>
+  <title>Lovable + Kinic: Memory Demo</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { background: linear-gradient(135deg, #0a0e27 0%, #1a1e3a 100%); color:#e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height:100vh; }
-    .header { padding:40px; text-align:center; background: rgba(255,255,255,0.02); border-bottom:1px solid rgba(100,255,218,0.1); }
+    .header { padding:40px; text-align:center; background: rgba(255,255,255,0.02); border-bottom:1px solid rgba(100,255,218,0.1); position:relative; overflow:hidden; }
     h1 { font-size:42px; font-weight:700; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .subtitle { color:#8892b0; margin-top:8px; }
     .container { max-width:1200px; margin:0 auto; padding:32px; }
@@ -28,12 +28,34 @@
     .btn { padding:10px 16px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
     pre { white-space: pre-wrap; }
     .note { color:#8892b0; font-size:13px; margin-top:6px; }
+
+    /* Animations */
+    .fade-in { animation: fadeIn 0.6s ease forwards; opacity:0; }
+    .fade-out { animation: fadeOut 0.6s ease forwards; }
+    .slide-up { animation: slideUp 0.6s ease forwards; transform: translateY(12px); opacity: 0; }
+    .pulse { animation: pulse 1.2s ease-in-out infinite; }
+    .glow { box-shadow: 0 0 0 rgba(100,255,218,0.7); animation: glowPulse 1.6s infinite; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes fadeOut { from{opacity:1} to{opacity:0} }
+    @keyframes slideUp { to{transform: translateY(0); opacity:1} }
+    @keyframes pulse { 0%,100%{transform: scale(1)} 50%{transform: scale(1.02)} }
+    @keyframes glowPulse { 0%{box-shadow: 0 0 0 0 rgba(100,255,218,0.4)} 70%{box-shadow: 0 0 20px 8px rgba(100,255,218,0.0)} 100%{box-shadow: 0 0 0 0 rgba(100,255,218,0)} }
+    .callout { position: fixed; left:50%; transform: translateX(-50%); bottom: 24px; background: rgba(10,14,39,0.9); border:1px solid rgba(100,255,218,0.3); color:#e0fff2; padding: 12px 16px; border-radius: 12px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.4); backdrop-filter: blur(6px); }
+    .callout strong { color:#64ffda; }
+    .cta-overlay { position: fixed; inset:0; background: radial-gradient(1200px 600px at 50% 30%, rgba(100,255,218,0.12), transparent), rgba(10,14,39,0.92); display:none; align-items:center; justify-content:center; z-index: 1100; }
+    .cta-card { text-align:center; max-width: 760px; padding: 32px; border: 1px solid rgba(100,255,218,0.2); border-radius: 16px; background: rgba(255,255,255,0.02); }
+    .cta-title { font-size: 40px; font-weight: 800; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom: 12px; }
+    .cta-sub { color:#bdeedf; margin-bottom: 20px; font-size: 18px; }
+    .cta-btn { display:inline-block; margin: 0 10px; padding: 12px 22px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border-radius: 10px; font-weight: 700; text-decoration:none; }
+    /* Side start button (kept out of main view, slides in on hover) */
+    .start-btn { position: fixed; right: -140px; top: 50%; transform: translateY(-50%); padding: 10px 16px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border: none; border-radius: 8px 0 0 8px; font-weight: 800; letter-spacing: .5px; z-index:1050; opacity:.15; transition: right .25s ease, opacity .25s ease, transform .25s ease; box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+    .start-btn:hover { right: 0; opacity: 1; transform: translateY(-50%) scale(1.02); cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Lovable + Kinic: Simulated Memory Demo</h1>
-    <div class="subtitle">Pure client-side simulation — ready for GitHub Pages</div>
+    <h1 class="slide-up">Lovable + Kinic: Memory Demo</h1>
+    <div class="subtitle fade-in" style="animation-delay:.15s">Build once. Remember forever.</div>
   </div>
   <div class="container">
     <div class="demo-card">
@@ -102,8 +124,24 @@
     </div>
   </div>
 
+  <!-- Annotation callout -->
+  <div id="callout" class="callout" style="display:none;"></div>
+
+  <!-- End Overlay CTA -->
+  <div id="ctaOverlay" class="cta-overlay">
+    <div class="cta-card fade-in">
+      <div class="cta-title">Stop Re‑Explaining. Start Shipping.</div>
+      <div class="cta-sub">Kinic gives Lovable perfect, portable memory across projects, PRs, and time.</div>
+      <a class="cta-btn" href="https://www.kinic.io" target="_blank" rel="noopener">Get Started</a>
+      <a class="cta-btn" href="#" onclick="replay(); return false;">Replay Demo</a>
+    </div>
+  </div>
+
+  <!-- Off-screen Start button for recording control -->
+  <button id="startBtn" class="start-btn" aria-label="Start Demo">▶ Start Demo</button>
+
   <script>
-    // Fully mocked dataset for GitHub Pages
+    // Fully mocked dataset
     const memoryData = {
       org_id: "acme-corp",
       export_date: new Date().toISOString(),
@@ -238,12 +276,80 @@
       if (out.innerHTML.trim()==='') out.innerHTML = '<div class="chat-message ai-message"><div class="message-label">PR Comment</div><div>No PR notes yet for this selection.</div></div>';
     }
 
-    // Initialize
-    populateFilters();
-    renderTopMemories();
-    searchMemory();
-    renderPRPreview();
+    // Guided autoplay with annotations
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+    const callout = document.getElementById('callout');
+    const ctaOverlay = document.getElementById('ctaOverlay');
+
+    function showCallout(text, duration=1800) {
+      callout.innerHTML = text;
+      callout.style.display = 'block';
+      callout.classList.remove('fade-out');
+      callout.classList.add('fade-in');
+      setTimeout(() => { callout.classList.remove('fade-in'); callout.classList.add('fade-out'); setTimeout(()=>{ callout.style.display='none'; callout.classList.remove('fade-out'); }, 500); }, duration);
+    }
+
+    async function autoPlay() {
+      // Initial render
+      populateFilters();
+      renderTopMemories();
+      searchMemory();
+      renderPRPreview();
+
+      await sleep(800);
+      showCallout('<strong>Day 1</strong>: Decisions become durable memory.');
+
+      // Focus project A
+      const projSelect = document.getElementById('projectSelect');
+      projSelect.value = 'ecommerce-mvp'; projSelect.dispatchEvent(new Event('change'));
+      document.getElementById('topMemories').classList.add('glow');
+      await sleep(2000);
+      document.getElementById('topMemories').classList.remove('glow');
+
+      // Search for auth
+      showCallout('Semantic memory finds <strong>auth patterns</strong> fast.');
+      const q = document.getElementById('searchQuery');
+      q.value = 'auth'; searchMemory();
+      document.getElementById('searchResults').classList.add('glow');
+      await sleep(2200);
+      document.getElementById('searchResults').classList.remove('glow');
+
+      // Switch to project B
+      showCallout('Cross‑project reuse: <strong>org standards</strong> auto‑apply.');
+      projSelect.value = 'blog-platform'; projSelect.dispatchEvent(new Event('change'));
+      document.getElementById('topMemories').classList.add('glow');
+      await sleep(2000);
+      document.getElementById('topMemories').classList.remove('glow');
+
+      // PR preview highlight
+      showCallout('PR‑time guidance from <strong>past fixes</strong>.');
+      document.getElementById('prPreview').scrollIntoView({ behavior:'smooth', block:'center' });
+      document.getElementById('prPreview').classList.add('glow');
+      await sleep(2400);
+      document.getElementById('prPreview').classList.remove('glow');
+
+      // Exit CTA
+      await sleep(400);
+      ctaOverlay.style.display = 'flex';
+    }
+
+    function replay() {
+      ctaOverlay.style.display = 'none';
+      document.getElementById('searchQuery').value='';
+      document.getElementById('projectSelect').value='';
+      document.getElementById('repoSelect').value='';
+      document.getElementById('typeSelect').value='';
+      renderTopMemories(); searchMemory(); renderPRPreview();
+      autoPlay();
+    }
+
+    // Kickoff
+    autoPlay();
+
+    // Side start button handler
+    document.getElementById('startBtn').addEventListener('click', () => {
+      replay();
+    });
   </script>
 </body>
 </html>
-
