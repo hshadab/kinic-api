@@ -345,11 +345,22 @@
       autoPlay();
     }
 
-    // Kickoff (no autorun). Render static view only; use Start/Replay to animate.
+    // Kickoff (no autorun by default). Render static view; Start/Replay or ?autoplay=1 will animate.
     populateFilters();
     renderTopMemories();
     searchMemory();
     renderPRPreview();
+
+    // URL param to force autoplay: simulated.html?autoplay=1
+    (function(){
+      const params = new URLSearchParams(window.location.search);
+      const shouldAuto = ['1','true','yes'].includes((params.get('autoplay')||'').toLowerCase());
+      if (shouldAuto) {
+        const startBtn = document.getElementById('startBtn');
+        if (startBtn) startBtn.style.display = 'none';
+        replay();
+      }
+    })();
 
     // Side start button handler
     (function(){
