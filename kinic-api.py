@@ -8,9 +8,25 @@ import pyperclip
 import time
 import json
 import os
+from functools import wraps
 
 app = Flask(__name__)
-CORS(app)
+
+# Restrictive CORS for all routes, favoring localhost during local dev
+def _allowed_origins():
+    default = " ".join([
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "null",  # allow local file:// testers
+    ])
+    origins_str = os.environ.get("ALLOWED_ORIGINS", default)
+    return [o.strip() for o in origins_str.split() if o.strip()]
+
+CORS(app, resources={r"/*": {"origins": _allowed_origins()}})
 
 # Load config from current directory
 config_file = "kinic-config.json"
@@ -36,6 +52,31 @@ def save_config():
 pyautogui.FAILSAFE = False
 pyautogui.PAUSE = 0.1
 
+# Optional local token protection: if KINIC_LOCAL_TOKEN is set, require header
+LOCAL_TOKEN = os.environ.get('KINIC_LOCAL_TOKEN')
+
+def require_token(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if LOCAL_TOKEN:
+            token = request.headers.get('X-Kinic-Token')
+            if token != LOCAL_TOKEN:
+                return jsonify({'success': False, 'error': 'Unauthorized'}), 401
+        return f(*args, **kwargs)
+    return wrapper
+
+# Small helper to poll for a condition instead of fixed sleeps
+def wait_for(predicate, timeout=5.0, interval=0.2):
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            if predicate():
+                return True
+        except Exception:
+            pass
+        time.sleep(interval)
+    return False
+
 @app.route('/')
 def home():
     return jsonify({
@@ -54,6 +95,7 @@ def home():
     })
 
 @app.route('/click', methods=['POST'])
+@require_token
 def click_kinic():
     """Click the Kinic button"""
     try:
@@ -63,6 +105,7 @@ def click_kinic():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/close', methods=['POST'])
+@require_token
 def close_kinic():
     """Close Kinic popup"""
     try:
@@ -72,6 +115,7 @@ def close_kinic():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/save', methods=['POST'])
+@require_token
 def save_page():
     """Save current page to Kinic"""
     try:
@@ -121,6 +165,7 @@ def save_page():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/search-and-retrieve', methods=['POST'])
+@require_token
 def search_and_retrieve():
     """Search Kinic and get first URL"""
     try:
@@ -184,7 +229,8 @@ def search_and_retrieve():
         
         print("10. Copying URL (ENTER)...")
         pyautogui.press('enter')
-        time.sleep(1)
+        # Wait briefly for clipboard to receive the URL
+        wait_for(lambda: (pyperclip.paste() or "").startswith("http"), timeout=5, interval=0.2)
         
         # Step 10: Get URL from clipboard
         url = pyperclip.paste()
@@ -209,6 +255,7 @@ def search_and_retrieve():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/search-ai-extract', methods=['POST'])
+@require_token
 def search_ai_extract():
     """Search and extract AI response"""
     try:
@@ -281,7 +328,8 @@ def search_ai_extract():
         # Step 12: Copy to clipboard
         print("12. Copying selected text (CTRL+C)...")
         pyautogui.hotkey('ctrl', 'c')
-        time.sleep(2)
+        # Wait for clipboard to populate
+        wait_for(lambda: len(pyperclip.paste() or "") > 0, timeout=5, interval=0.2)
         
         # Step 13: Get AI response from clipboard
         ai_response = pyperclip.paste()
@@ -308,6 +356,7 @@ def search_ai_extract():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/setup-kinic', methods=['POST'])
+@require_token
 def setup_kinic():
     """Update Kinic button position"""
     try:
@@ -325,6 +374,7 @@ def setup_kinic():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/setup-ai', methods=['POST'])
+@require_token
 def setup_ai():
     """Update AI response position"""
     try:
@@ -349,8 +399,15 @@ if __name__ == '__main__':
     print("Configuration:")
     print(f"  Kinic button: ({config['kinic_x']}, {config['kinic_y']})")
     print(f"  AI response: ({config['ai_response_x']}, {config['ai_response_y']})")
+    if LOCAL_TOKEN:
+        print("  Auth: KINIC_LOCAL_TOKEN is set (required)")
+    else:
+        print("  Auth: KINIC_LOCAL_TOKEN not set (no auth enforced)")
     print()
-    print("Running on http://localhost:5006")
+    port = int(os.environ.get('PORT', 5006))
+    host = os.environ.get('HOST', '127.0.0.1')
+    debug = os.environ.get('DEBUG', 'false').lower() == 'true'
+    print(f"Running on http://{host}:{port}")
     print("=" * 60)
     
-    app.run(host='0.0.0.0', port=5006)
+    app.run(host=host, port=port, debug=debug)

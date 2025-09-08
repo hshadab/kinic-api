@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lovable + Kinic: Simulated Memory Demo</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background: linear-gradient(135deg, #0a0e27 0%, #1a1e3a 100%); color:#e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height:100vh; }
+    .header { padding:40px; text-align:center; background: rgba(255,255,255,0.02); border-bottom:1px solid rgba(100,255,218,0.1); }
+    h1 { font-size:42px; font-weight:700; background: linear-gradient(135deg, #64ffda, #00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .subtitle { color:#8892b0; margin-top:8px; }
+    .container { max-width:1200px; margin:0 auto; padding:32px; }
+    .demo-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(100,255,218,0.2); border-radius: 16px; padding: 24px; margin: 20px 0; }
+    .card-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+    .card-icon { font-size:28px; }
+    .card-title { font-size:20px; font-weight:600; color:#64ffda; }
+    .demo-section { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .chat-container { background: rgba(0,0,0,0.3); border-radius:12px; padding:16px; max-height:420px; overflow-y:auto; }
+    .chat-message { margin:12px 0; padding:12px 14px; border-radius:8px; }
+    .ai-message { background: rgba(189,147,249,0.1); border-left:3px solid #bd93f9; }
+    .message-label { font-size:11px; color:#8892b0; text-transform:uppercase; margin-bottom:4px; }
+    .memory-viz { background: rgba(0,0,0,0.3); border-radius:12px; padding:16px; min-height:120px; }
+    .memory-item { display:flex; align-items:flex-start; gap:10px; padding:10px; margin:6px 0; background: rgba(255,255,255,0.02); border-radius:8px; border:1px solid rgba(100,255,218,0.1); }
+    .memory-icon { width:8px; height:8px; border-radius:50%; background:#64ffda; box-shadow:0 0 10px #64ffda; margin-top:6px; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+    .input, select { padding:10px; background: rgba(255,255,255,0.05); border:1px solid rgba(100,255,218,0.2); border-radius:8px; color:#fff; }
+    .btn { padding:10px 16px; background: linear-gradient(135deg, #64ffda, #00ff88); color:#0a0e27; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
+    pre { white-space: pre-wrap; }
+    .note { color:#8892b0; font-size:13px; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Lovable + Kinic: Simulated Memory Demo</h1>
+    <div class="subtitle">Pure client-side simulation — ready for GitHub Pages</div>
+  </div>
+  <div class="container">
+    <div class="demo-card">
+      <div class="card-header">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">What this shows</div>
+      </div>
+      <div class="note">
+        - Session continuity across days without re-explaining<br />
+        - Org-wide standards and pattern reuse across projects/repos<br />
+        - Memory-aware PR guidance, independent of chat history
+      </div>
+    </div>
+
+    <div class="demo-card">
+      <div class="card-header">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">Memory Hub (Simulated)</div>
+      </div>
+
+      <div class="controls">
+        <select id="projectSelect">
+          <option value="">All Projects</option>
+        </select>
+        <select id="repoSelect">
+          <option value="">All Repos</option>
+        </select>
+        <select id="typeSelect">
+          <option value="">All Types</option>
+          <option value="decision">decision</option>
+          <option value="pattern">pattern</option>
+          <option value="snippet">snippet</option>
+          <option value="bug">bug</option>
+          <option value="fix">fix</option>
+          <option value="standard">standard</option>
+          <option value="pr_note">pr_note</option>
+        </select>
+        <input id="searchQuery" class="input" placeholder="Search memories..." />
+        <button class="btn" onclick="searchMemory()">Search</button>
+      </div>
+
+      <div class="demo-section">
+        <div class="demo-card" style="margin:0;">
+          <div class="card-header" style="margin-bottom:8px;">
+            <div class="card-icon">⭐</div>
+            <div class="card-title">Top Memories</div>
+          </div>
+          <div id="topMemories" class="memory-viz"></div>
+        </div>
+        <div class="demo-card" style="margin:0;">
+          <div class="card-header" style="margin-bottom:8px;">
+            <div class="card-icon">🔍</div>
+            <div class="card-title">Search Results</div>
+          </div>
+          <div id="searchResults" class="memory-viz"></div>
+        </div>
+      </div>
+
+      <div class="demo-card" style="margin-top:20px;">
+        <div class="card-header" style="margin-bottom:8px;">
+          <div class="card-icon">📝</div>
+          <div class="card-title">PR Review Preview</div>
+        </div>
+        <div id="prPreview" class="chat-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fully mocked dataset for GitHub Pages
+    const memoryData = {
+      org_id: "acme-corp",
+      export_date: new Date().toISOString(),
+      projects: ["ecommerce-mvp", "blog-platform"],
+      repos: [
+        "github.com/acme/ecommerce-mvp",
+        "github.com/acme/blog-platform"
+      ],
+      memories: [
+        { id:"m1", type:"decision", content:"React + TypeScript for app foundation", timestamp:"2025-01-01T10:00:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+        { id:"m2", type:"decision", content:"Tailwind CSS for styling", timestamp:"2025-01-01T10:01:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+        { id:"m3", type:"decision", content:"Supabase for auth + PostgreSQL", timestamp:"2025-01-01T10:02:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+        { id:"m4", type:"pattern", content:"Prefer async/await over .then() chains", confidence:0.85, examples:["fetchProducts","authenticateUser"], timestamp:"2025-01-01T10:03:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+        { id:"m5", type:"standard", content:"ui.framework: tailwind-css", scope:"org", timestamp:"2025-01-01T10:05:00Z", metadata:{ user_id:"dev_a" } },
+        { id:"m6", type:"standard", content:"react.state: prefer-context-over-redux", scope:"org", timestamp:"2025-01-01T10:06:00Z", metadata:{ user_id:"dev_a" } },
+        { id:"m7", type:"snippet", content:"Supabase auth helper", language:"ts", snippet:"export async function requireAuth(client){\n  const { data } = await client.auth.getUser();\n  if(!data.user) throw new Error('not-authenticated');\n  return data.user;\n}", timestamp:"2025-01-01T10:07:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+
+        { id:"m8", type:"decision", content:"Cart state via React Context API", timestamp:"2025-01-02T09:00:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+        { id:"m9", type:"bug", content:"Race condition updating cart on concurrent requests", severity:"high", timestamp:"2025-01-02T09:10:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+        { id:"m10", type:"fix", content:"Wrap cart updates in server-side transaction + optimistic UI rollback", relates_to:"m9", timestamp:"2025-01-02T09:12:00Z", metadata:{ project:"ecommerce-mvp", repo:"github.com/acme/ecommerce-mvp", user_id:"dev_a" } },
+
+        // New project inherits org memory
+        { id:"m11", type:"decision", content:"Use React + TypeScript (carried from org memory)", timestamp:"2025-01-05T11:00:00Z", metadata:{ project:"blog-platform", repo:"github.com/acme/blog-platform", user_id:"dev_b" } },
+        { id:"m12", type:"decision", content:"Use Tailwind CSS (org standard)", timestamp:"2025-01-05T11:01:00Z", metadata:{ project:"blog-platform", repo:"github.com/acme/blog-platform", user_id:"dev_b" } },
+        { id:"m13", type:"decision", content:"Supabase for auth + DB (consistent with past success)", timestamp:"2025-01-05T11:02:00Z", metadata:{ project:"blog-platform", repo:"github.com/acme/blog-platform", user_id:"dev_b" } },
+        { id:"m14", type:"pattern", content:"Prefers async/await for async logic", confidence:0.9, timestamp:"2025-01-05T11:03:00Z", metadata:{ project:"blog-platform", repo:"github.com/acme/blog-platform", user_id:"dev_b" } },
+        { id:"m15", type:"pr_note", content:"Apply cart transaction pattern from ecommerce-mvp to blog drafts flow", outcome:"suggestion", timestamp:"2025-01-05T11:10:00Z", metadata:{ project:"blog-platform", repo:"github.com/acme/blog-platform", user_id:"dev_b" } }
+      ]
+    };
+
+    function typeIcon(t) {
+      switch ((t||'').toLowerCase()) {
+        case 'decision': return '🧩';
+        case 'pattern': return '📈';
+        case 'snippet': return '📄';
+        case 'bug': return '🐛';
+        case 'fix': return '🛠️';
+        case 'standard': return '📐';
+        case 'pr_note': return '📝';
+        default: return '🔹';
+      }
+    }
+
+    function populateFilters() {
+      const projects = new Set();
+      const repos = new Set();
+      const types = new Set();
+      memoryData.memories.forEach(m => {
+        const meta = m.metadata || {};
+        if (meta.project) projects.add(meta.project);
+        if (meta.repo) repos.add(meta.repo);
+        if (m.type) types.add(m.type);
+      });
+      const projSelect = document.getElementById('projectSelect');
+      const repoSelect = document.getElementById('repoSelect');
+      const typeSelect = document.getElementById('typeSelect');
+      // reset
+      projSelect.length = 1; repoSelect.length = 1;
+      Array.from(projects).sort().forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; projSelect.appendChild(o); });
+      Array.from(repos).sort().forEach(r => { const o=document.createElement('option'); o.value=r; o.textContent=r; repoSelect.appendChild(o); });
+      Array.from(types).sort().forEach(t => {
+        if (![...typeSelect.options].some(o=>o.value===t)) {
+          const o=document.createElement('option'); o.value=t; o.textContent=t; typeSelect.appendChild(o);
+        }
+      });
+      projSelect.onchange = () => { renderTopMemories(); searchMemory(); renderPRPreview(); };
+      repoSelect.onchange = () => { searchMemory(); renderPRPreview(); };
+      typeSelect.onchange = () => { searchMemory(); };
+    }
+
+    function renderTopMemories() {
+      const proj = document.getElementById('projectSelect').value;
+      const container = document.getElementById('topMemories');
+      container.innerHTML = '';
+      let items = memoryData.memories.slice();
+      if (proj) items = items.filter(m => (m.metadata||{}).project === proj);
+      items.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+      items.slice(0,8).forEach(m => {
+        const div = document.createElement('div'); div.className='memory-item';
+        const icon = document.createElement('div'); icon.className='memory-icon';
+        const label = document.createElement('div'); label.style.marginLeft='6px';
+        const meta = m.metadata || {};
+        label.innerHTML = `${typeIcon(m.type)} <strong>${m.type||'memory'}</strong> — ${
+          (m.content||'').toString().slice(0,80)}${(m.content||'').length>80?'…':''}<br>`+
+          `<span style="color:#8892b0; font-size:12px;">${meta.project||''} · ${meta.repo||''} · ${new Date(m.timestamp).toLocaleString()}</span>`;
+        div.appendChild(icon); div.appendChild(label); container.appendChild(div);
+      });
+      if (container.innerHTML.trim()==='') container.innerHTML = '<div class="note">No memories found for this project.</div>';
+    }
+
+    function searchMemory() {
+      const q = (document.getElementById('searchQuery').value||'').toLowerCase();
+      const proj = document.getElementById('projectSelect').value;
+      const repo = document.getElementById('repoSelect').value;
+      const type = document.getElementById('typeSelect').value;
+      const out = document.getElementById('searchResults'); out.innerHTML='';
+      let items = memoryData.memories.slice();
+      if (proj) items = items.filter(m => (m.metadata||{}).project === proj);
+      if (repo) items = items.filter(m => (m.metadata||{}).repo === repo);
+      if (type) items = items.filter(m => (m.type||'') === type);
+      if (q) items = items.filter(m => ((m.content||'') + ' ' + (m.snippet||'')).toLowerCase().includes(q));
+      items.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+      items.slice(0,20).forEach(m => {
+        const div = document.createElement('div'); div.className='memory-item';
+        const label = document.createElement('div');
+        const meta = m.metadata || {};
+        const snippet = m.snippet ? `<pre style="margin-top:6px; color:#bfb;">${(m.snippet||'').toString().slice(0,220)}${(m.snippet||'').length>220?'…':''}</pre>` : '';
+        label.innerHTML = `${typeIcon(m.type)} <strong>${m.type||'memory'}</strong> — ${
+          (m.content||'').toString().slice(0,100)}${(m.content||'').length>100?'…':''}`+
+          `<div style="color:#8892b0; font-size:12px;">${meta.project||''} · ${meta.repo||''} · ${new Date(m.timestamp).toLocaleString()}</div>`+snippet;
+        div.appendChild(label); out.appendChild(div);
+      });
+      if (out.innerHTML.trim()==='') out.innerHTML = '<div class="note">No results.</div>';
+    }
+
+    function renderPRPreview() {
+      const proj = document.getElementById('projectSelect').value;
+      const repo = document.getElementById('repoSelect').value;
+      const out = document.getElementById('prPreview'); out.innerHTML='';
+      let notes = memoryData.memories.filter(m => (m.type||'')==='pr_note');
+      if (proj) notes = notes.filter(m => (m.metadata||{}).project === proj);
+      if (repo) notes = notes.filter(m => (m.metadata||{}).repo === repo);
+      notes.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+      notes.slice(0,5).forEach(n => {
+        const div = document.createElement('div'); div.className='chat-message ai-message';
+        const meta = n.metadata || {};
+        div.innerHTML = `<div class="message-label">PR Comment · ${meta.project||''} · ${meta.repo||''}</div>`+
+          `<div><strong>${n.content||''}</strong></div>`+
+          `<div style="color:#8892b0; font-size:12px; margin-top:6px;">${new Date(n.timestamp).toLocaleString()}</div>`;
+        out.appendChild(div);
+      });
+      if (out.innerHTML.trim()==='') out.innerHTML = '<div class="chat-message ai-message"><div class="message-label">PR Comment</div><div>No PR notes yet for this selection.</div></div>';
+    }
+
+    // Initialize
+    populateFilters();
+    renderTopMemories();
+    searchMemory();
+    renderPRPreview();
+  </script>
+</body>
+</html>
+

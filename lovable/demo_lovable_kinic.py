@@ -25,8 +25,16 @@ class LovableKinicDemo:
     """
     
     def __init__(self):
-        self.kinic = KinicMemoryAPI(agent_id="lovable-assistant")
-        self.current_project = "ecommerce-mvp"
+        # Simulate an org with two users working across two projects
+        self.org_id = "acme-corp"
+        self.dev_a = KinicMemoryAPI(agent_id="lovable-assistant", org_id=self.org_id, user_id="dev_a")
+        self.dev_b = KinicMemoryAPI(agent_id="lovable-assistant", org_id=self.org_id, user_id="dev_b")
+        self.project_a = "ecommerce-mvp"
+        self.repo_a = "github.com/acme/ecommerce-mvp"
+        self.project_b = "blog-platform"
+        self.repo_b = "github.com/acme/blog-platform"
+        # Defaults for the narrative
+        self.current_project = self.project_a
         
     def simulate_day_1_development(self):
         """Simulate first day of development with Lovable"""
@@ -83,10 +91,30 @@ class LovableKinicDemo:
             }
         ]
         
+        # Dev A working on Project A
+        self.dev_a.set_context(project=self.project_a, repo=self.repo_a)
         for decision in decisions:
-            result = self.kinic.store_memory(decision)
+            result = self.dev_a.store_memory(decision)
             print(f"   ✓ Stored: {decision['content'][:50]}...")
             time.sleep(0.5)
+
+        # Add org-wide standards and snippets
+        print("\n🧭 Kinic: Recording org standards and reusable snippets...")
+        self.dev_a.store_standard("ui.framework", "tailwind-css", scope="org")
+        self.dev_a.store_standard("react.state", "prefer-context-over-redux", scope="org")
+        self.dev_a.store_snippet(
+            title="Supabase auth helper",
+            language="ts",
+            code=(
+                "export async function requireAuth(client){\n"
+                "  const { data } = await client.auth.getUser();\n"
+                "  if(!data.user) throw new Error('not-authenticated');\n"
+                "  return data.user;\n"
+                "}"
+            ),
+            project=self.project_a,
+            repo=self.repo_a,
+        )
         
         print("\n✅ Day 1 Complete: Basic e-commerce app created")
         print("📊 Memories stored: 5 decisions and patterns")
@@ -135,8 +163,8 @@ class LovableKinicDemo:
         
         # Kinic retrieves context
         print("🧠 Kinic: Retrieving relevant context...")
-        context = self.kinic.retrieve_memory({
-            "project": self.current_project,
+        context = self.dev_a.retrieve_memory({
+            "project": self.project_a,
             "recent": 10
         })
         time.sleep(1)
@@ -172,7 +200,7 @@ class LovableKinicDemo:
         ]
         
         for decision in new_decisions:
-            self.kinic.store_memory(decision)
+            self.dev_a.store_memory(decision)
         
         print("✅ Result: Seamless continuation")
         print("⏱️  Time saved: 10-15 minutes")
@@ -185,7 +213,7 @@ class LovableKinicDemo:
         print("="*60 + "\n")
         
         # Analyze patterns
-        patterns = [m for m in self.kinic.memory_store if m.get("type") == "pattern"]
+        patterns = [m for m in self.dev_a.memory_store if m.get("type") == "pattern"]
         
         print("🧠 Kinic has learned your patterns:")
         for pattern in patterns:
@@ -207,7 +235,7 @@ class LovableKinicDemo:
         print("📊 MEMORY STATISTICS")
         print("="*60 + "\n")
         
-        context = self.kinic.get_context_for_session()
+        context = self.dev_a.get_context_for_session()
         
         print(f"Total Memories Stored: {context['total_memories']}")
         print(f"Session ID: {context['session_id']}")
@@ -215,7 +243,7 @@ class LovableKinicDemo:
         
         # Count by type
         memory_types = {}
-        for memory in self.kinic.memory_store:
+        for memory in self.dev_a.memory_store:
             mem_type = memory.get("type", "unknown")
             memory_types[mem_type] = memory_types.get(mem_type, 0) + 1
         
@@ -231,18 +259,41 @@ class LovableKinicDemo:
         
         print("👤 User: 'Start a new blog project'\n")
         time.sleep(1)
-        
+        # Dev B starts Project B and benefits from org memory created by Dev A
+        self.dev_b.set_context(project=self.project_b, repo=self.repo_b)
+
         print("🧠 Kinic: Applying learned preferences from previous projects...")
+        org_memories = [m for m in (self.dev_a.memory_store + self.dev_b.memory_store) if m.get("type") in {"standard", "pattern", "snippet"}]
+        # Dev B stores decisions influenced by org memory
+        self.dev_b.store_decision("Use React + TypeScript", project=self.project_b, repo=self.repo_b)
+        self.dev_b.store_decision("Use Tailwind CSS", project=self.project_b, repo=self.repo_b)
+        self.dev_b.store_decision("Use Supabase for auth and DB", project=self.project_b, repo=self.repo_b)
+        self.dev_b.store_pattern("Prefers async/await for async logic", confidence=0.85, project=self.project_b, repo=self.repo_b)
+
         print("\n🤖 Lovable + Kinic: 'Starting blog with your preferences:'")
-        print("   • React + TypeScript (your stack)")
-        print("   • Tailwind CSS (your preferred styling)")
-        print("   • Supabase (you've used it successfully)")
-        print("   • Async/await patterns (your coding style)")
-        print("\nNo need to re-specify - I remember how you like to build!")
+        print("   • React + TypeScript (carried from org memory)")
+        print("   • Tailwind CSS (org standard)")
+        print("   • Supabase (consistent with past success)")
+        print("   • Async/await patterns (learned preference)")
+        print("\nNo need to re-specify - I remember how your team likes to build!")
+
+        # Simulate bug in Project A and its fix, later reused in Project B
+        print("\n🐛 Capturing incident and propagating fix across projects...")
+        bug = self.dev_a.store_bug("Race condition in cart update when concurrent requests", severity="high", project=self.project_a, repo=self.repo_a)
+        fix = self.dev_a.store_fix("Add server-side transaction + optimistic UI rollback", relates_to=bug["memory_id"], project=self.project_a, repo=self.repo_a)
+        self.dev_b.store_pr_note("Apply cart transaction pattern from ecommerce-mvp to blog drafts", outcome="suggestion", project=self.project_b, repo=self.repo_b)
     
     def export_demo_data(self):
         """Export memory data for visualization"""
-        export_data = self.kinic.export_memories()
+        # Merge memory across users for export (org-wide memory)
+        export_data = {
+            "org_id": self.org_id,
+            "export_date": datetime.now().isoformat(),
+            "projects": [self.project_a, self.project_b],
+            "repos": [self.repo_a, self.repo_b],
+            "memories": self.dev_a.memory_store + self.dev_b.memory_store,
+            "total_count": len(self.dev_a.memory_store) + len(self.dev_b.memory_store),
+        }
         
         # Save to file for visualization
         with open('demo_memory_export.json', 'w') as f:

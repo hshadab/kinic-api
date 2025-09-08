@@ -595,6 +595,61 @@
         </div>
       </div>
     </div>
+
+    <!-- Memory Hub -->
+    <div class="demo-card" style="margin: 40px 0;">
+      <div class="card-header">
+        <div class="card-icon">🧠</div>
+        <div class="card-title solution-title">Memory Hub (Powered by Kinic)</div>
+      </div>
+
+      <!-- Controls -->
+      <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom: 16px;">
+        <select id="projectSelect" style="padding:10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(100,255,218,0.2); border-radius:8px; color:#fff;">
+          <option value="">All Projects</option>
+        </select>
+        <select id="repoSelect" style="padding:10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(100,255,218,0.2); border-radius:8px; color:#fff;">
+          <option value="">All Repos</option>
+        </select>
+        <select id="typeSelect" style="padding:10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(100,255,218,0.2); border-radius:8px; color:#fff;">
+          <option value="">All Types</option>
+          <option value="decision">decision</option>
+          <option value="pattern">pattern</option>
+          <option value="snippet">snippet</option>
+          <option value="bug">bug</option>
+          <option value="fix">fix</option>
+          <option value="standard">standard</option>
+          <option value="pr_note">pr_note</option>
+        </select>
+        <input id="searchQuery" placeholder="Search memories..." style="flex:1; min-width:240px; padding:10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(100,255,218,0.2); border-radius:8px; color:#fff;"/>
+        <button class="demo-btn" onclick="searchMemory()">Search</button>
+      </div>
+
+      <div class="demo-section" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="demo-card" style="margin:0;">
+          <div class="card-header" style="margin-bottom:12px;">
+            <div class="card-icon">⭐</div>
+            <div class="card-title">Top Memories (by project)</div>
+          </div>
+          <div id="topMemories" class="memory-viz"></div>
+        </div>
+        <div class="demo-card" style="margin:0;">
+          <div class="card-header" style="margin-bottom:12px;">
+            <div class="card-icon">🔍</div>
+            <div class="card-title">Search Results</div>
+          </div>
+          <div id="searchResults" class="memory-viz"></div>
+        </div>
+      </div>
+
+      <div class="demo-card" style="margin-top:20px;">
+        <div class="card-header" style="margin-bottom:12px;">
+          <div class="card-icon">📝</div>
+          <div class="card-title">PR Review Preview</div>
+        </div>
+        <div id="prPreview" class="chat-container"></div>
+      </div>
+    </div>
     
     <!-- CTA Section -->
     <div class="cta-section">
@@ -610,6 +665,146 @@
   </div>
   
   <script>
+    let memoryData = null;
+
+    function typeIcon(t) {
+      switch ((t||'').toLowerCase()) {
+        case 'decision': return '🧩';
+        case 'pattern': return '📈';
+        case 'snippet': return '📄';
+        case 'bug': return '🐛';
+        case 'fix': return '🛠️';
+        case 'standard': return '📐';
+        case 'pr_note': return '📝';
+        default: return '🔹';
+      }
+    }
+
+    function renderTopMemories() {
+      const proj = document.getElementById('projectSelect').value;
+      const container = document.getElementById('topMemories');
+      container.innerHTML = '';
+      if (!memoryData) return;
+      let items = memoryData.memories.slice();
+      if (proj) items = items.filter(m => (m.metadata||{}).project === proj);
+      items.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+      items.slice(0, 8).forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'memory-item';
+        const icon = document.createElement('div');
+        icon.className = 'memory-icon';
+        const label = document.createElement('div');
+        label.style.marginLeft = '6px';
+        const meta = m.metadata || {};
+        label.innerHTML = `${typeIcon(m.type)} <strong>${(m.type||'memory')}</strong> — ${
+          (m.content||'').toString().slice(0,80)}${(m.content||'').length>80?'…':''}<br>`+
+          `<span style="color:#8892b0; font-size:12px;">${meta.project||''} · ${meta.repo||''} · ${new Date(m.timestamp).toLocaleString()}</span>`;
+        div.appendChild(icon);
+        div.appendChild(label);
+        container.appendChild(div);
+      });
+      if (container.innerHTML.trim()==='') {
+        container.innerHTML = '<div style="color:#8892b0;">No memories found for this project.</div>';
+      }
+    }
+
+    function populateFilters() {
+      if (!memoryData) return;
+      const projects = new Set();
+      const repos = new Set();
+      const types = new Set();
+      (memoryData.memories||[]).forEach(m => {
+        const meta = m.metadata || {};
+        if (meta.project) projects.add(meta.project);
+        if (meta.repo) repos.add(meta.repo);
+        if (m.type) types.add(m.type);
+      });
+      const projSelect = document.getElementById('projectSelect');
+      const repoSelect = document.getElementById('repoSelect');
+      const typeSelect = document.getElementById('typeSelect');
+      // Clear existing except first option
+      projSelect.length = 1; repoSelect.length = 1;
+      Array.from(projects).sort().forEach(p => {
+        const opt = document.createElement('option'); opt.value=p; opt.textContent=p; projSelect.appendChild(opt);
+      });
+      Array.from(repos).sort().forEach(r => {
+        const opt = document.createElement('option'); opt.value=r; opt.textContent=r; repoSelect.appendChild(opt);
+      });
+      // types already present; optional add new types if any unknown
+      Array.from(types).sort().forEach(t => {
+        if (![...typeSelect.options].some(o => o.value===t)) {
+          const opt = document.createElement('option'); opt.value=t; opt.textContent=t; typeSelect.appendChild(opt);
+        }
+      });
+      projSelect.onchange = () => { renderTopMemories(); searchMemory(); renderPRPreview(); };
+      repoSelect.onchange = () => { searchMemory(); renderPRPreview(); };
+      typeSelect.onchange = () => { searchMemory(); };
+    }
+
+    async function loadMemoryData() {
+      try {
+        const res = await fetch('demo_memory_export.json?cb=' + Date.now());
+        memoryData = await res.json();
+        populateFilters();
+        renderTopMemories();
+        renderPRPreview();
+      } catch (e) {
+        const hub = document.getElementById('topMemories');
+        if (hub) hub.innerHTML = '<div style="color:#ff5555;">Failed to load demo_memory_export.json</div>';
+      }
+    }
+
+    function searchMemory() {
+      const q = (document.getElementById('searchQuery').value||'').toLowerCase();
+      const proj = document.getElementById('projectSelect').value;
+      const repo = document.getElementById('repoSelect').value;
+      const type = document.getElementById('typeSelect').value;
+      const out = document.getElementById('searchResults');
+      out.innerHTML = '';
+      if (!memoryData) return;
+      let items = memoryData.memories.slice();
+      if (proj) items = items.filter(m => (m.metadata||{}).project === proj);
+      if (repo) items = items.filter(m => (m.metadata||{}).repo === repo);
+      if (type) items = items.filter(m => (m.type||'') === type);
+      if (q) items = items.filter(m => ((m.content||'') + ' ' + (m.snippet||'')).toLowerCase().includes(q));
+      items.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+      items.slice(0, 20).forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'memory-item';
+        const label = document.createElement('div');
+        const meta = m.metadata || {};
+        const snippet = m.snippet ? `<pre style="margin-top:6px; white-space:pre-wrap; color:#bfb;">${(m.snippet||'').toString().slice(0,200)}${(m.snippet||'').length>200?'…':''}</pre>` : '';
+        label.innerHTML = `${typeIcon(m.type)} <strong>${m.type||'memory'}</strong> — ${
+          (m.content||'').toString().slice(0,100)}${(m.content||'').length>100?'…':''}`+
+          `<div style="color:#8892b0; font-size:12px;">${meta.project||''} · ${meta.repo||''} · ${new Date(m.timestamp).toLocaleString()}</div>` +
+          snippet;
+        div.appendChild(label);
+        out.appendChild(div);
+      });
+      if (out.innerHTML.trim()==='') out.innerHTML = '<div style="color:#8892b0;">No results.</div>';
+    }
+
+    function renderPRPreview() {
+      const proj = document.getElementById('projectSelect').value;
+      const repo = document.getElementById('repoSelect').value;
+      const out = document.getElementById('prPreview');
+      out.innerHTML = '';
+      if (!memoryData) return;
+      let notes = memoryData.memories.filter(m => (m.type||'') === 'pr_note');
+      if (proj) notes = notes.filter(m => (m.metadata||{}).project === proj);
+      if (repo) notes = notes.filter(m => (m.metadata||{}).repo === repo);
+      notes.sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+      notes.slice(0,5).forEach(n => {
+        const div = document.createElement('div');
+        div.className = 'chat-message ai-message';
+        const meta = n.metadata || {};
+        div.innerHTML = `<div class="message-label">PR Comment · ${meta.project||''} · ${meta.repo||''}</div>` +
+          `<div><strong>${n.content||''}</strong></div>` +
+          `<div style="color:#8892b0; font-size:12px; margin-top:6px;">${new Date(n.timestamp).toLocaleString()}</div>`;
+        out.appendChild(div);
+      });
+      if (out.innerHTML.trim()==='') out.innerHTML = '<div class="chat-message ai-message"><div class="message-label">PR Comment</div><div>No PR notes yet for this selection.</div></div>';
+    }
     function runLiveDemo() {
       // Animate the demo
       const messages = document.querySelectorAll('.chat-message');
@@ -640,8 +835,9 @@
       }
     }
     
-    // Auto-run demo on page load
+    // Auto-run demo and load memory
     setTimeout(runLiveDemo, 1000);
+    loadMemoryData();
   </script>
 </body>
 </html>

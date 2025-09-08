@@ -2,11 +2,31 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import openai
 from anthropic import Anthropic
+try:
+    from anthropic import APIStatusError  # normalized error handling
+except Exception:  # fallback if SDK changes
+    class APIStatusError(Exception):
+        pass
 import os
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+
+# Restrictive CORS: allow localhost and optional env overrides
+def _allowed_origins():
+    default = " ".join([
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "null",  # allow local file:// testers
+    ])
+    origins_str = os.environ.get("ALLOWED_ORIGINS", default)
+    return [o.strip() for o in origins_str.split() if o.strip()]
+
+CORS(app, resources={r"/api/*": {"origins": _allowed_origins()}})
 
 @app.route('/api/test-connection', methods=['POST'])
 def test_connection():
@@ -106,23 +126,15 @@ def test_anthropic_connection(api_key, model):
             'timestamp': datetime.now().isoformat()
         })
         
+    except APIStatusError as e:
+        status = getattr(e, "status_code", None)
+        if status in (401, 403):
+            return jsonify({'success': False, 'error': 'Invalid API key'}), 401
+        if status == 404:
+            return jsonify({'success': False, 'error': f'Model {model} not found or not accessible'}), 404
+        return jsonify({'success': False, 'error': str(e)}), 500
     except Exception as e:
-        error_str = str(e)
-        if 'authentication' in error_str.lower() or 'api key' in error_str.lower():
-            return jsonify({
-                'success': False,
-                'error': 'Invalid API key'
-            }), 401
-        elif 'model' in error_str.lower():
-            return jsonify({
-                'success': False,
-                'error': f'Model {model} not found or not accessible'
-            }), 404
-        else:
-            return jsonify({
-                'success': False,
-                'error': error_str
-            }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 def test_deepseek_connection(api_key, model):
     """Test DeepSeek API connection (uses OpenAI client)"""
@@ -250,4 +262,6 @@ def health_check():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    host = os.environ.get('HOST', '127.0.0.1')
+    debug = os.environ.get('DEBUG', 'false').lower() == 'true'
+    app.run(debug=debug, host=host, port=port)

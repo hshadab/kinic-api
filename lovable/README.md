@@ -52,6 +52,18 @@ Open `index.html` in your browser (or visit the [GitHub Pages demo](https://hsha
 - Integration code examples
 - Performance statistics
 
+### Pure Simulation (GitHub Pages Ready)
+
+For a zero-setup, fully mocked experience that runs entirely client-side:
+
+- Open `simulated.html` locally, or visit:
+- https://hshadab.github.io/kinic-api/lovable/simulated.html
+
+This page uses embedded mock data (no backend, no JSON fetch) and demonstrates:
+- Cross-project memory reuse (org standards, patterns, snippets)
+- Session continuity across days
+- PR Review Preview generated from stored org memory
+
 ## 💻 Integration Code
 
 ### Basic Integration

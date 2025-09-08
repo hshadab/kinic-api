@@ -19,8 +19,12 @@ class KinicMemoryAPI:
     Kinic Memory API for AI agent context persistence
     """
     
-    def __init__(self, agent_id: str = "lovable-assistant"):
+    def __init__(self, agent_id: str = "lovable-assistant", org_id: Optional[str] = None, user_id: Optional[str] = None):
         self.agent_id = agent_id
+        self.org_id = org_id
+        self.user_id = user_id
+        self.default_project: Optional[str] = None
+        self.default_repo: Optional[str] = None
         self.memory_store = []  # In production, this would connect to Kinic
         self.session_id = self._generate_session_id()
         
@@ -48,8 +52,19 @@ class KinicMemoryAPI:
             "agent_id": self.agent_id,
             "session_id": self.session_id,
             "timestamp": datetime.now().isoformat(),
+            "org_id": self.org_id,
+            "user_id": self.user_id,
             **memory_data
         }
+        # Add defaults if not present
+        metadata = memory_entry.get("metadata") or {}
+        if self.default_project and not metadata.get("project"):
+            metadata["project"] = self.default_project
+        if self.default_repo and not metadata.get("repo"):
+            metadata["repo"] = self.default_repo
+        if self.user_id and not metadata.get("user_id"):
+            metadata["user_id"] = self.user_id
+        memory_entry["metadata"] = metadata
         
         # In production, this would call Kinic's native messaging API
         # For now, simulate storage
@@ -87,6 +102,14 @@ class KinicMemoryAPI:
         # Filter by project if specified
         if "project" in query:
             results = [m for m in results if m.get("metadata", {}).get("project") == query["project"]]
+        # Filter by repo if specified
+        if "repo" in query:
+            results = [m for m in results if m.get("metadata", {}).get("repo") == query["repo"]]
+        # Filter by user/org if specified
+        if "user_id" in query:
+            results = [m for m in results if m.get("metadata", {}).get("user_id") == query["user_id"]]
+        if "org_id" in query:
+            results = [m for m in results if m.get("org_id") == query["org_id"]]
         
         # Sort by timestamp (most recent first)
         results.sort(key=lambda x: x["timestamp"], reverse=True)
@@ -96,6 +119,73 @@ class KinicMemoryAPI:
             results = results[:query["recent"]]
         
         return results
+
+    # Convenience context setters
+    def set_context(self, project: Optional[str] = None, repo: Optional[str] = None, user_id: Optional[str] = None):
+        if project is not None:
+            self.default_project = project
+        if repo is not None:
+            self.default_repo = repo
+        if user_id is not None:
+            self.user_id = user_id
+
+    # Standardized memory helpers
+    def store_decision(self, content: str, **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "decision",
+            "content": content,
+            "metadata": metadata,
+        })
+
+    def store_pattern(self, pattern: str, confidence: float = 0.8, examples: Optional[List[str]] = None, **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "pattern",
+            "content": pattern,
+            "confidence": confidence,
+            "examples": examples or [],
+            "metadata": metadata,
+        })
+
+    def store_snippet(self, title: str, code: str, language: str = "", **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "snippet",
+            "content": title,
+            "language": language,
+            "snippet": code,
+            "metadata": metadata,
+        })
+
+    def store_bug(self, description: str, severity: str = "medium", **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "bug",
+            "content": description,
+            "severity": severity,
+            "metadata": metadata,
+        })
+
+    def store_fix(self, description: str, relates_to: Optional[str] = None, **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "fix",
+            "content": description,
+            "relates_to": relates_to,
+            "metadata": metadata,
+        })
+
+    def store_standard(self, name: str, value: str, scope: str = "org", **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "standard",
+            "content": f"{name}: {value}",
+            "scope": scope,
+            "metadata": metadata,
+        })
+
+    def store_pr_note(self, summary: str, outcome: str = "comment", **metadata) -> Dict[str, Any]:
+        return self.store_memory({
+            "type": "pr_note",
+            "content": summary,
+            "outcome": outcome,
+            "metadata": metadata,
+        })
     
     def learn_pattern(self, pattern_data: Dict[str, Any]) -> Dict[str, Any]:
         """
