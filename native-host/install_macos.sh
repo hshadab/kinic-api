@@ -12,6 +12,10 @@ TARGET_FILE="$TARGET_DIR/$HOST_NAME.json"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOST_PATH="$SCRIPT_DIR/kinic_native_host.py"
 
+# Optional extension IDs (32-char lowercase) or use placeholders
+DEV_ID="${DEV_ID:-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}"
+PROD_ID="${PROD_ID:-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}"
+
 if [[ ! -f "$HOST_PATH" ]]; then
   echo "Host script not found: $HOST_PATH" >&2
   exit 1
@@ -26,10 +30,13 @@ if [[ ! -f "$MANIFEST_TEMPLATE" ]]; then
 fi
 
 # Replace absolute path in template
-ABS_PATH_MANIFEST=$(cat "$MANIFEST_TEMPLATE" | sed "s|/ABSOLUTE/PATH/TO/kinic_native_host.py|$HOST_PATH|g")
+ABS_PATH_MANIFEST=$(cat "$MANIFEST_TEMPLATE" \
+  | sed "s|/ABSOLUTE/PATH/TO/kinic_native_host.py|$HOST_PATH|g" \
+  | sed "s|DEV_EXTENSION_ID|$DEV_ID|g" \
+  | sed "s|PROD_EXTENSION_ID|$PROD_ID|g"
+)
 echo "$ABS_PATH_MANIFEST" > "$TARGET_FILE"
 
 chmod +x "$HOST_PATH"
 echo "Installed manifest: $TARGET_FILE"
 echo "Ensure you replace DEV_EXTENSION_ID and PROD_EXTENSION_ID with your IDs."
-

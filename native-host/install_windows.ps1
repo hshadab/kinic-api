@@ -1,5 +1,7 @@
 Param(
-  [string]$HostName = 'com.kinic.api'
+  [string]$HostName = 'com.kinic.api',
+  [string]$DevId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  [string]$ProdId = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,6 +29,8 @@ New-Item -ItemType Directory -Force -Path $ManifestDir | Out-Null
 # Replace absolute path placeholder
 $content = Get-Content $ManifestTemplate -Raw
 $content = $content.Replace('C:\\ABSOLUTE\\PATH\\TO\\kinic_native_host.bat', $HostBat)
+$content = $content.Replace('DEV_EXTENSION_ID', $DevId)
+$content = $content.Replace('PROD_EXTENSION_ID', $ProdId)
 Set-Content -Path $ManifestPath -Value $content -Encoding ASCII
 
 # Registry key
@@ -37,4 +41,3 @@ New-ItemProperty -Path $RegPath -Name '(Default)' -Value $ManifestPath -Property
 Write-Output "Installed manifest: $ManifestPath"
 Write-Output "Registry: $RegPath"
 Write-Output "Replace DEV_EXTENSION_ID and PROD_EXTENSION_ID in the manifest as needed."
-

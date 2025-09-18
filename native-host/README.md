@@ -86,6 +86,14 @@ See examples:
 - Service worker: `native-host/examples/sw_example.js`
 - Content script: `native-host/examples/content_script.js`
 
+Quick installable example: `native-host/example-extension.zip`
+- Load unpacked (or unzip and load folder) at chrome://extensions
+- After install, note the extension ID and rerun installer with IDs to update host manifest, e.g.:
+  - macOS:
+    - `DEV_ID=<your_id> PROD_ID=<your_id> ./install_macos.sh`
+  - Windows:
+    - `powershell -ExecutionPolicy Bypass -File .\install_windows.ps1 -DevId <your_id> -ProdId <your_id>`
+
 ## Smoke test
 With the extension installed and the service worker connected (native host process should be running):
 

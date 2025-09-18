@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Kinic Example Native Host Integration",
+  "version": "0.1.0",
+  "description": "Example extension wiring for Kinic native host (MV3)",
+  "background": { "service_worker": "sw.js" },
+  "permissions": ["nativeMessaging", "tabs", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content_script.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Kinic Example"
+  }
+}
+
