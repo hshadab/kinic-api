@@ -279,6 +279,16 @@ The native host correlates by `id` and returns stable HTTP shapes:
 - Package installers for multiple Chromium channels (Chrome, Edge, Beta/Canary)
 
 
+## What needs the extension to finish
+
+- Implement real handlers in the service worker for `kinic.store` and `kinic.retrieve` (replace the stubs). Each must send a definitive final response `{ id, ok, result|error }` when done.
+- Ensure a persistent native connection via `chrome.runtime.connectNative('com.kinic.api')` and reconnect on `onDisconnect` so the host stays reachable.
+- Add your extension IDs to the host manifest `allowed_origins` (installers accept `DEV_ID`/`PROD_ID`) and load the extension so Chrome can launch the host.
+- Verify connectivity at `GET http://127.0.0.1:5007/api/status`. Until the extension connects, the host returns `503 extension_disconnected` for API calls.
+- Keep messages small. Send URLs/metadata; do heavy work (page capture, persistence, search) in the extension/backends.
+- Include the required permissions (`nativeMessaging`, `tabs`, `scripting`) and, if using message-based capture, a content script.
+
+
 ## Notes
 - The native host only prints JSON frames to stdout. All logs go to stderr.
 - The host exits when Chrome closes stdin (e.g., on disconnect). The service worker should reconnect and Chrome will relaunch the host.
