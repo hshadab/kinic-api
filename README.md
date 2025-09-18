@@ -132,6 +132,12 @@ Use your Kinic Chrome extension from local apps via Chrome Native Messaging.
   - `POST /api/kinic/retrieve` with `{ query, top_k?, filters? }`
 - Smoke test: `./native-host/smoke_test.sh`
 
+Next steps:
+- Load the example extension from `native-host/example-extension` (or your own) via `chrome://extensions`.
+- Note the extension ID and re-run the installer with IDs to update host manifests.
+- Verify the host at `GET http://127.0.0.1:5007/api/status` and trigger a test store/retrieve.
+- Replace the example service worker stubs with your real Kinic save/retrieve logic.
+
 ## 💡 Simple Example: Two Agents Sharing Knowledge
 
 Here's how easy it is for agents to collaborate through Kinic:

@@ -154,6 +154,150 @@ print(resp.json())
 - HTTP 503 `extension_disconnected`: Service worker not connected. Ensure `connectNative()` runs on startup and stays connected.
 - Large pages: If content is huge, prefer saving just `url`, and let your backend fetch/ingest content. Message limit host→extension is 1 MB.
 
+## Background & Architecture
+
+This setup splits responsibilities cleanly between three parties:
+
+- Extension (MV3 service worker)
+  - Knows the browser, tabs, and page content
+  - Implements the real Kinic logic (store/retrieve, auth to your backend, etc.)
+  - Keeps a persistent native port to the local host open
+
+- Native host (this folder)
+  - A small local process Chrome launches when the extension calls `connectNative()`
+  - Speaks Chrome’s native messaging protocol (stdin/stdout with 32‑bit length prefix)
+  - Exposes a local HTTP API so any local app (CLI, UI, other services) can trigger Kinic actions
+  - Correlates requests with `{ id }` and bridges extension responses back to HTTP
+
+- Your local apps
+  - Call `http://127.0.0.1:5007/api/kinic/store` and `/api/kinic/retrieve`
+  - Don’t need to know about Chrome’s native messaging details
+
+### Architecture Diagram
+
+```
+┌─────────────┐   HTTP (localhost)    ┌─────────────────────────────┐
+│  Local App  │  ───────────────────▶ │   Native Host (this repo)   │
+│ (CLI/UI/etc)│   /api/kinic/*        │  - HTTP server (5007)       │
+└─────────────┘                        │  - Native messaging bridge  │
+                                       └─────────────┬──────────────┘
+                                                     │ stdio (framed JSON)
+                                                     ▼
+                                         ┌───────────────────────────┐
+                                         │ Chrome Extension (MV3 SW) │
+                                         │ - connectNative(HOST)     │
+                                         │ - kinic.store/retrieve    │
+                                         │ - tabs/scripting/content  │
+                                         └─────────────┬─────────────┘
+                                                       │
+                                                       ▼
+                                             ┌──────────────────┐
+                                             │  Web Page / Tab  │
+                                             └──────────────────┘
+```
+
+### Why a persistent port?
+
+- `chrome.runtime.connectNative(HOST)` creates one long‑lived process/pipe, keeping the MV3 service worker alive and allowing the host to accept triggers at any time.
+- `chrome.runtime.sendNativeMessage()` would spawn a new host process per call and not keep the worker alive; that makes push‑style flows and low‑latency repeated calls harder.
+
+### Message Contract (boring and explicit)
+
+- Host → Extension
+  - `{ "id": "uuid", "action": "kinic.store", "params": { /* small */ } }`
+  - `{ "id": "uuid", "action": "kinic.retrieve", "params": { "query": "...", "top_k?": N } }`
+
+- Extension → Host
+  - `{ "id": "uuid", "ok": true,  "result": { /* result */ } }`
+  - `{ "id": "uuid", "ok": false, "error": "..." }`
+
+The native host correlates by `id` and returns stable HTTP shapes:
+
+- `{ success: true/false, message: string, data?: any }`
+
+### MV3 Lifecycle Considerations
+
+- A native port connection prevents the service worker from going idle. If the host exits, the port closes and the worker can stop; the SW should reconnect in `onDisconnect`.
+- Keep payloads small. Pass URLs or minimal metadata; let the extension/backend fetch heavy content.
+- Use `tabs` and `scripting` permissions to access page context. You may use `activeTab` as a more restrictive alternative.
+
+### Security & Size Limits
+
+- Native messaging host manifests must list your extension IDs in `allowed_origins`.
+- Host path must be absolute (macOS/Linux). Windows requires a registry key pointing to the manifest path.
+- Size limits (Chrome): host→extension ~1 MB; extension→host ~64 MB. Design responses to fit comfortably below these.
+- This HTTP bridge is local and unauthenticated by design (per requirements). If needed, add a token header or bind only to `127.0.0.1` (already default).
+
+### Installation Paths (User Scope)
+
+- macOS: `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.kinic.api.json`
+- Linux: `~/.config/google-chrome/NativeMessagingHosts/com.kinic.api.json` (template not included here; similar to macOS)
+- Windows: Manifest anywhere + registry key at `HKCU\Software\Google\Chrome\NativeMessagingHosts\com.kinic.api`
+
+### Typical Flows
+
+- Store active tab
+  - Local app → HTTP `POST /api/kinic/store {}`
+  - Host → Extension `kinic.store` without `url`
+  - Extension determines active tab, optionally captures selection/content, performs save, and replies with result
+
+- Store arbitrary URL
+  - Local app → HTTP `POST /api/kinic/store { url, tags, notes }`
+  - Extension loads/extracts (if needed) or simply records metadata and URL, and replies with a definitive success
+
+- Retrieve
+  - Local app → HTTP `POST /api/kinic/retrieve { query, top_k }`
+  - Extension runs its search against Kinic memory and returns small summaries
+
+### Why this vs. UI automation
+
+- Previous flows in this repo used pyautogui to drive the UI. Native messaging avoids coordinate fragility, timing issues, and OS differences.
+- With native messaging, the extension remains the canonical source of truth for browsing context and Kinic operations, while the host provides a clean local API for apps.
+
+### Integration Checklist
+
+- [ ] Add `nativeMessaging`, `tabs`, and `scripting` permissions in `manifest.json`
+- [ ] Implement a service worker that:
+  - [ ] Connects to `com.kinic.api` on install/startup
+  - [ ] Handles `kinic.store` and `kinic.retrieve`
+  - [ ] Replies with `{ id, ok, result|error }`
+- [ ] (Optional) Add a content script for capture, or use `chrome.scripting.executeScript`
+- [ ] Install the native host manifest with your extension IDs in `allowed_origins`
+- [ ] Run the smoke test and verify both store and retrieve
+
+## Next Steps
+
+1) Install the example extension (or your own) and confirm it connects
+- Load `native-host/example-extension` at `chrome://extensions` (Developer Mode → Load unpacked)
+- Note the extension ID (a 32‑char string)
+
+2) Install the native host manifest with your extension ID(s)
+- macOS:
+  - `cd native-host && python3 -m pip install -r requirements.txt`
+  - `DEV_ID=<ext_id> PROD_ID=<ext_id> ./install_macos.sh`
+- Windows (PowerShell):
+  - `cd native-host && pip install -r requirements.txt`
+  - `powershell -ExecutionPolicy Bypass -File .\\install_windows.ps1 -DevId <ext_id> -ProdId <ext_id>`
+
+3) Verify connectivity
+- `curl -s http://127.0.0.1:5007/api/status` → expect `{ success: true, ... connected: true }`
+
+4) Exercise the API
+- `./native-host/smoke_test.sh` (runs store then retrieve)
+- Or manual:
+  - `curl -s -X POST http://127.0.0.1:5007/api/kinic/store -H 'Content-Type: application/json' -d '{}'`
+  - `curl -s -X POST http://127.0.0.1:5007/api/kinic/retrieve -H 'Content-Type: application/json' -d '{"query":"test"}'`
+
+5) Replace stubs with real Kinic logic
+- In the service worker, implement actual persistence for `kinic.store` and searching for `kinic.retrieve`
+- Keep responses small; return IDs/summaries, not entire documents
+
+6) Productionize (optional)
+- Add logging and error reporting in the extension
+- Consider per‑user auth tokens for the local HTTP API if needed
+- Package installers for multiple Chromium channels (Chrome, Edge, Beta/Canary)
+
+
 ## Notes
 - The native host only prints JSON frames to stdout. All logs go to stderr.
 - The host exits when Chrome closes stdin (e.g., on disconnect). The service worker should reconnect and Chrome will relaunch the host.
