@@ -49,10 +49,7 @@ Thumbs.db
 *.bak
 *~
 
-# Shell scripts (optional - remove if you want to include them)
-*.sh
-*.bat
-*.ps1
+# Shell scripts: tracked for tooling and install helpers
 
 # Archive folder - old/backup files
 archive/
