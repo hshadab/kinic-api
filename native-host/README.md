@@ -4,6 +4,7 @@ This is a Python native host that lets your local app trigger actions in the Kin
 
 ## Plain-English Background & Quick Overview
 - Adds a tiny local “bridge” that Chrome launches on demand. Your extension keeps a persistent connection to it, and the bridge exposes a simple local HTTP API.
+- What is the “bridge”? It’s a Chrome Native Messaging host — a small local process (this repo’s `kinic_native_host.py`) that lives outside the browser. The extension starts it by calling `chrome.runtime.connectNative('com.kinic.api')`. The host and extension exchange UTF‑8 JSON messages over stdin/stdout using a 32‑bit length prefix. In this implementation, the host also runs a local HTTP server on `127.0.0.1:5007` so any desktop app can trigger extension actions without speaking the native protocol directly. The host can’t attach to Chrome by itself; the extension initiates and controls its lifetime. It stays alive while the port is open and exits when disconnected; the service worker should reconnect to relaunch it.
 - Any desktop app can now ask the extension to store the active tab (or a URL) and retrieve results—without fragile UI automation.
 - How it works at a glance:
   - The extension opens a native port to `com.kinic.api` and listens for `{ id, action, params }`.
