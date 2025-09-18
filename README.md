@@ -119,6 +119,19 @@ Complete testing and debugging infrastructure:
 - **Real-time error reporting**: Clear feedback when things go wrong
 - **Coordinate calibration tools**: For UI automation testing
 
+### 5. **🧩 Native Host (Chrome)**
+Use your Kinic Chrome extension from local apps via Chrome Native Messaging.
+- Location: `native-host/`
+- Install (macOS):
+  - `cd native-host && python3 -m pip install -r requirements.txt && ./install_macos.sh`
+- Install (Windows):
+  - `cd native-host && pip install -r requirements.txt && powershell -ExecutionPolicy Bypass -File .\\install_windows.ps1`
+- Extension setup: Add `"permissions": ["nativeMessaging"]` and a service worker that keeps a persistent connection. See examples in `native-host/examples/`.
+- HTTP API (local):
+  - `POST /api/kinic/store` with `{ url?, title?, tags?, notes?, content?, selection?, metadata? }`
+  - `POST /api/kinic/retrieve` with `{ query, top_k?, filters? }`
+- Smoke test: `./native-host/smoke_test.sh`
+
 ## 💡 Simple Example: Two Agents Sharing Knowledge
 
 Here's how easy it is for agents to collaborate through Kinic:

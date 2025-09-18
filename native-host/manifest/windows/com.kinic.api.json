@@ -1,0 +1,11 @@
+{
+  "name": "com.kinic.api",
+  "description": "Kinic Native Host (Windows)",
+  "path": "C:\\ABSOLUTE\\PATH\\TO\\kinic_native_host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://DEV_EXTENSION_ID/",
+    "chrome-extension://PROD_EXTENSION_ID/"
+  ]
+}
+
