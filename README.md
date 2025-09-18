@@ -121,6 +121,11 @@ Complete testing and debugging infrastructure:
 
 ### 5. **🧩 Native Host (Chrome)**
 Use your Kinic Chrome extension from local apps via Chrome Native Messaging.
+- Plain-English background: This adds a tiny Python “bridge” that Chrome launches on demand. Your extension keeps a persistent connection to it, and the bridge exposes a simple local HTTP API. Any desktop app can now ask the extension to store the active tab (or a URL) and retrieve results—without fragile UI automation.
+- How it works at a glance:
+  - The extension opens a native port to `com.kinic.api` and listens for `{ id, action, params }`.
+  - The native host exposes `http://127.0.0.1:5007/api/kinic/*` and forwards requests to the extension over the port, then returns `{ success, message, data }`.
+  - Keep messages small; the extension does the heavy lifting (page capture, persistence, search).
 - Location: `native-host/`
 - Install (macOS):
   - `cd native-host && python3 -m pip install -r requirements.txt && ./install_macos.sh`
@@ -131,6 +136,22 @@ Use your Kinic Chrome extension from local apps via Chrome Native Messaging.
   - `POST /api/kinic/store` with `{ url?, title?, tags?, notes?, content?, selection?, metadata? }`
   - `POST /api/kinic/retrieve` with `{ query, top_k?, filters? }`
 - Smoke test: `./native-host/smoke_test.sh`
+
+Step-by-step example:
+1) Load the example extension
+   - `chrome://extensions` → Developer Mode → Load unpacked → select `native-host/example-extension` (or unzip `example-extension.zip`)
+   - Copy the extension ID (32 characters)
+2) Install the native host manifest with your extension ID
+   - macOS: `cd native-host && DEV_ID=<your_id> PROD_ID=<your_id> ./install_macos.sh`
+   - Windows (PowerShell): `cd native-host && powershell -ExecutionPolicy Bypass -File .\\install_windows.ps1 -DevId <your_id> -ProdId <your_id>`
+3) Open a web page in Chrome (e.g., https://kinic.io) so there’s an active tab
+4) Save the active tab
+   - `curl -s -X POST http://127.0.0.1:5007/api/kinic/store -H 'Content-Type: application/json' -d '{}'`
+   - Expect `{ "success": true, "message": "stored", "data": { ... } }`
+5) Retrieve results
+   - `curl -s -X POST http://127.0.0.1:5007/api/kinic/retrieve -H 'Content-Type: application/json' -d '{"query":"test"}'`
+   - Expect `{ "success": true, "data": { "items": [...] } }`
+6) Replace stubs in the example service worker with your real Kinic save/retrieve code.
 
 Next steps:
 - Load the example extension from `native-host/example-extension` (or your own) via `chrome://extensions`.
