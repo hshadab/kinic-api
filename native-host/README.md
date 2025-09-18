@@ -2,6 +2,30 @@
 
 This is a Python native host that lets your local app trigger actions in the Kinic Chrome extension via Chrome Native Messaging. It exposes a tiny HTTP API so any local process can save websites programmatically.
 
+## Plain-English Background & Quick Overview
+- Adds a tiny local “bridge” that Chrome launches on demand. Your extension keeps a persistent connection to it, and the bridge exposes a simple local HTTP API.
+- Any desktop app can now ask the extension to store the active tab (or a URL) and retrieve results—without fragile UI automation.
+- How it works at a glance:
+  - The extension opens a native port to `com.kinic.api` and listens for `{ id, action, params }`.
+  - The native host exposes `http://127.0.0.1:5007/api/kinic/*`, forwards requests to the extension, then returns `{ success, message, data }`.
+  - Keep messages small; the extension does the heavy lifting (page capture, persistence, search).
+
+### Step-by-Step Example
+1) Load the example extension
+   - `chrome://extensions` → Developer Mode → Load unpacked → select `native-host/example-extension` (or unzip `example-extension.zip`)
+   - Copy the extension ID (32 characters)
+2) Install the native host manifest with your extension ID
+   - macOS: `cd native-host && DEV_ID=<your_id> PROD_ID=<your_id> ./install_macos.sh`
+   - Windows (PowerShell): `cd native-host && powershell -ExecutionPolicy Bypass -File .\\install_windows.ps1 -DevId <your_id> -ProdId <your_id>`
+3) Open a web page in Chrome (e.g., https://kinic.io) so there’s an active tab
+4) Save the active tab
+   - `curl -s -X POST http://127.0.0.1:5007/api/kinic/store -H 'Content-Type: application/json' -d '{}'`
+   - Expect `{ "success": true, "message": "stored", "data": { ... } }`
+5) Retrieve results
+   - `curl -s -X POST http://127.0.0.1:5007/api/kinic/retrieve -H 'Content-Type: application/json' -d '{"query":"test"}'`
+   - Expect `{ "success": true, "data": { "items": [...] } }`
+6) Replace stubs in the example service worker with your real Kinic save/retrieve code.
+
 ## What’s included
 - `kinic_native_host.py`: Native host with stdin/stdout framing and an HTTP API
 - `manifest/`: Host manifest templates for macOS and Windows
@@ -104,50 +128,6 @@ cd native-host
 ```
 
 You should see status JSON and a `kinic.store` call result.
-
-## Plain-English Overview
-- The native host is a tiny local program Chrome launches on demand. The extension connects to it over a pipe (stdin/stdout) and both sides exchange JSON messages framed by a 32-bit length prefix.
-- Your local apps can call a simple HTTP API on `http://127.0.0.1:5007`. The host forwards requests to the extension via the open native port.
-- The extension does the real work (saving pages, retrieving memories) and replies; the host bridges that back to HTTP.
-
-## Examples
-- Save current tab:
-
-```
-curl -s -X POST http://127.0.0.1:5007/api/kinic/store -H 'Content-Type: application/json' -d '{}'
-```
-
-- Save specific URL with tags/notes:
-
-```
-curl -s -X POST http://127.0.0.1:5007/api/kinic/store \
-  -H 'Content-Type: application/json' \
-  -d '{"url":"https://kinic.io","tags":["docs","kinic"],"notes":"homepage"}'
-```
-
-- Retrieve by query:
-
-```
-curl -s -X POST http://127.0.0.1:5007/api/kinic/retrieve \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"auth tokens","top_k":3}'
-```
-
-- Python snippet:
-
-```
-import requests
-
-base = 'http://127.0.0.1:5007'
-
-# Store
-resp = requests.post(f'{base}/api/kinic/store', json={"url": "https://kinic.io", "tags": ["docs"]})
-print(resp.json())
-
-# Retrieve
-resp = requests.post(f'{base}/api/kinic/retrieve', json={"query": "kinic docs", "top_k": 5})
-print(resp.json())
-```
 
 ## Troubleshooting Tips
 - “host not found”: Manifest not in the right place or `allowed_origins` missing your extension ID.
